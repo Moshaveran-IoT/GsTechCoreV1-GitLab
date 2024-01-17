@@ -5,6 +5,21 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <AssemblyName>Moshaveran.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>Moshaveran.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <PublishTrimmed>True</PublishTrimmed>
+    <PublishAot>False</PublishAot>
+    <Title>Moshaveran GS-Tech Worker Service</Title>
+    <Authors>Mirmostafa</Authors>
+    <Company>Moshaveran</Company>
+    <Product>GS-Tech</Product>
+    <Copyright>©2024 Moshaveran Company</Copyright>
+    <AnalysisLevel>preview-all</AnalysisLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <DebugType>none</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
