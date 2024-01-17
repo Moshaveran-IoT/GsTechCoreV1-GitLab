@@ -6,10 +6,8 @@ internal class Program
     //{
     //    var builder = WebApplication.CreateBuilder(args);
 
-    //    // Add services to the container.
-
     //    builder.Services.AddControllers();
-    //    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
     //    builder.Services.AddEndpointsApiExplorer();
     //    builder.Services.AddSwaggerGen();
 
@@ -33,14 +31,9 @@ internal class Program
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>();
-            })
+            .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>())
             .UseWindowsService();
 
-    public static void Main(string[] args)
-    {
+    public static void Main(string[] args) =>
         CreateHostBuilder(args).Build().Run();
-    }
 }
