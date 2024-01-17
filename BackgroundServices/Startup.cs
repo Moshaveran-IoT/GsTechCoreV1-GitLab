@@ -1,4 +1,6 @@
-﻿namespace BackgroundServices
+﻿using MqttServices;
+
+namespace BackgroundServices
 {
     public class Startup
     {
@@ -26,6 +28,7 @@
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddMqqt();
             services.AddSwaggerGen();
         }
     }

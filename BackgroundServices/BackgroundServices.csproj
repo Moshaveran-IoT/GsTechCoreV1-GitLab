@@ -7,8 +7,6 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <AssemblyName>Moshaveran.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>Moshaveran.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
-    <PublishTrimmed>True</PublishTrimmed>
-    <PublishAot>False</PublishAot>
     <Title>Moshaveran GS-Tech Worker Service</Title>
     <Authors>Mirmostafa</Authors>
     <Company>Moshaveran</Company>
@@ -25,6 +23,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\MqttServces\MqttServices.csproj" />
   </ItemGroup>
 
 </Project>

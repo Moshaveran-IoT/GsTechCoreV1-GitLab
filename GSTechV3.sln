@@ -5,9 +5,15 @@ VisualStudioVersion = 17.9.34414.90
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C1434590-A95C-47AE-A3D6-EDC1FE9D7AF3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundServices", "BackgroundServices\BackgroundServices.csproj", "{0015D605-ABB0-46A7-A2F1-0A4912473AF8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackgroundServices", "BackgroundServices\BackgroundServices.csproj", "{0015D605-ABB0-46A7-A2F1-0A4912473AF8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MqttServices", "src\MqttServces\MqttServices.csproj", "{1C1D518A-E8DE-4238-A0B8-530C2993FFD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MqttServices", "src\MqttServces\MqttServices.csproj", "{1C1D518A-E8DE-4238-A0B8-530C2993FFD9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "src\Infrastructure\Infrastructure.csproj", "{C29E06F2-6B10-44E6-AB89-BCEAFEA8E428}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1763E6DC-026B-41CA-B0E8-7F550066961F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InfrastructureTests", "tests\InfrastructureTests\InfrastructureTests.csproj", "{0D50B6C1-5731-4BED-BE99-C3C918B6E1A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,6 +29,14 @@ Global
 		{1C1D518A-E8DE-4238-A0B8-530C2993FFD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C1D518A-E8DE-4238-A0B8-530C2993FFD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C1D518A-E8DE-4238-A0B8-530C2993FFD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C29E06F2-6B10-44E6-AB89-BCEAFEA8E428}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C29E06F2-6B10-44E6-AB89-BCEAFEA8E428}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C29E06F2-6B10-44E6-AB89-BCEAFEA8E428}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C29E06F2-6B10-44E6-AB89-BCEAFEA8E428}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D50B6C1-5731-4BED-BE99-C3C918B6E1A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D50B6C1-5731-4BED-BE99-C3C918B6E1A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D50B6C1-5731-4BED-BE99-C3C918B6E1A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D50B6C1-5731-4BED-BE99-C3C918B6E1A4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -30,6 +44,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{0015D605-ABB0-46A7-A2F1-0A4912473AF8} = {C1434590-A95C-47AE-A3D6-EDC1FE9D7AF3}
 		{1C1D518A-E8DE-4238-A0B8-530C2993FFD9} = {C1434590-A95C-47AE-A3D6-EDC1FE9D7AF3}
+		{C29E06F2-6B10-44E6-AB89-BCEAFEA8E428} = {C1434590-A95C-47AE-A3D6-EDC1FE9D7AF3}
+		{0D50B6C1-5731-4BED-BE99-C3C918B6E1A4} = {1763E6DC-026B-41CA-B0E8-7F550066961F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ED29EBFA-1421-4541-BBEE-C22996291CDC}
