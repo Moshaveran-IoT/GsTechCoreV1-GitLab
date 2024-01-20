@@ -2,8 +2,8 @@ using Moshaveran.Infrastructure;
 
 namespace InfrastructureTests;
 
-[Trait("Category", nameof(Moshaveran.Infrastructure))]
-[Trait("Category", nameof(IMapper))]
+//[Trait("Category", nameof(Moshaveran.Infrastructure))]
+//[Trait("Category", nameof(IMapper))]
 public class MapperTests
 {
     [Fact]

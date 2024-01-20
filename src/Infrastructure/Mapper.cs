@@ -40,8 +40,14 @@ internal sealed class Mapper : IMapper
         return destination;
     }
 
-    private static void CopyAll(object src, object dst)
+    private void CopyAll(object src, object dst)
     {
+        var converter = this.Maps.Where(x => x.Source == src.GetType() && x.Destination == dst.GetType()).FirstOrDefault().Converter;
+        if(converter!=default)
+        {
+            dst = converter.DynamicInvoke(src, dst);
+            
+        }
         var dstProps = dst.GetType().GetProperties();
         foreach (var prop in dstProps)
         {
