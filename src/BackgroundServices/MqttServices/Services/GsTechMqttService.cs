@@ -1,111 +1,41 @@
-﻿using MQTTnet;
-using MQTTnet.AspNetCore;
-using MQTTnet.AspNetCore.AttributeRouting;
-using MQTTnet.Protocol;
-using MQTTnet.Server;
-
-using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Text.RegularExpressions;
+﻿using System.Text.Json;
 
 namespace Moshaveran.BackgroundServices.MqttServices.Services;
 
-public class GsTechMqttService(ILogger<GsTechMqttService> logger, IServiceScopeFactory scopeFactory) :
-    IMqttServerConnectionValidator,
-    IMqttServerSubscriptionInterceptor,
-    IMqttServerClientConnectedHandler,
-    IMqttServerClientDisconnectedHandler
+public class GsTechMqttService
 {
-    private static readonly string _newLine = Environment.NewLine;
-    private readonly Collection<string> _connectedClientIds = [];
+    private const string validHex = "0123456789abcdefABCDEF";
 
-    private IMqttServer? _server;
-
-    public void ConfigureMqttServer(IMqttServer mqtt)
+    public Task Can(string payloadMessage, string Imei)
     {
-        this._server = CheckNull(mqtt);
-        mqtt.ClientConnectedHandler = this;
-        mqtt.ClientDisconnectedHandler = this;
-    }
-
-    public Task HandleClientConnectedAsync(MqttServerClientConnectedEventArgs eventArgs) => Task.Run(() =>
-    {
-        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientConnectedAsync Handler Triggered");
-
-        if (this._connectedClientIds.Count == 0)
+        var dto = JsonDocument.Parse(payloadMessage);
+        foreach (var app in dto.RootElement.EnumerateObject())
         {
-            this.SubscribeKiss();
-        }
-
-        var clientId = eventArgs.ClientId;
-        this._connectedClientIds.Add(clientId);
-
-        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Connected:{_newLine} - ClientID = {clientId + _newLine}");
-    });
-
-    public Task HandleClientDisconnectedAsync(MqttServerClientDisconnectedEventArgs eventArgs) => Task.Run(() =>
-    {
-        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientDisconnectedAsync Handler Triggered");
-
-        var clientId = eventArgs.ClientId;
-        _ = this._connectedClientIds.Remove(clientId);
-
-        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Disconnected:{_newLine} - ClientID = {clientId + _newLine}");
-    });
-
-    public async Task InterceptSubscriptionAsync(MqttSubscriptionInterceptorContext context)
-    {
-        _ = CheckNull(context);
-
-        var processSubscription = true;
-        var topic = context.TopicFilter.Topic;
-        switch (true)
-        {
-            case bool when Regex.IsMatch(topic, @"Gs/(#IMEI#)/(Action|RF|Result)$".Replace("#IMEI#", context.ClientId)): break;
-            case bool when Regex.IsMatch(topic, @"(AliveMessage)$"): break;
-            default: processSubscription = false; break;
-        }
-        context.AcceptSubscription = processSubscription;
-        await Task.CompletedTask.ConfigureAwait(false);
-    }
-
-    public void SubscribeKiss() => Task.Run(async () =>
-    {
-        var msg = new MqttApplicationMessageBuilder().WithPayload($"MQTTnet hosted on GsTech has started up!").WithTopic("AliveMessage");
-
-        while (this._connectedClientIds.Count > 0)
-        {
-            try
+            var isHex = app.Name.All(validHex.Contains) && app.Value.GetRawText().All(validHex.Contains);
+            if (!isHex)
             {
-                _ = await this._server.PublishAsync(msg.Build()).ConfigureAwait(false);
-                _ = msg.WithPayload($"MQTTnet hosted on GsTech is still running at {DateTime.Now}!");
+                continue;
             }
-            catch (Exception e)
+            var binaryString = string.Join(string.Empty, app.Name.PadLeft(8, '0').Select(c => Convert.ToString(Convert.ToInt32(c.ToString(), 16), 2).PadLeft(4, '0')));
+            var Priority = binaryString[..6];
+            var Reserved = binaryString[6..7];
+            var DataPage = binaryString[7..8];
+            var PDUFormat = binaryString[8..16];
+            var SourceAddress = binaryString[24..32];
+            var decPDUFormat = Convert.ToInt64(PDUFormat, 2);
+            string binaryPGN;
+            if (decPDUFormat >= 240)
             {
-                Console.WriteLine(e);
+                var PDUSpecific = binaryString[16..24];
+                binaryPGN = $"000000{Reserved}{DataPage}{PDUFormat}{PDUSpecific}";
             }
-            finally
+            else
             {
-                await Task.Delay(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+                binaryPGN = $"000000{Reserved}{DataPage}{PDUFormat}00000000";
             }
+            var PGN = Convert.ToInt64(binaryPGN, 2);
         }
-    });
 
-    public Task ValidateConnectionAsync(MqttConnectionValidatorContext context)
-    {
-        _ = CheckNull(context);
-
-        context.ReasonCode = MqttConnectReasonCode.BadUserNameOrPassword;
-        if (context.ClientId.Length == 15 && context.Username.Equals("root") && context.Password.Equals(context.ClientId[10..]))
-        {
-            context.ReasonCode = MqttConnectReasonCode.Success;
-        }
-        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - " + "ValidateConnectionAsync Handler Triggered");
         return Task.CompletedTask;
     }
-
-    [SuppressMessage("Usage", "CA2201:Do not raise reserved exception types", Justification = "<Pending>")]
-    private static T CheckNull<T>([NotNull][AllowNull] T o)
-        where T : class => o ?? throw new NullReferenceException();
 }

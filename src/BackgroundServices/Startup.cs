@@ -6,7 +6,7 @@ public class Startup
 {
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        //if (env.IsDevelopment())
+        if (env.IsDevelopment())
         {
             _ = app.UseDeveloperExceptionPage();
             _ = app.UseSwagger();
@@ -23,7 +23,7 @@ public class Startup
             _ = endpoints.MapControllers();
             _ = endpoints.MapGet("Hi", () => "Hello from Mohammad");
         });
-        
+
         _ = app.ConfigureMqtt(1545);
     }
 

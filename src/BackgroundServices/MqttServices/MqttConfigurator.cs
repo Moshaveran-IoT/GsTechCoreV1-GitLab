@@ -12,7 +12,7 @@ public static class MqttConfigurator
     public static IServiceCollection AddMqttServices(this IServiceCollection services)
     {
         // Add Singleton MQTT Server object
-        _ = services.AddSingleton<GsTechMqttService>();
+        _ = services.AddSingleton<GsTechMqttInterceptorService>();
 
         // Add the MQTT Controllers
         _ = services.AddMqttControllers();
@@ -21,8 +21,7 @@ public static class MqttConfigurator
         _ = services
             .AddHostedMqttServerWithServices(options =>
             {
-                var mqttService = options.ServiceProvider.GetRequiredService<GsTechMqttService>();
-                //mqttService.ConfigureMqttServerOptions(options);
+                var mqttService = options.ServiceProvider.GetRequiredService<GsTechMqttInterceptorService>();
                 // Configure the MQTT Server options here
                 _ = options.WithoutDefaultEndpoint()
                            .WithDefaultEndpointPort(1885)
@@ -51,6 +50,6 @@ public static class MqttConfigurator
             _ = endpoints.MapConnectionHandler<MqttConnectionHandler>("/mqtt", e => e.WebSockets.SubProtocolSelector = p => p.FirstOrDefault() ?? string.Empty);
         }).UseMqttServer(server =>
         {
-            app.ApplicationServices.GetRequiredService<GsTechMqttService>().ConfigureMqttServer(server);
+            app.ApplicationServices.GetRequiredService<GsTechMqttInterceptorService>().ConfigureMqttServer(server);
         });
 }
