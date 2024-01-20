@@ -4,18 +4,22 @@ namespace Moshaveran.Infrastructure;
 
 public interface IMapper
 {
+    IList<(Type Source, Type Destination, Delegate Converter)> Maps { get; }
+
+    static IMapper New() =>
+        new Mapper();
+
     T Map<T>(in object o) where T : new();
 
     T Map<T>(in T o) where T : new();
 
     T Map<T>(in object o, in T destination);
-
-    static IMapper New() =>
-        new Mapper();
 }
 
 internal sealed class Mapper : IMapper
 {
+    public IList<(Type Source, Type Destination, Delegate Converter)> Maps { get; } = new List<(Type Source, Type Destination, Delegate Converter)>();
+
     public T Map<T>(in object o)
         where T : new()
     {
@@ -36,7 +40,7 @@ internal sealed class Mapper : IMapper
         return destination;
     }
 
-    private void CopyAll(object src, object dst)
+    private static void CopyAll(object src, object dst)
     {
         var dstProps = dst.GetType().GetProperties();
         foreach (var prop in dstProps)
@@ -45,7 +49,7 @@ internal sealed class Mapper : IMapper
         }
     }
 
-    private void CopyByDstPropName(object src, object dst, PropertyInfo dstProp)
+    private static void CopyByDstPropName(object src, object dst, PropertyInfo dstProp)
     {
         if (src.GetType().GetProperty(dstProp.Name) is { } srcProp)
         {
@@ -57,5 +61,14 @@ internal sealed class Mapper : IMapper
             {
             }
         }
+    }
+}
+
+public static class MapperExtensions
+{
+    public static IMapper MapFor<TSource, TDestinations>(this IMapper mapper, Func<TSource, TDestinations> converter)
+    {
+        mapper.Maps.Add((typeof(TSource), typeof(TDestinations), converter));
+        return mapper;
     }
 }

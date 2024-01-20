@@ -2,6 +2,8 @@ using Moshaveran.Infrastructure;
 
 namespace InfrastructureTests;
 
+[Trait("Category", nameof(Moshaveran.Infrastructure))]
+[Trait("Category", nameof(IMapper))]
 public class MapperTests
 {
     [Fact]
@@ -24,9 +26,9 @@ public class MapperTests
     {
         // Assign
         var mapper = IMapper.New();
+        var src = new { Name = "Ali", Age = 20 };
 
         // Act
-        var src = new { Name = "Ali", Age = 20 };
         var dst = mapper.Map(src, new Person());
 
         // Assert
@@ -63,6 +65,22 @@ public class MapperTests
         Assert.Equal(src.Name, dst.Name);
         Assert.Equal(src.Age, dst.Age);
     }
+
+    [Fact]
+    public void BasicTest5()
+    {
+        // Assign
+        var mapper = IMapper.New()
+            .MapFor<Person, Person>(x => new Person(x.Name, x.Age));
+        var src = new Person("Ali", 20);
+
+        // Act
+        var dst = mapper.Map(src);
+
+        // Assert
+        Assert.Equal(src.Name, dst.Name);
+        Assert.Equal(src.Age, dst.Age);
+    }
 }
 
 internal sealed class Person
@@ -86,8 +104,8 @@ internal sealed class Person
 
 public static class SimpleEquitable
 {
-    public static bool Equals(this object? me, object? other)
-    {
-        return me == null ? other == null : other == null ? false : me.GetHashCode() == other.GetHashCode();
-    }
+    public new static bool Equals(this object? me, object? other) =>
+        me == null
+            ? other == null
+            : other != null && me.GetHashCode() == other.GetHashCode();
 }
