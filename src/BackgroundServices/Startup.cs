@@ -1,42 +1,35 @@
 ﻿using Moshaveran.BackgroundServices.MqttServices;
-using Moshaveran.BackgroundServices.MqttServices.Services;
 
-using MQTTnet.AspNetCore.Extensions;
+namespace Moshaveran.BackgroundServices;
 
-namespace BackgroundServices
+public class Startup
 {
-    public class Startup
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        //if (env.IsDevelopment())
         {
-            //if (env.IsDevelopment())
+            _ = app.UseDeveloperExceptionPage();
+            _ = app.UseSwagger();
+            _ = app.UseSwaggerUI(c =>
             {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "MQTT API V3");
-                });
-            }
-            
-            app.UseRouting();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                endpoints.MapGet("Hi", () => "Hello from Mohammad");
-            });
-            app.UseMqttServer(server =>
-            {
-                app.ApplicationServices.GetRequiredService<GsTechMqttService>().ConfigureMqttServer(server);
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "MQTT API V3");
             });
         }
 
-        public void ConfigureServices(IServiceCollection services)
+        _ = app.UseRouting();
+
+        _ = app.UseEndpoints(endpoints =>
         {
-            services.AddControllers();
-            services.AddMqttServices();
-            services.AddSwaggerGen();
-        }
+            _ = endpoints.MapControllers();
+            _ = endpoints.MapGet("Hi", () => "Hello from Mohammad");
+        });
+        _ = app.ConfigureMqtt();
+    }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        _ = services.AddControllers();
+        _ = services.AddMqttServices();
+        _ = services.AddSwaggerGen();
     }
 }
