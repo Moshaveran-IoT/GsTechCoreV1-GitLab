@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 
 namespace Moshaveran.BackgroundServices.MqttServices.Services;
 
-public class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorService> logger, IServiceScopeFactory scopeFactory) :
+public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorService> logger, IServiceScopeFactory scopeFactory) :
     IMqttServerConnectionValidator,
     IMqttServerSubscriptionInterceptor,
     IMqttServerClientConnectedHandler,

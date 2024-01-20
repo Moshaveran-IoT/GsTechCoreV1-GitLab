@@ -2,7 +2,7 @@
 
 namespace Moshaveran.BackgroundServices.MqttServices.Services;
 
-public class GsTechMqttService
+public sealed class GsTechMqttService
 {
     private const string validHex = "0123456789abcdefABCDEF";
 
@@ -23,16 +23,10 @@ public class GsTechMqttService
             var PDUFormat = binaryString[8..16];
             var SourceAddress = binaryString[24..32];
             var decPDUFormat = Convert.ToInt64(PDUFormat, 2);
-            string binaryPGN;
-            if (decPDUFormat >= 240)
-            {
-                var PDUSpecific = binaryString[16..24];
-                binaryPGN = $"000000{Reserved}{DataPage}{PDUFormat}{PDUSpecific}";
-            }
-            else
-            {
-                binaryPGN = $"000000{Reserved}{DataPage}{PDUFormat}00000000";
-            }
+            var PDUSpecific = decPDUFormat >= 240
+                ? binaryString[16..24]
+                : $"000000{Reserved}{DataPage}{PDUFormat}00000000";
+            var binaryPGN = $"000000{Reserved}{DataPage}{PDUFormat}{PDUSpecific}";
             var PGN = Convert.ToInt64(binaryPGN, 2);
         }
 
