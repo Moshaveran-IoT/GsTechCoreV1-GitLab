@@ -1,5 +1,7 @@
 using Moshaveran.BackgroundServices;
 
+using MQTTnet.AspNetCore.Extensions;
+
 internal class Program
 {
     public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -12,10 +14,9 @@ internal class Program
                     .Build();
 
                 var appPort = int.Parse(config["AppPort"]);
-
                 _ = webBuilder.UseKestrel(o =>
                 {
-                    //TODO o.ListenAnyIP(1885, l => l.UseMqtt());
+                    o.ListenAnyIP(1885, l => l.UseMqtt());
                     o.ListenAnyIP(appPort); // default http pipeline
                 });
 

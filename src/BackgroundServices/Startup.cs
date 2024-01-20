@@ -1,10 +1,12 @@
-﻿namespace Moshaveran.BackgroundServices;
+﻿using Moshaveran.BackgroundServices.MqttServices;
+
+namespace Moshaveran.BackgroundServices;
 
 public class Startup
 {
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        //if (env.IsDevelopment())
+        if (env.IsDevelopment())
         {
             _ = app.UseDeveloperExceptionPage();
             _ = app.UseSwagger();
@@ -21,11 +23,14 @@ public class Startup
             _ = endpoints.MapControllers();
             _ = endpoints.MapGet("Hi", () => "Hello from Mohammad");
         });
+
+        _ = app.ConfigureMqtt(1545);
     }
 
     public void ConfigureServices(IServiceCollection services)
     {
         _ = services.AddControllers();
+        _ = services.AddMqttServices();
         _ = services.AddSwaggerGen();
     }
 }
