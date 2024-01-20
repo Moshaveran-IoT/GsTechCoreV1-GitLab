@@ -1,4 +1,7 @@
 using Moshaveran.BackgroundServices;
+using Moshaveran.BackgroundServices.MqttServices;
+
+using MQTTnet.AspNetCore.Extensions;
 
 internal class Program
 {
@@ -6,20 +9,17 @@ internal class Program
         Host.CreateDefaultBuilder(args)
             .ConfigureWebHostDefaults(webBuilder =>
             {
-                // TODO: Specify port#
+                var config = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                    .Build();
 
-                //var config = new ConfigurationBuilder()
-                //    .SetBasePath(Directory.GetCurrentDirectory())
-                //    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                //    .Build();
-
-                //var appPort = int.Parse(config["AppPort"]);
-
-                //_ = webBuilder.UseKestrel(o =>
-                //{
-                //    o.ListenAnyIP(1885, l => l.UseMqtt());
-                //    o.ListenAnyIP(appPort); // default http pipeline
-                //});
+                var appPort = int.Parse(config["AppPort"]);
+                _ = webBuilder.UseKestrel(o =>
+                {
+                    o.ListenAnyIP(1885, l => l.UseMqtt());
+                    o.ListenAnyIP(appPort); // default http pipeline
+                });
 
                 _ = webBuilder.UseStartup<Startup>();
             })

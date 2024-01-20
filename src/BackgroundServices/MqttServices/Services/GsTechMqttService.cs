@@ -29,21 +29,6 @@ public class GsTechMqttService(ILogger<GsTechMqttService> logger, IServiceScopeF
         mqtt.ClientDisconnectedHandler = this;
     }
 
-    public void ConfigureMqttServerOptions(AspNetMqttServerOptionsBuilder options)
-    {
-        _ = CheckNull(options);
-
-        // Configure the MQTT Server options here
-        _ = options.WithoutDefaultEndpoint();
-        _ = options.WithDefaultEndpointPort(1885);
-        _ = options.WithConnectionValidator(this);
-        _ = options.WithSubscriptionInterceptor(this);
-        // Enable Attribute Routing
-        // By default, messages published to topics that don't match any routes are rejected.
-        // Change this to true to allow those messages to be routed without hitting any controller actions.
-        _ = options.WithAttributeRouting(true);
-    }
-
     public Task HandleClientConnectedAsync(MqttServerClientConnectedEventArgs eventArgs) => Task.Run(() =>
     {
         Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientConnectedAsync Handler Triggered");

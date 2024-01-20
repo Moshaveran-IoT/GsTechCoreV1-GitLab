@@ -1,4 +1,6 @@
-﻿using MQTTnet.AspNetCore.AttributeRouting;
+﻿using Moshaveran.BackgroundServices.MqttServices.Services;
+
+using MQTTnet.AspNetCore.AttributeRouting;
 
 using System.Text;
 
@@ -19,7 +21,7 @@ public class CatchAllController(ILogger<CatchAllController> logger) : MqttBaseCo
 
 [MqttController]
 [MqttRoute("Gs")]
-public class MqttGsTechController(ILogger<MqttGsTechController> logger) : MqttBaseController
+public class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMqttService mqttService) : MqttBaseController
 {
     [MqttRoute("{IMEI}/CAN")]
     public void CAN(string IMEI) => logger.LogInformation("*** CAN Payload Received! IMEI: " + IMEI);

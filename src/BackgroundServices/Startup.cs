@@ -23,7 +23,8 @@ public class Startup
             _ = endpoints.MapControllers();
             _ = endpoints.MapGet("Hi", () => "Hello from Mohammad");
         });
-        _ = app.ConfigureMqtt();
+        
+        _ = app.ConfigureMqtt(1545);
     }
 
     public void ConfigureServices(IServiceCollection services)

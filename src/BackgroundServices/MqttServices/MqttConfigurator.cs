@@ -19,11 +19,21 @@ public static class MqttConfigurator
 
         // Add the MQTT Service
         _ = services
-            .AddHostedMqttServerWithServices(aspNetMqttServerOptionsBuilder =>
+            .AddHostedMqttServerWithServices(options =>
             {
-                var mqttService = aspNetMqttServerOptionsBuilder.ServiceProvider.GetRequiredService<GsTechMqttService>();
-                mqttService.ConfigureMqttServerOptions(aspNetMqttServerOptionsBuilder);
-                _ = aspNetMqttServerOptionsBuilder.Build();
+                var mqttService = options.ServiceProvider.GetRequiredService<GsTechMqttService>();
+                //mqttService.ConfigureMqttServerOptions(options);
+                // Configure the MQTT Server options here
+                _ = options.WithoutDefaultEndpoint()
+                           .WithDefaultEndpointPort(1885)
+                           .WithConnectionValidator(mqttService)
+                           .WithSubscriptionInterceptor(mqttService);
+                // Enable Attribute Routing
+                // By default, messages published to topics that don't match any routes are rejected.
+                // Change this to true to allow those messages to be routed without hitting any controller actions.
+                _ = options.WithAttributeRouting(true);
+
+                _ = options.Build();
             })
             .AddMqttTcpServerAdapter()
             .AddMqttWebSocketServerAdapter()
@@ -35,15 +45,12 @@ public static class MqttConfigurator
         return services;
     }
 
-    public static IApplicationBuilder ConfigureMqtt(this IApplicationBuilder app)
-    {
-        
-        return app.UseEndpoints(endpoints =>
+    public static IApplicationBuilder ConfigureMqtt(this IApplicationBuilder app, int portNo)
+        => app.UseEndpoints(endpoints =>
         {
             _ = endpoints.MapConnectionHandler<MqttConnectionHandler>("/mqtt", e => e.WebSockets.SubProtocolSelector = p => p.FirstOrDefault() ?? string.Empty);
         }).UseMqttServer(server =>
         {
             app.ApplicationServices.GetRequiredService<GsTechMqttService>().ConfigureMqttServer(server);
         });
-    }
 }
