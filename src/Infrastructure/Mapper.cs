@@ -24,35 +24,20 @@ internal sealed class Mapper : IMapper
         where T : new()
     {
         var result = new T();
-        return Map(o, result);
+        return this.Map(o, result);
     }
 
     public T Map<T>(in T o)
         where T : new()
     {
         var result = new T();
-        return Map(o, result);
+        return this.Map(o, result);
     }
 
     public T Map<T>(in object o, in T destination)
     {
-        CopyAll(o, destination);
+        this.CopyAll(o, destination);
         return destination;
-    }
-
-    private void CopyAll(object src, object dst)
-    {
-        var converter = this.Maps.Where(x => x.Source == src.GetType() && x.Destination == dst.GetType()).FirstOrDefault().Converter;
-        if(converter!=default)
-        {
-            dst = converter.DynamicInvoke(src, dst);
-            
-        }
-        var dstProps = dst.GetType().GetProperties();
-        foreach (var prop in dstProps)
-        {
-            CopyByDstPropName(src, dst, prop);
-        }
     }
 
     private static void CopyByDstPropName(object src, object dst, PropertyInfo dstProp)
@@ -66,6 +51,20 @@ internal sealed class Mapper : IMapper
             catch
             {
             }
+        }
+    }
+
+    private void CopyAll(object src, object dst)
+    {
+        var converter = this.Maps.Where(x => x.Source == src.GetType() && x.Destination == dst.GetType()).FirstOrDefault().Converter;
+        if (converter != default)
+        {
+            dst = converter.DynamicInvoke(src, dst);
+        }
+        var dstProps = dst.GetType().GetProperties();
+        foreach (var prop in dstProps)
+        {
+            CopyByDstPropName(src, dst, prop);
         }
     }
 }
