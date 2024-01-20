@@ -46,8 +46,7 @@ public class GsTechMqttService(ILogger<GsTechMqttService> logger, IServiceScopeF
 
     public Task HandleClientConnectedAsync(MqttServerClientConnectedEventArgs eventArgs) => Task.Run(() =>
     {
-        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - " +
-                          "HandleClientConnectedAsync Handler Triggered");
+        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientConnectedAsync Handler Triggered");
 
         if (this._connectedClientIds.Count == 0)
         {
@@ -57,20 +56,17 @@ public class GsTechMqttService(ILogger<GsTechMqttService> logger, IServiceScopeF
         var clientId = eventArgs.ClientId;
         this._connectedClientIds.Add(clientId);
 
-        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - " +
-                          $"MQTT Client Connected:{_newLine} - ClientID = {clientId + _newLine}");
+        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Connected:{_newLine} - ClientID = {clientId + _newLine}");
     });
 
     public Task HandleClientDisconnectedAsync(MqttServerClientDisconnectedEventArgs eventArgs) => Task.Run(() =>
     {
-        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - " +
-                                              "HandleClientDisconnectedAsync Handler Triggered");
+        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientDisconnectedAsync Handler Triggered");
 
         var clientId = eventArgs.ClientId;
         _ = this._connectedClientIds.Remove(clientId);
 
-        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - " +
-                          $"MQTT Client Disconnected:{_newLine} - ClientID = {clientId + _newLine}");
+        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Disconnected:{_newLine} - ClientID = {clientId + _newLine}");
     });
 
     public async Task InterceptSubscriptionAsync(MqttSubscriptionInterceptorContext context)

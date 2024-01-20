@@ -1,25 +1,14 @@
-﻿using MQTTnet.AspNetCore.AttributeRouting;
+﻿using Moshaveran.BackgroundServices.MqttServices.Services;
 
-using System.Text;
+using MQTTnet.AspNetCore.AttributeRouting;
 
 namespace Moshaveran.BackgroundServices.MqttServices.Controllers;
 
 [MqttController]
-public class CatchAllController(ILogger<CatchAllController> logger) : MqttBaseController
-{
-    [MqttRoute("{*topic}")]
-    public Task WildCardMatchTopic(string topic)
-    {
-        var payloadMessage = Encoding.UTF8.GetString(this.Message.Payload);
-        logger.LogInformation($"Wildcard matched on Topic: '{topic}'");
-        logger.LogInformation($"{payloadMessage}");
-        return this.Ok();
-    }
-}
-
-[MqttController]
 [MqttRoute("Gs")]
-public class MqttGsTechController(ILogger<MqttGsTechController> logger) : MqttBaseController
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1848:Use the LoggerMessage delegates", Justification = "<Pending>")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2254:Template should be a static expression", Justification = "<Pending>")]
+public sealed class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMqttService mqttService) : MqttBaseController
 {
     [MqttRoute("{IMEI}/CAN")]
     public void CAN(string IMEI) => logger.LogInformation("*** CAN Payload Received! IMEI: " + IMEI);

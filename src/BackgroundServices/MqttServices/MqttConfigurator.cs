@@ -35,12 +35,15 @@ public static class MqttConfigurator
         return services;
     }
 
-    public static IApplicationBuilder ConfigureMqtt(this IApplicationBuilder app) =>
-        app.UseEndpoints(endpoints =>
+    public static IApplicationBuilder ConfigureMqtt(this IApplicationBuilder app)
+    {
+        
+        return app.UseEndpoints(endpoints =>
         {
             _ = endpoints.MapConnectionHandler<MqttConnectionHandler>("/mqtt", e => e.WebSockets.SubProtocolSelector = p => p.FirstOrDefault() ?? string.Empty);
         }).UseMqttServer(server =>
         {
             app.ApplicationServices.GetRequiredService<GsTechMqttService>().ConfigureMqttServer(server);
         });
+    }
 }

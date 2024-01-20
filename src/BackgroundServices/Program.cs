@@ -6,14 +6,15 @@ internal class Program
         Host.CreateDefaultBuilder(args)
             .ConfigureWebHostDefaults(webBuilder =>
             {
-                var config = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                    .Build();
-
-                var appPort = int.Parse(config["AppPort"]);
-                
                 // TODO: Specify port#
+
+                //var config = new ConfigurationBuilder()
+                //    .SetBasePath(Directory.GetCurrentDirectory())
+                //    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                //    .Build();
+
+                //var appPort = int.Parse(config["AppPort"]);
+
                 //_ = webBuilder.UseKestrel(o =>
                 //{
                 //    o.ListenAnyIP(1885, l => l.UseMqtt());
