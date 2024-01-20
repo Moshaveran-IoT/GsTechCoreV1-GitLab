@@ -1,4 +1,6 @@
-using Moshaveran.BackgroundServices;
+using BackgroundServices;
+
+using MQTTnet.AspNetCore;
 
 internal class Program
 {
@@ -11,15 +13,15 @@ internal class Program
                     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                     .Build();
 
-                var appPort = int.Parse(config["AppPort"]);
+                int appPort = int.Parse(config["AppPort"]);
 
-                _ = webBuilder.UseKestrel(o =>
+                webBuilder.UseKestrel(o =>
                 {
                     //TODO o.ListenAnyIP(1885, l => l.UseMqtt());
                     o.ListenAnyIP(appPort); // default http pipeline
                 });
 
-                _ = webBuilder.UseStartup<Startup>();
+                webBuilder.UseStartup<Startup>();
             })
             .UseWindowsService();
 

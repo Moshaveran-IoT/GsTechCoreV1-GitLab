@@ -1,31 +1,42 @@
-﻿namespace Moshaveran.BackgroundServices;
+﻿using Moshaveran.BackgroundServices.MqttServices;
+using Moshaveran.BackgroundServices.MqttServices.Services;
 
-public class Startup
+using MQTTnet.AspNetCore.Extensions;
+
+namespace BackgroundServices
 {
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public class Startup
     {
-        //if (env.IsDevelopment())
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            _ = app.UseDeveloperExceptionPage();
-            _ = app.UseSwagger();
-            _ = app.UseSwaggerUI(c =>
+            //if (env.IsDevelopment())
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "MQTT API V3");
+                app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "MQTT API V3");
+                });
+            }
+            
+            app.UseRouting();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapGet("Hi", () => "Hello from Mohammad");
+            });
+            app.UseMqttServer(server =>
+            {
+                app.ApplicationServices.GetRequiredService<GsTechMqttService>().ConfigureMqttServer(server);
             });
         }
 
-        _ = app.UseRouting();
-
-        _ = app.UseEndpoints(endpoints =>
+        public void ConfigureServices(IServiceCollection services)
         {
-            _ = endpoints.MapControllers();
-            _ = endpoints.MapGet("Hi", () => "Hello from Mohammad");
-        });
-    }
-
-    public void ConfigureServices(IServiceCollection services)
-    {
-        _ = services.AddControllers();
-        _ = services.AddSwaggerGen();
+            services.AddControllers();
+            services.AddMqttServices();
+            services.AddSwaggerGen();
+        }
     }
 }
