@@ -1,4 +1,5 @@
 ﻿using Moshaveran.WinService.Mqtt.Services;
+
 using MQTTnet.AspNetCore.AttributeRouting;
 
 using System.Text;
@@ -11,10 +12,10 @@ public class CatchAllController(ILogger<CatchAllController> logger) : MqttBaseCo
     [MqttRoute("{*topic}")]
     public Task WildCardMatchTopic(string topic)
     {
-        var payloadMessage = Encoding.UTF8.GetString(Message.Payload);
+        var payloadMessage = Encoding.UTF8.GetString(this.Message.Payload);
         logger.LogInformation($"Wildcard matched on Topic: '{topic}'");
         logger.LogInformation($"{payloadMessage}");
-        return Ok();
+        return this.Ok();
     }
 }
 
@@ -26,14 +27,11 @@ public class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMq
     public async void CAN(string IMEI)
     {
         logger.LogInformation("*** CAN Payload Received! IMEI: " + IMEI);
-        await service.InsertCanBroker(Message.Payload, IMEI);
+        _ = await service.InsertCanBroker(this.Message.Payload, IMEI);
     }
 
     [MqttRoute("{IMEI}/General")]
-    public void General(string IMEI)
-    {
-        logger.LogInformation("*** General Payload Received! IMEI: " + IMEI);
-    }
+    public void General(string IMEI) => logger.LogInformation("*** General Payload Received! IMEI: " + IMEI);
 
     [MqttRoute("{IMEI}/GeneralPlus")]
     public void GeneralPlus(string IMEI) => logger.LogInformation("*** General Payload Received! IMEI: " + IMEI);
