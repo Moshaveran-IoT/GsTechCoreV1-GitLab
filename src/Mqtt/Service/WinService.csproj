@@ -23,7 +23,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Controllers\MqttGsTechController.old.cs" />
+	  <Compile Remove="Mqtt\Controllers\MqttGsTechController.old.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -42,6 +42,9 @@
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="MQTTnet.AspNetCore.AttributeRouting.Forked" Version="0.3.16" />
 
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
 	</ItemGroup>
 
 </Project>

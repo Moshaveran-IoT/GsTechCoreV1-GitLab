@@ -1,9 +1,9 @@
-﻿using Moshaveran.WinService.Services;
+﻿using Moshaveran.WinService.Mqtt.Services;
 using MQTTnet.AspNetCore.AttributeRouting;
 
 using System.Text;
 
-namespace Moshaveran.WinService.Controllers;
+namespace Moshaveran.WinService.Mqtt.Controllers;
 
 [MqttController]
 public class CatchAllController(ILogger<CatchAllController> logger) : MqttBaseController

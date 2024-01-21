@@ -3,7 +3,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace Moshaveran.WinService.Services;
+namespace Moshaveran.WinService.Mqtt.Services;
 
 public sealed class GsTechMqttService(ILogger<GsTechMqttService> logger)
 {

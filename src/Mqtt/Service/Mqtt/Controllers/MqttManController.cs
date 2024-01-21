@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MQTTnet.Server;
 
-namespace Moshaveran.WinService.Controllers;
+namespace Moshaveran.WinService.Mqtt.Controllers;
 
 [Route("[controller]")]
 [ApiController]
