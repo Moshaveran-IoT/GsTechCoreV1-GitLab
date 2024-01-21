@@ -1,6 +1,4 @@
-﻿using Moshaveran.BackgroundServices.MqttServices;
-
-namespace Moshaveran.BackgroundServices;
+﻿namespace Moshaveran.WinService;
 
 public class Startup
 {

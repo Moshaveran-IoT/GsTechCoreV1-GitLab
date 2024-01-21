@@ -1,10 +1,9 @@
-﻿using Moshaveran.BackgroundServices.Mqtt.Services;
-
+﻿using Moshaveran.WinService.Services;
 using MQTTnet.AspNetCore.AttributeRouting;
 
 using System.Text;
 
-namespace Moshaveran.BackgroundServices.Mqtt.Controllers;
+namespace Moshaveran.WinService.Controllers;
 
 [MqttController]
 public class CatchAllController(ILogger<CatchAllController> logger) : MqttBaseController
@@ -12,10 +11,10 @@ public class CatchAllController(ILogger<CatchAllController> logger) : MqttBaseCo
     [MqttRoute("{*topic}")]
     public Task WildCardMatchTopic(string topic)
     {
-        var payloadMessage = Encoding.UTF8.GetString(this.Message.Payload);
+        var payloadMessage = Encoding.UTF8.GetString(Message.Payload);
         logger.LogInformation($"Wildcard matched on Topic: '{topic}'");
         logger.LogInformation($"{payloadMessage}");
-        return this.Ok();
+        return Ok();
     }
 }
 

@@ -1,11 +1,10 @@
-﻿using Moshaveran.BackgroundServices.Mqtt.Controllers;
-using Moshaveran.BackgroundServices.Mqtt.Services;
-
+﻿using Moshaveran.WinService.Controllers;
+using Moshaveran.WinService.Services;
 using MQTTnet.AspNetCore;
 using MQTTnet.AspNetCore.AttributeRouting;
 using MQTTnet.AspNetCore.Extensions;
 
-namespace Moshaveran.BackgroundServices.MqttServices;
+namespace Moshaveran.WinService;
 
 public static class MqttConfigurator
 {
