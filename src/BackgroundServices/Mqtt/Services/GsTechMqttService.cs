@@ -3,7 +3,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace Moshaveran.BackgroundServices.MqttServices.Services;
+namespace Moshaveran.BackgroundServices.Mqtt.Services;
 
 public sealed class GsTechMqttService(ILogger<GsTechMqttService> logger)
 {
@@ -41,6 +41,6 @@ public sealed class GsTechMqttService(ILogger<GsTechMqttService> logger)
     {
         var payloadMessage = Encoding.UTF8.GetString(payload);
 
-        
+
     }
 }

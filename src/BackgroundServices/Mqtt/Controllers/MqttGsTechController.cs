@@ -1,10 +1,10 @@
-﻿using Moshaveran.BackgroundServices.MqttServices.Services;
+﻿using Moshaveran.BackgroundServices.Mqtt.Services;
 
 using MQTTnet.AspNetCore.AttributeRouting;
 
 using System.Text;
 
-namespace Moshaveran.BackgroundServices.MqttServices.Controllers;
+namespace Moshaveran.BackgroundServices.Mqtt.Controllers;
 
 [MqttController]
 public class CatchAllController(ILogger<CatchAllController> logger) : MqttBaseController

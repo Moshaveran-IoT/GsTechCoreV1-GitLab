@@ -30,7 +30,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Remove="MqttServices\Controllers\MqttGsTechController.old.cs" />
+	  <Compile Remove="Mqtt\Controllers\MqttGsTechController.old.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

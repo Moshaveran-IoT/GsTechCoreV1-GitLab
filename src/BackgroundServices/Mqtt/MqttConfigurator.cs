@@ -1,5 +1,5 @@
-﻿using Moshaveran.BackgroundServices.MqttServices.Controllers;
-using Moshaveran.BackgroundServices.MqttServices.Services;
+﻿using Moshaveran.BackgroundServices.Mqtt.Controllers;
+using Moshaveran.BackgroundServices.Mqtt.Services;
 
 using MQTTnet.AspNetCore;
 using MQTTnet.AspNetCore.AttributeRouting;

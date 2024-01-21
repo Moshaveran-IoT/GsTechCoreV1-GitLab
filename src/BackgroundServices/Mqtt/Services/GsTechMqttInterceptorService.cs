@@ -9,7 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace Moshaveran.BackgroundServices.MqttServices.Services;
+namespace Moshaveran.BackgroundServices.Mqtt.Services;
 
 public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorService> logger, IServiceScopeFactory scopeFactory) :
     IMqttServerConnectionValidator,
