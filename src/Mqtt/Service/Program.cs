@@ -1,4 +1,4 @@
-using Moshaveran.BackgroundServices;
+using Moshaveran.WinService;
 
 using MQTTnet.AspNetCore.Extensions;
 

@@ -23,17 +23,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Controllers\**" />
-	  <Content Remove="Controllers\**" />
-	  <EmbeddedResource Remove="Controllers\**" />
-	  <None Remove="Controllers\**" />
+	  <Compile Remove="Mqtt\Controllers\MqttGsTechController.old.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Remove="MqttServices\Controllers\MqttGsTechController.old.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
+		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 	</ItemGroup>
@@ -43,12 +37,15 @@
 		<PackageReference Include="MQTTnet.Extensions.WebSocket4Net" Version="4.3.3.952" />
 		<PackageReference Include="MQTTnet.AspNetCore.AttributeRouting" Version="0.3.16" />
 
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="System.Net.Security" Version="4.3.2" />
 		<PackageReference Include="System.Text.Encodings.Web" Version="8.0.0" />
 		<PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />-->
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="MQTTnet.AspNetCore.AttributeRouting.Forked" Version="0.3.16" />
 
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
 	</ItemGroup>
 
 </Project>

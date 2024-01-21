@@ -9,7 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace Moshaveran.BackgroundServices.MqttServices.Services;
+namespace Moshaveran.WinService.Mqtt.Services;
 
 public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorService> logger, IServiceScopeFactory scopeFactory) :
     IMqttServerConnectionValidator,
@@ -24,7 +24,7 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
 
     public void ConfigureMqttServer(IMqttServer mqtt)
     {
-        this._server = CheckNull(mqtt);
+        _server = CheckNull(mqtt);
         mqtt.ClientConnectedHandler = this;
         mqtt.ClientDisconnectedHandler = this;
     }
@@ -33,13 +33,13 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
     {
         Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientConnectedAsync Handler Triggered");
 
-        if (this._connectedClientIds.Count == 0)
+        if (_connectedClientIds.Count == 0)
         {
-            this.SubscribeKiss();
+            SubscribeKiss();
         }
 
         var clientId = eventArgs.ClientId;
-        this._connectedClientIds.Add(clientId);
+        _connectedClientIds.Add(clientId);
 
         Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Connected:{_newLine} - ClientID = {clientId + _newLine}");
     });
@@ -49,7 +49,7 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
         Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientDisconnectedAsync Handler Triggered");
 
         var clientId = eventArgs.ClientId;
-        _ = this._connectedClientIds.Remove(clientId);
+        _ = _connectedClientIds.Remove(clientId);
 
         Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Disconnected:{_newLine} - ClientID = {clientId + _newLine}");
     });
@@ -74,11 +74,11 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
     {
         var msg = new MqttApplicationMessageBuilder().WithPayload($"MQTTnet hosted on GsTech has started up!").WithTopic("AliveMessage");
 
-        while (this._connectedClientIds.Count > 0)
+        while (_connectedClientIds.Count > 0)
         {
             try
             {
-                _ = await this._server.PublishAsync(msg.Build()).ConfigureAwait(false);
+                _ = await _server.PublishAsync(msg.Build()).ConfigureAwait(false);
                 _ = msg.WithPayload($"MQTTnet hosted on GsTech is still running at {DateTime.Now}!");
             }
             catch (Exception e)

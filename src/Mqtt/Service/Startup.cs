@@ -1,8 +1,9 @@
-﻿using Moshaveran.BackgroundServices.MqttServices;
+﻿
+using Moshaveran.WinService.Mqtt;
 
-namespace Moshaveran.BackgroundServices;
+namespace Moshaveran.WinService;
 
-public class Startup
+public class Startup(IConfiguration configuration)
 {
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
@@ -29,8 +30,8 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        _ = services.AddMqttServices(configuration);
         _ = services.AddControllers();
-        _ = services.AddMqttServices();
-        _ = services.AddSwaggerGen();
+        _ = services.AddSwaggerGen();        
     }
 }

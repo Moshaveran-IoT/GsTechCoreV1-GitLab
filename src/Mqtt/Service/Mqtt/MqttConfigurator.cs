@@ -1,15 +1,35 @@
-﻿using Moshaveran.BackgroundServices.MqttServices.Controllers;
-using Moshaveran.BackgroundServices.MqttServices.Services;
+﻿using Moshaveran.Mqtt.DataAccess;
+
+using Moshaveran.WinService.Mqtt.Controllers;
+using Moshaveran.WinService.Mqtt.Services;
 
 using MQTTnet.AspNetCore;
 using MQTTnet.AspNetCore.AttributeRouting;
 using MQTTnet.AspNetCore.Extensions;
 
-namespace Moshaveran.BackgroundServices.MqttServices;
+namespace Moshaveran.WinService.Mqtt;
 
 public static class MqttConfigurator
 {
-    public static IServiceCollection AddMqttServices(this IServiceCollection services)
+    public static IServiceCollection AddMqttServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddScoped<GsTechMqttService>();
+        _ = services.AddAutoMapper(typeof(Startup));
+        _ = services.AddMqttNetServices();
+        _ = services.AddMqttDataAccessServices(configuration);
+        return services;
+    }
+
+    public static IApplicationBuilder ConfigureMqtt(this IApplicationBuilder app, int portNo)
+        => app.UseEndpoints(endpoints =>
+        {
+            _ = endpoints.MapConnectionHandler<MqttConnectionHandler>("/mqtt", e => e.WebSockets.SubProtocolSelector = p => p.FirstOrDefault() ?? string.Empty);
+        }).UseMqttServer(server =>
+        {
+            app.ApplicationServices.GetRequiredService<GsTechMqttInterceptorService>().ConfigureMqttServer(server);
+        });
+
+    private static IServiceCollection AddMqttNetServices(this IServiceCollection services)
     {
         // Add Singleton MQTT Server object
         _ = services.AddSingleton<GsTechMqttInterceptorService>();
@@ -40,16 +60,6 @@ public static class MqttConfigurator
             .AddConnections();
 
         _ = services.AddScoped<MqttBaseController, MqttGsTechController>();
-
         return services;
     }
-
-    public static IApplicationBuilder ConfigureMqtt(this IApplicationBuilder app, int portNo)
-        => app.UseEndpoints(endpoints =>
-        {
-            _ = endpoints.MapConnectionHandler<MqttConnectionHandler>("/mqtt", e => e.WebSockets.SubProtocolSelector = p => p.FirstOrDefault() ?? string.Empty);
-        }).UseMqttServer(server =>
-        {
-            app.ApplicationServices.GetRequiredService<GsTechMqttInterceptorService>().ConfigureMqttServer(server);
-        });
 }
