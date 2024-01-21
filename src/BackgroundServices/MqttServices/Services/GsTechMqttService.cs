@@ -1,13 +1,17 @@
-﻿using System.Text.Json;
+﻿using Newtonsoft.Json;
+
+using System.Text;
+using System.Text.Json;
 
 namespace Moshaveran.BackgroundServices.MqttServices.Services;
 
-public sealed class GsTechMqttService
+public sealed class GsTechMqttService(ILogger<GsTechMqttService> logger)
 {
     private const string validHex = "0123456789abcdefABCDEF";
 
-    public Task Can(string payloadMessage, string Imei)
+    public Task Can(byte[] payload, string imei)
     {
+        var payloadMessage = Encoding.UTF8.GetString(payload);
         var dto = JsonDocument.Parse(payloadMessage);
         foreach (var app in dto.RootElement.EnumerateObject())
         {
@@ -31,5 +35,12 @@ public sealed class GsTechMqttService
         }
 
         return Task.CompletedTask;
+    }
+
+    public async Task OBD(byte[] payload, string imei)
+    {
+        var payloadMessage = Encoding.UTF8.GetString(payload);
+
+        
     }
 }
