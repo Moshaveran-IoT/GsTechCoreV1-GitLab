@@ -30,8 +30,8 @@ public class Startup(IConfiguration configuration)
 
     public void ConfigureServices(IServiceCollection services)
     {
-        _ = services.AddControllers();
         _ = services.AddMqttServices(configuration);
+        _ = services.AddControllers();
         _ = services.AddSwaggerGen();        
     }
 }

@@ -23,17 +23,16 @@ public class CatchAllController(ILogger<CatchAllController> logger) : MqttBaseCo
 public class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMqttService service) : MqttBaseController
 {
     [MqttRoute("{IMEI}/CAN")]
-    public void CAN(string IMEI)
+    public async void CAN(string IMEI)
     {
         logger.LogInformation("*** CAN Payload Received! IMEI: " + IMEI);
-        service.Can(Message.Payload, IMEI);
+        await service.InsertCanBroker(Message.Payload, IMEI);
     }
 
     [MqttRoute("{IMEI}/General")]
     public void General(string IMEI)
     {
         logger.LogInformation("*** General Payload Received! IMEI: " + IMEI);
-
     }
 
     [MqttRoute("{IMEI}/GeneralPlus")]

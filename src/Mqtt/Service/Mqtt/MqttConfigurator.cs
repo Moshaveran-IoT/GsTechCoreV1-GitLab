@@ -1,4 +1,4 @@
-﻿using DataAccess;
+﻿using Moshaveran.Mqtt.DataAccess;
 
 using Moshaveran.WinService.Mqtt.Controllers;
 using Moshaveran.WinService.Mqtt.Services;
@@ -13,6 +13,8 @@ public static class MqttConfigurator
 {
     public static IServiceCollection AddMqttServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddScoped<GsTechMqttService>();
+        _ = services.AddAutoMapper(typeof(Startup));
         _ = services.AddMqttNetServices();
         _ = services.AddMqttDataAccessServices(configuration);
         return services;
