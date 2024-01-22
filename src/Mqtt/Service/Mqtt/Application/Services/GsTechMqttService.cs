@@ -1,12 +1,11 @@
 ﻿using System.Text;
 using System.Text.Json;
-
 using Moshaveran.Infrastructure.Mapping;
 using Moshaveran.Infrastructure.Results;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
 using Moshaveran.Mqtt.DataAccess.Repositories;
 
-namespace Moshaveran.API.Mqtt.Services;
+namespace Moshaveran.API.Mqtt.Application.Services;
 
 public sealed class GsTechMqttService(ILogger<GsTechMqttService> logger, IMapper mapper, IRepository<CanBroker> canRepo)
 {

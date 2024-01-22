@@ -23,7 +23,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Mqtt\Controllers\MqttGsTechController.old.cs" />
+	  <Compile Remove="Mqtt\API\Controllers\MqttGsTechController.old.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -45,6 +45,15 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Mqtt\API\Models\" />
+	  <Folder Include="Mqtt\Application\Commands\" />
+	  <Folder Include="Mqtt\Application\Interfaces\" />
+	  <Folder Include="Mqtt\Application\Queries\" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="..\..\..\.editorconfig" Link=".editorconfig" />
 	</ItemGroup>
 
 </Project>

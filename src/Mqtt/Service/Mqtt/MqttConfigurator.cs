@@ -1,7 +1,6 @@
-﻿using Moshaveran.API.Mqtt.Controllers;
-using Moshaveran.API.Mqtt.Services;
+﻿using Moshaveran.API.Mqtt.API.Controllers;
+using Moshaveran.API.Mqtt.Application.Services;
 using Moshaveran.Mqtt.DataAccess;
-using Moshaveran.WinService.Mqtt.Services;
 
 using MQTTnet.AspNetCore;
 using MQTTnet.AspNetCore.AttributeRouting;

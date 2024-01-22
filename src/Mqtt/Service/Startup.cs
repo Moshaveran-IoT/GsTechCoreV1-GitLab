@@ -30,9 +30,11 @@ public class Startup(IConfiguration configuration)
 
     public void ConfigureServices(IServiceCollection services)
     {
+        // Add project services
         _ = services.AddInfrastructureService()
             .AddMqttServices(configuration);
 
+        // Setup api
         _ = services.AddControllers();
         _ = services.AddSwaggerGen();
     }
