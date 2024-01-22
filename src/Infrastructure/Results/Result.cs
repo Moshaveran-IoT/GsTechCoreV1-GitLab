@@ -44,7 +44,3 @@ public abstract class ResultBase
 
     public string? Message { get; init; }
 }
-
-public static class ResultFactory
-{
-}

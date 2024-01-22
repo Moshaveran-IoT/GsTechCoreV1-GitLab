@@ -1,20 +1,19 @@
-﻿using Moshaveran.Mqtt.DataAccess;
-
-using Moshaveran.WinService.Mqtt.Controllers;
+﻿using Moshaveran.API.Mqtt.Controllers;
+using Moshaveran.API.Mqtt.Services;
+using Moshaveran.Mqtt.DataAccess;
 using Moshaveran.WinService.Mqtt.Services;
 
 using MQTTnet.AspNetCore;
 using MQTTnet.AspNetCore.AttributeRouting;
 using MQTTnet.AspNetCore.Extensions;
 
-namespace Moshaveran.WinService.Mqtt;
+namespace Moshaveran.API.Mqtt;
 
 public static class MqttConfigurator
 {
     public static IServiceCollection AddMqttServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<GsTechMqttService>();
-        _ = services.AddAutoMapper(typeof(Startup));
+        _ = services.AddScoped<GsTechMqttService>();
         _ = services.AddMqttNetServices();
         _ = services.AddMqttDataAccessServices(configuration);
         return services;

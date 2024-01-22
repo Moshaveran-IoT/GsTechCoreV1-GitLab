@@ -1,7 +1,7 @@
-﻿
-using Moshaveran.WinService.Mqtt;
+﻿using Moshaveran.API.Mqtt;
+using Moshaveran.Infrastructure;
 
-namespace Moshaveran.WinService;
+namespace Moshaveran.API;
 
 public class Startup(IConfiguration configuration)
 {
@@ -30,8 +30,10 @@ public class Startup(IConfiguration configuration)
 
     public void ConfigureServices(IServiceCollection services)
     {
-        _ = services.AddMqttServices(configuration);
+        _ = services.AddInfrastructureService()
+            .AddMqttServices(configuration);
+
         _ = services.AddControllers();
-        _ = services.AddSwaggerGen();        
+        _ = services.AddSwaggerGen();
     }
 }

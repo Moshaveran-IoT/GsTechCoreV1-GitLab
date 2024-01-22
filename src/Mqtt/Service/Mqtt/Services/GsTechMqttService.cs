@@ -1,17 +1,16 @@
-﻿using AutoMapper;
+﻿using System.Text;
+using System.Text.Json;
 
+using Moshaveran.Infrastructure.Mapping;
 using Moshaveran.Infrastructure.Results;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
 using Moshaveran.Mqtt.DataAccess.Repositories;
 
-using System.Text;
-using System.Text.Json;
-
-namespace Moshaveran.WinService.Mqtt.Services;
+namespace Moshaveran.API.Mqtt.Services;
 
 public sealed class GsTechMqttService(ILogger<GsTechMqttService> logger, IMapper mapper, IRepository<CanBroker> canRepo)
 {
-    private const string validHex = "0123456789abcdefABCDEF";
+    private const string VALID_HEX = "0123456789abcdefABCDEF";
 
     public async Task<Result> InsertCanBroker(byte[] payload, string imei)
     {
@@ -20,31 +19,32 @@ public sealed class GsTechMqttService(ILogger<GsTechMqttService> logger, IMapper
         foreach (var app in dto.RootElement.EnumerateObject())
         {
             var key = app.Name;
-            var value = app.Value.GetRawText().Trim('\"');
-            var isHex = key.All(validHex.Contains) && value.All(validHex.Contains);
+            var rawValue = app.Value.GetRawText();
+            var value = rawValue.Trim('\"');
+            var isHex = key.All(VALID_HEX.Contains) && value.All(VALID_HEX.Contains);
             if (!isHex)
             {
                 continue;
             }
             var binaryString = string.Join(string.Empty, key.PadLeft(8, '0').Select(c => Convert.ToString(Convert.ToInt32(c.ToString(), 16), 2).PadLeft(4, '0')));
-            var Priority = binaryString[..6];
-            var Reserved = binaryString[6..7];
-            var DataPage = binaryString[7..8];
-            var PDUFormat = binaryString[8..16];
-            var SourceAddress = binaryString[24..32];
-            var decPDUFormat = Convert.ToInt64(PDUFormat, 2);
-            var PDUSpecific = decPDUFormat >= 240
+            //var Priority = binaryString[..6];
+            var reserved = binaryString[6..7];
+            var dataPage = binaryString[7..8];
+            var pduFormat = binaryString[8..16];
+            //var sourceAddress = binaryString[24..32];
+            var decPduFormat = Convert.ToInt64(pduFormat, 2);
+            var pduSpecific = decPduFormat >= 240
                 ? binaryString[16..24]
-                : $"000000{Reserved}{DataPage}{PDUFormat}00000000";
-            var binaryPGN = $"000000{Reserved}{DataPage}{PDUFormat}{PDUSpecific}";
-            var PGN = Convert.ToInt64(binaryPGN, 2);
+                : $"000000{reserved}{dataPage}{pduFormat}00000000";
+            var binaryPgn = $"000000{reserved}{dataPage}{pduFormat}{pduSpecific}";
+            var pgn = Convert.ToInt64(binaryPgn, 2);
 
-            CanBroker canBroker = new()
+            var canBroker = new CanBroker()
             {
                 CreatedOn = DateTime.Now,
                 Identifier = key,
-                Pgn = PGN,
-                Value = app.Value.ToString(),
+                Pgn = pgn,
+                Value = rawValue.ToString(),
                 Imei = imei
             };
             _ = await canRepo.Insert(canBroker, false);
