@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Globalization;
+
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,7 +26,13 @@ public static class DataAccessConfigurator
             options => options.UseSqlServer(connectionString,
                   b => b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName)),
             ServiceLifetime.Transient);
-        _ = services.AddTransient<IRepository<CanBroker>>(x => new GenericRepository<CanBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()));
+        var invariantCulture = new CultureInfo("en-US");
+        CultureInfo.DefaultThreadCurrentCulture = invariantCulture;
+        CultureInfo.DefaultThreadCurrentUICulture = invariantCulture;
+
+        _ = services.AddTransient<IRepository<CanBroker>>(x => new GenericRepository<CanBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
+            .AddTransient<IRepository<GeneralBroker>>(x => new GenericRepository<GeneralBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()));
+
         return services;
     }
 }

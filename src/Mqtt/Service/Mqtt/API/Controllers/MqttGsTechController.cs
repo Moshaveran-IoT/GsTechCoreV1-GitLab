@@ -1,44 +1,25 @@
-﻿using System.Text;
-
-using Moshaveran.API.Mqtt.Application.Services;
+﻿using Moshaveran.API.Mqtt.Application.Services;
+using Moshaveran.Infrastructure.Results;
 
 using MQTTnet.AspNetCore.AttributeRouting;
 
 namespace Moshaveran.API.Mqtt.API.Controllers;
 
 [MqttController]
-public class CatchAllController(ILogger<CatchAllController> logger) : MqttBaseController
-{
-    [MqttRoute("{*topic}")]
-    public Task WildCardMatchTopic(string topic)
-    {
-        var payloadMessage = Encoding.UTF8.GetString(Message.Payload);
-        logger.LogInformation($"Wildcard matched on Topic: '{topic}'");
-        logger.LogInformation($"{payloadMessage}");
-        return Ok();
-    }
-}
-
-[MqttController]
 [MqttRoute("Gs")]
 public class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMqttService service) : MqttBaseController
 {
     [MqttRoute("{IMEI}/CAN")]
-    public async Task CAN(string IMEI)
-    {
-        logger.LogInformation("*** CAN Payload Received! IMEI: " + IMEI);
-        var result = await service.InsertCanBroker(Message.Payload, IMEI);
-        if (result.IsSucceed)
-            await Ok();
-        else
-            await this.BadMessage();
-    }
+    public async Task CAN(string IMEI, CancellationToken token = default)
+        => await ProcessServiceMethod(service.ProcessCanPayload, "CAN", IMEI, token);
 
     [MqttRoute("{IMEI}/General")]
-    public void General(string IMEI) => logger.LogInformation("*** General Payload Received! IMEI: " + IMEI);
+    public async Task General(string IMEI, CancellationToken token = default)
+        => await ProcessServiceMethod(service.ProcessGeneralPayload, "General", IMEI, token);
 
     [MqttRoute("{IMEI}/GeneralPlus")]
-    public void GeneralPlus(string IMEI) => logger.LogInformation("*** General Payload Received! IMEI: " + IMEI);
+    public async Task GeneralPlus(string IMEI, CancellationToken token = default)
+        => await ProcessServiceMethod(service.ProcessGeneralPlusPayload, "General Plus", IMEI, token);
 
     [MqttRoute("{IMEI}/GPS")]
     public void GPS(string IMEI) => logger.LogInformation("*** GPS Payload Received! IMEI: " + IMEI);
@@ -50,7 +31,8 @@ public class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMq
     public void OBD(string IMEI) => logger.LogInformation("*** OBD Payload Received! IMEI: " + IMEI);
 
     [MqttRoute("{IMEI}/Signal")]
-    public void Signal(string IMEI) => logger.LogInformation("*** Signal Payload Received! IMEI: " + IMEI);
+    public async Task Signal(string IMEI, CancellationToken token = default)
+        => await ProcessServiceMethod(service.ProcessSignalPayload, "Signal", IMEI, token);
 
     [MqttRoute("{IMEI}/Temp")]
     public void Temp(string IMEI) => logger.LogInformation("*** Temperature Payload Received! IMEI: " + IMEI);
@@ -60,4 +42,21 @@ public class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMq
 
     [MqttRoute("{IMEI}/Voltage")]
     public void Voltage(string IMEI) => logger.LogInformation("*** Voltage Payload Received! IMEI: " + IMEI);
+
+    private async Task ProcessServiceMethod(Func<byte[], string, CancellationToken, Task<Result>> method, string payloadName, string imei, CancellationToken token = default)
+        => await ProcessServiceMethod(() => method(Message.Payload, imei, token), payloadName, imei);
+
+    private async Task ProcessServiceMethod(Func<Task<Result>> method, string payloadName, string imei)
+    {
+        logger.LogInformation($"*** {payloadName} Payload Received! IMEI: {imei}");
+        var result = await method();
+        if (result.IsSucceed)
+        {
+            await Ok();
+        }
+        else
+        {
+            await this.BadMessage();
+        }
+    }
 }
