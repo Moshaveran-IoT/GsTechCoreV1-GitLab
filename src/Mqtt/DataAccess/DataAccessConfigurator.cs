@@ -26,7 +26,8 @@ public static class DataAccessConfigurator
         _ = services.AddScoped<IRepository<CanBroker>>(x => new GenericRepository<CanBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
             .AddScoped<IRepository<GeneralBroker>>(x => new GenericRepository<GeneralBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
             .AddScoped<IRepository<SignalBroker>>(x => new GenericRepository<SignalBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
-            .AddScoped<IRepository<VoltageBroker>>(x => new GenericRepository<VoltageBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()));
+            .AddScoped<IRepository<VoltageBroker>>(x => new GenericRepository<VoltageBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
+            .AddScoped<IRepository<GpsBroker>>(x => new GenericRepository<GpsBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()));
 
         return services;
     }

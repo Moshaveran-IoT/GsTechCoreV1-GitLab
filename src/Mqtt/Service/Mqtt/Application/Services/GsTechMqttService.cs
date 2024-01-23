@@ -1,5 +1,6 @@
 ﻿using System.Text;
 
+using Moshaveran.Infrastructure.ApplicationServices;
 using Moshaveran.Infrastructure.Helpers;
 using Moshaveran.Infrastructure.Mapping;
 using Moshaveran.Infrastructure.Results;
@@ -8,26 +9,35 @@ using Moshaveran.Mqtt.DataAccess.Repositories;
 
 namespace Moshaveran.API.Mqtt.Application.Services;
 
-public sealed class GsTechMqttService
+public sealed class GsTechMqttService : IBusinessService
 {
     private readonly IRepository<CanBroker> _canRepo;
     private readonly IRepository<GeneralBroker> _genRepo;
+    private readonly IGeocodingService _geocoding;
+    private readonly IRepository<GpsBroker> _gpsRepo;
+    private readonly ILogger<GsTechMqttService> _logger;
     private readonly IMapper _mapper;
     private readonly IRepository<SignalBroker> _signalRepo;
     private readonly IRepository<VoltageBroker> _voltageRepo;
 
     public GsTechMqttService(
+        ILogger<GsTechMqttService> logger,
         IMapper mapper,
+        IGeocodingService geocoding,
         IRepository<CanBroker> canRepo,
         IRepository<GeneralBroker> genRepo,
         IRepository<SignalBroker> signalRepo,
-        IRepository<VoltageBroker> voltageRepo)
+        IRepository<VoltageBroker> voltageRepo,
+        IRepository<GpsBroker> gpsRepo)
     {
-        _mapper = mapper;
-        _canRepo = canRepo;
+        this._logger = logger;
+        this._mapper = mapper;
+        this._geocoding = geocoding;
+        this._canRepo = canRepo;
         this._genRepo = genRepo;
         this._signalRepo = signalRepo;
         this._voltageRepo = voltageRepo;
+        this._gpsRepo = gpsRepo;
     }
 
     public async Task<Result> ProcessCanPayload(byte[] payload, string imei, CancellationToken token = default)
@@ -121,32 +131,32 @@ public sealed class GsTechMqttService
         }, payload);
 
     public Task<Result> ProcessGeneralPlusPayload(byte[] payload, string imei, CancellationToken token = default)
-        => ProcessPayload(async (GeneralBroker result) =>
+        => ProcessPayload(async (GeneralBroker gp) =>
         {
-            result.Imei = imei;
-            result.CreatedOn = DateTime.Now;
-            result.InternetRemainingUssd = result.InternetTotalVolume;
-            var USSD = StringHelper.HexToUnicode(result.InternetTotalVolume);
+            gp.Imei = imei;
+            gp.CreatedOn = DateTime.Now;
+            gp.InternetRemainingUssd = gp.InternetTotalVolume;
+            var USSD = StringHelper.HexToUnicode(gp.InternetTotalVolume);
             if (USSD.Contains("صفر"))
             {
-                result.InternetTotalVolume = "بدون بسته";
-                result.InternetRemainingTime = "---";
+                gp.InternetTotalVolume = "بدون بسته";
+                gp.InternetRemainingTime = "---";
                 var match = USSD.Split(["اصلی"], StringSplitOptions.None)[1].Split("ریال")[0].Trim().Split(" ")[0];
-                result.InternetRemainingVolume = string.Concat(match, " ", "ریال");
+                gp.InternetRemainingVolume = string.Concat(match, " ", "ریال");
             }
             else
             {
-                result.InternetTotalVolume = USSD.Split(":")[0].Trim();
-                result.InternetRemainingVolume = USSD.Split(":")[1].Trim().Split("،")[0].Trim();
-                result.InternetRemainingTime = USSD.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
+                gp.InternetTotalVolume = USSD.Split(":")[0].Trim();
+                gp.InternetRemainingVolume = USSD.Split(":")[1].Trim().Split("،")[0].Trim();
+                gp.InternetRemainingTime = USSD.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
             }
 
-            if (!string.IsNullOrEmpty(result.SimCardNumber))
+            if (!string.IsNullOrEmpty(gp.SimCardNumber))
             {
-                var splitSimCard = StringHelper.HexToUnicode(result.SimCardNumber).Split("\n");
+                var splitSimCard = StringHelper.HexToUnicode(gp.SimCardNumber).Split("\n");
                 if (splitSimCard.ToList().Count > 0)
                 {
-                    result.SimCardNumber = splitSimCard[1].ToString().Substring(2, 11);
+                    gp.SimCardNumber = splitSimCard[1].ToString().Substring(2, 11);
                 }
             }
             //await _mqttDbContext.General_Brokers.AddAsync(result);
@@ -155,33 +165,61 @@ public sealed class GsTechMqttService
             //await _mqttDbContext.General_Daily_Brokers.AddAsync(dailydata);
             ////await _restrictionRepository.GetRestrictionItems(imei, result, "General_Brokers");
             //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
-            _ = await this._genRepo.Insert(result);
+            _ = await this._genRepo.Insert(gp);
+        }, payload);
+
+    public Task<Result> ProcessGpsPayload(byte[] payload, string imei, CancellationToken token = default)
+        => ProcessPayload(async (GpsBroker gps) =>
+        {
+            if ((gps.Latitude is >= -90 and <= 90) && (gps.Longitude is >= -180 and <= 180) && (gps.Latitude.ToString().Length != 1) && (gps.Longitude.ToString().Length != 1))
+            {
+                gps.Imei = imei;
+                gps.CreatedOn = DateTime.Now;
+                //ReverseGeocoding nr = await _geocoding.Reverse(result.Latitude, result.Longitude);
+                //result.Address = nr.Formatted_address;
+                var address = await _geocoding.Reverse(gps.Latitude, gps.Longitude);
+                gps.Address = address;
+                //await _mqttDbContext.GPS_Brokers.AddAsync(result);
+                //var dailydata = JsonConvert.DeserializeObject<GPS_Daily_Broker>(JsonConvert.SerializeObject(result));
+                //dailydata.Id = Guid.Empty;
+                //await _mqttDbContext.GPS_Daily_Brokers.AddAsync(dailydata);
+                //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
+
+                //var dailyData = _mapper.Map<GpsDailyBroker>(result).With(x => x.Id = Guid.Empty);
+
+                _ = await _gpsRepo.Insert(gps);
+                _logger.LogInformation($"*** GPS Payload Saved! IMEI: {imei}");
+            }
+            else
+            {
+                _logger.LogInformation($"*** GPS Payload Not Saved! IMEI: {imei}");
+            }
         }, payload);
 
     public Task<Result> ProcessSignalPayload(byte[] payload, string imei, CancellationToken token = default)
-        => ProcessPayload(async (SignalBroker result) =>
+            => ProcessPayload(async (SignalBroker signal) =>
         {
-            result.Imei = imei;
-            result.CreatedOn = DateTime.Now;
+            signal.Imei = imei;
+            signal.CreatedOn = DateTime.Now;
             //await _mqttDbContext.Signal_Brokers.AddAsync(result);
             //var dailydata = JsonConvert.DeserializeObject<Signal_Daily_Broker>(JsonConvert.SerializeObject(result));
             //dailydata.Id = Guid.Empty;
             //await _mqttDbContext.Signal_Daily_Brokers.AddAsync(dailydata);
             //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
-            _ = await _signalRepo.Insert(result, token: token);
+            _ = await _signalRepo.Insert(signal, token: token);
         }, payload);
 
     public Task<Result> ProcessVoltagePayload(byte[] payload, string imei, CancellationToken token = default)
-        => ProcessPayload(async (VoltageBroker result) =>
+        => ProcessPayload(async (VoltageBroker voltage) =>
         {
-            result.Imei = imei;
-            result.CreatedOn = DateTime.Now;
+            voltage.Imei = imei;
+            voltage.CreatedOn = DateTime.Now;
             //await _mqttDbContext.Voltage_Brokers.AddAsync(result);
             //var dailydata = JsonConvert.DeserializeObject<Voltage_Daily_Broker>(JsonConvert.SerializeObject(result));
             //dailydata.Id = Guid.Empty;
             //await _mqttDbContext.Voltage_Daily_Brokers.AddAsync(dailydata);
             //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
-            _ = await _voltageRepo.Insert(result);
+            _ = await _voltageRepo.Insert(voltage);
         }, payload);
 
     private static async Task<Result> ProcessPayload<TDbBroker>(Func<TDbBroker, Task> process, byte[] payload)

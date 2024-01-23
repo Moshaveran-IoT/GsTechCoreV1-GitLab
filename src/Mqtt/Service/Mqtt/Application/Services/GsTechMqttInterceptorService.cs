@@ -1,13 +1,11 @@
-﻿using MQTTnet;
-using MQTTnet.AspNetCore;
-using MQTTnet.AspNetCore.AttributeRouting;
-using MQTTnet.Protocol;
-using MQTTnet.Server;
-
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
+
+using MQTTnet;
+using MQTTnet.Protocol;
+using MQTTnet.Server;
 
 namespace Moshaveran.API.Mqtt.Application.Services;
 
@@ -97,7 +95,7 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
         _ = CheckNull(context);
 
         context.ReasonCode = MqttConnectReasonCode.BadUserNameOrPassword;
-        if (context.ClientId.Length == 15 && context.Username.Equals("root") && context.Password.Equals(context.ClientId[10..]))
+        if (context.ClientId.Length == 15 && context.Username.Equals("root", StringComparison.Ordinal) && context.Password.Equals(context.ClientId[10..], StringComparison.Ordinal))
         {
             context.ReasonCode = MqttConnectReasonCode.Success;
         }

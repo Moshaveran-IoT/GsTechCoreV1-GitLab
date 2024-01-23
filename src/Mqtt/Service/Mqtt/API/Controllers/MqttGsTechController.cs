@@ -22,7 +22,8 @@ public class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMq
         => await ProcessServiceMethod(service.ProcessGeneralPlusPayload, "General Plus", IMEI, token);
 
     [MqttRoute("{IMEI}/GPS")]
-    public void GPS(string IMEI) => logger.LogInformation("*** GPS Payload Received! IMEI: " + IMEI);
+    public  async Task GPS(string IMEI, CancellationToken token = default)
+        => await ProcessServiceMethod(service.ProcessGpsPayload, "GPS", IMEI, token);
 
     [MqttRoute("{IMEI}/Image")]
     public void Image(string IMEI) => logger.LogInformation("*** Image Payload Received! IMEI: " + IMEI);
