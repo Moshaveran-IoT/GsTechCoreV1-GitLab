@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,24 +13,20 @@ public static class DataAccessConfigurator
     public static IServiceCollection AddMqttDataAccessServices(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("ApplicationConnection");
-        _ = services.AddDbContext<MqttReadDbContext>(
-            options =>
-            {
-                _ = options.UseSqlServer(connectionString, b => b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName));
-                _ = options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            },
-            ServiceLifetime.Transient);
-        _ = services.AddDbContext<MqttWriteDbContext>(
-            options => options.UseSqlServer(connectionString,
-                  b => b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName)),
-            ServiceLifetime.Transient);
-        var invariantCulture = new CultureInfo("en-US");
-        CultureInfo.DefaultThreadCurrentCulture = invariantCulture;
-        CultureInfo.DefaultThreadCurrentUICulture = invariantCulture;
+        _ = services
+            .AddDbContext<MqttWriteDbContext>(options => options.UseSqlServer(connectionString, b => b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName)), ServiceLifetime.Transient)
+            .AddDbContext<MqttReadDbContext>(
+                options =>
+                {
+                    _ = options.UseSqlServer(connectionString, b => b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName));
+                    _ = options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                }, ServiceLifetime.Transient)
+            ;
 
         _ = services.AddScoped<IRepository<CanBroker>>(x => new GenericRepository<CanBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
             .AddScoped<IRepository<GeneralBroker>>(x => new GenericRepository<GeneralBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
-            .AddScoped<IRepository<SignalBroker>>(x => new GenericRepository<SignalBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()));
+            .AddScoped<IRepository<SignalBroker>>(x => new GenericRepository<SignalBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
+            .AddScoped<IRepository<VoltageBroker>>(x => new GenericRepository<VoltageBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()));
 
         return services;
     }

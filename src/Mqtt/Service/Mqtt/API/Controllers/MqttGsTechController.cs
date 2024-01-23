@@ -41,7 +41,8 @@ public class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMq
     public void TPMS(string IMEI) => logger.LogInformation("*** TPMS Payload Received! IMEI: " + IMEI);
 
     [MqttRoute("{IMEI}/Voltage")]
-    public void Voltage(string IMEI) => logger.LogInformation("*** Voltage Payload Received! IMEI: " + IMEI);
+    public async Task Voltage(string IMEI, CancellationToken token = default)
+        => await ProcessServiceMethod(service.ProcessVoltagePayload, "Voltage", IMEI, token);
 
     private async Task ProcessServiceMethod(Func<byte[], string, CancellationToken, Task<Result>> method, string payloadName, string imei, CancellationToken token = default)
         => await ProcessServiceMethod(() => method(Message.Payload, imei, token), payloadName, imei);

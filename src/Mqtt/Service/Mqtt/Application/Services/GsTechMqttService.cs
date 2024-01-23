@@ -14,17 +14,20 @@ public sealed class GsTechMqttService
     private readonly IRepository<GeneralBroker> _genRepo;
     private readonly IMapper _mapper;
     private readonly IRepository<SignalBroker> _signalRepo;
+    private readonly IRepository<VoltageBroker> _voltageRepo;
 
     public GsTechMqttService(
         IMapper mapper,
         IRepository<CanBroker> canRepo,
         IRepository<GeneralBroker> genRepo,
-        IRepository<SignalBroker> signalRepo)
+        IRepository<SignalBroker> signalRepo,
+        IRepository<VoltageBroker> voltageRepo)
     {
         _mapper = mapper;
         _canRepo = canRepo;
         this._genRepo = genRepo;
         this._signalRepo = signalRepo;
+        this._voltageRepo = voltageRepo;
     }
 
     public async Task<Result> ProcessCanPayload(byte[] payload, string imei, CancellationToken token = default)
@@ -172,6 +175,19 @@ public sealed class GsTechMqttService
             //await _mqttDbContext.Signal_Daily_Brokers.AddAsync(dailydata);
             //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
             _ = await _signalRepo.Insert(result, token: token);
+        }, payload);
+
+    public Task<Result> ProcessVoltagePayload(byte[] payload, string imei, CancellationToken token = default)
+        => ProcessPayload(async (VoltageBroker result) =>
+        {
+            result.Imei = imei;
+            result.CreatedOn = DateTime.Now;
+            //await _mqttDbContext.Voltage_Brokers.AddAsync(result);
+            //var dailydata = JsonConvert.DeserializeObject<Voltage_Daily_Broker>(JsonConvert.SerializeObject(result));
+            //dailydata.Id = Guid.Empty;
+            //await _mqttDbContext.Voltage_Daily_Brokers.AddAsync(dailydata);
+            //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
+            _ = await _voltageRepo.Insert(result);
         }, payload);
 
     private static async Task<Result> ProcessPayload<TDbBroker>(Func<TDbBroker, Task> process, byte[] payload)
