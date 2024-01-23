@@ -13,12 +13,18 @@ public sealed class GsTechMqttService
     private readonly IRepository<CanBroker> _canRepo;
     private readonly IRepository<GeneralBroker> _genRepo;
     private readonly IMapper _mapper;
+    private readonly IRepository<SignalBroker> _signalRepo;
 
-    public GsTechMqttService(IMapper mapper, IRepository<CanBroker> canRepo, IRepository<GeneralBroker> genRepo)
+    public GsTechMqttService(
+        IMapper mapper,
+        IRepository<CanBroker> canRepo,
+        IRepository<GeneralBroker> genRepo,
+        IRepository<SignalBroker> signalRepo)
     {
         _mapper = mapper;
         _canRepo = canRepo;
         this._genRepo = genRepo;
+        this._signalRepo = signalRepo;
     }
 
     public async Task<Result> ProcessCanPayload(byte[] payload, string imei, CancellationToken token = default)
@@ -63,7 +69,7 @@ public sealed class GsTechMqttService
                     Imei = imei
                 };
                 _ = await _canRepo.Insert(canBroker, false, token);
-                var daily = _mapper.Map<CanDailyBroker>(canBroker);
+                var daily = _mapper.Map<CanDailyBroker>(canBroker).With(x => x.Id = Guid.Empty);
                 //await _mqttDbContext.CAN_Brokers.AddAsync(result);
                 //await _mQTTCacheRepository.TranslateData(result, false);
                 //var dailydata = JsonConvert.DeserializeObject<CAN_Daily_Broker>(JsonConvert.SerializeObject(result));
@@ -117,18 +123,8 @@ public sealed class GsTechMqttService
         return result;
     }
 
-    public async Task<Result> ProcessGeneralPlusPayload(byte[] payload, string imei, CancellationToken token = default)
-    {
-        var payloadMessage = Encoding.UTF8.GetString(payload);
-        if (!StringHelper.TryParseJson(payloadMessage, out GeneralBroker? result) || result == null)
-        {
-            return await Task.FromResult(Result.Failed);
-        }
-        if (string.IsNullOrEmpty(result.InternetTotalVolume))
-        {
-            return await Task.FromResult(Result.Succeed);
-        }
-        try
+    public Task<Result> ProcessGeneralPlusPayload(byte[] payload, string imei, CancellationToken token = default)
+        => ProcessPayload(async (GeneralBroker result) =>
         {
             result.Imei = imei;
             result.CreatedOn = DateTime.Now;
@@ -162,22 +158,11 @@ public sealed class GsTechMqttService
             //await _mqttDbContext.General_Daily_Brokers.AddAsync(dailydata);
             ////await _restrictionRepository.GetRestrictionItems(imei, result, "General_Brokers");
             //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
-            return await Task.FromResult(Result.Succeed);
-        }
-        catch
-        {
-            return await Task.FromResult(Result.Failed);
-        }
-    }
+            _ = await this._genRepo.Insert(result);
+        }, payload);
 
-    public async Task<Result> ProcessSignalPayload(byte[] payload, string imei, CancellationToken token = default)
-    {
-        var payloadMessage = Encoding.UTF8.GetString(payload);
-        if (!StringHelper.TryParseJson(payloadMessage, out SignalBroker? result) || result == null)
-        {
-            return await Task.FromResult(Result.Failed);
-        }
-        try
+    public Task<Result> ProcessSignalPayload(byte[] payload, string imei, CancellationToken token = default)
+        => ProcessPayload(async (SignalBroker result) =>
         {
             result.Imei = imei;
             result.CreatedOn = DateTime.Now;
@@ -186,6 +171,19 @@ public sealed class GsTechMqttService
             //dailydata.Id = Guid.Empty;
             //await _mqttDbContext.Signal_Daily_Brokers.AddAsync(dailydata);
             //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
+            _ = await _signalRepo.Insert(result, token: token);
+        }, payload);
+
+    private static async Task<Result> ProcessPayload<TDbBroker>(Func<TDbBroker, Task> process, byte[] payload)
+    {
+        var payloadMessage = Encoding.UTF8.GetString(payload);
+        if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? result) || result == null)
+        {
+            return await Task.FromResult(Result.Failed);
+        }
+        try
+        {
+            await process(result);
             return await Task.FromResult(Result.Succeed);
         }
         catch

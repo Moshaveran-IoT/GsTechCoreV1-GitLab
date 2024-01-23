@@ -11,10 +11,10 @@ public class GenericRepository<TModel> : IRepository<TModel>
     protected MqttReadDbContext ReadDbContext { get; }
     protected MqttWriteDbContext WriteDbContext { get; }
 
-    public Task<Result<int>> Delete(TModel model, bool persist = true, CancellationToken token = default)
+    public Task<Result> Delete(TModel model, bool persist = true, CancellationToken token = default)
         => this.ManipulateModel(model, this.OnDeleting, persist, token);
 
-    public Task<Result<int>> Insert(TModel model, bool persist = true, CancellationToken token = default)
+    public Task<Result> Insert(TModel model, bool persist = true, CancellationToken token = default)
         => this.ManipulateModel(model, this.OnInserting, persist, token);
 
     public async Task<Result<int>> SaveChanges(CancellationToken token = default)
@@ -23,7 +23,7 @@ public class GenericRepository<TModel> : IRepository<TModel>
         return Result.Create(result, result > 0);
     }
 
-    public Task<Result<int>> Update(TModel model, bool persist = true, CancellationToken token = default) =>
+    public Task<Result> Update(TModel model, bool persist = true, CancellationToken token = default) =>
         this.ManipulateModel(model, this.OnUpdating, persist, token);
 
     protected virtual Task<Result> OnDeleting(TModel model, CancellationToken token)
@@ -47,7 +47,7 @@ public class GenericRepository<TModel> : IRepository<TModel>
     protected virtual Result OnValidating(TModel? model, CancellationToken token = default)
         => Result.Succeed;
 
-    private async Task<Result<int>> ManipulateModel(TModel model, Func<TModel, CancellationToken, Task<Result>> action, bool persist = true, CancellationToken token = default)
+    private async Task<Result> ManipulateModel(TModel model, Func<TModel, CancellationToken, Task<Result>> action, bool persist = true, CancellationToken token = default)
     {
         var vr = this.OnValidating(model, token);
         if (vr?.IsSucceed != true)
