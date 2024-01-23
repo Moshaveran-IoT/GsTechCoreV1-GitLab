@@ -17,9 +17,9 @@ public sealed class GsTechMqttService : IBusinessService
     private readonly IRepository<GpsBroker> _gpsRepo;
     private readonly ILogger<GsTechMqttService> _logger;
     private readonly IMapper _mapper;
+    private readonly IRepository<ObdBroker> _obdRepo;
     private readonly IRepository<SignalBroker> _signalRepo;
     private readonly IRepository<VoltageBroker> _voltageRepo;
-
     public GsTechMqttService(
         ILogger<GsTechMqttService> logger,
         IMapper mapper,
@@ -28,6 +28,7 @@ public sealed class GsTechMqttService : IBusinessService
         IRepository<GeneralBroker> genRepo,
         IRepository<SignalBroker> signalRepo,
         IRepository<VoltageBroker> voltageRepo,
+        IRepository<ObdBroker> obdRepo,
         IRepository<GpsBroker> gpsRepo)
     {
         this._logger = logger;
@@ -37,6 +38,7 @@ public sealed class GsTechMqttService : IBusinessService
         this._genRepo = genRepo;
         this._signalRepo = signalRepo;
         this._voltageRepo = voltageRepo;
+        this._obdRepo = obdRepo;
         this._gpsRepo = gpsRepo;
     }
 
@@ -98,7 +100,7 @@ public sealed class GsTechMqttService : IBusinessService
     }
 
     public Task<Result> ProcessGeneralPayload(byte[] payload, string imei, CancellationToken token = default)
-        => ProcessPayload<GeneralBroker>(async genBro =>
+            => ProcessPayload<GeneralBroker>(async genBro =>
         {
             if (string.IsNullOrEmpty(genBro.InternetTotalVolume))
             {
@@ -196,8 +198,26 @@ public sealed class GsTechMqttService : IBusinessService
             }
         }, payload);
 
+    public Task<Result> ProcessObdPayload(byte[] payload, string imei, CancellationToken token = default)
+        => ProcessPayload(async (ObdBroker data) =>
+        {
+            var result = new ObdBroker
+            {
+                Imei = imei,
+                CreatedOn = DateTime.Now
+            };
+            //result.Value = payloadMessage;
+            //await _mqttDbContext.OBD_Brokers.AddAsync(result);
+            //var dailydata = JsonConvert.DeserializeObject<OBD_Daily_Broker>(JsonConvert.SerializeObject(result));
+            //dailydata.Id = Guid.Empty;
+            //await _mqttDbContext.OBD_Daily_Brokers.AddAsync(dailydata);
+
+            //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
+            _ = await _obdRepo.Insert(result);
+        }, payload);
+
     public Task<Result> ProcessSignalPayload(byte[] payload, string imei, CancellationToken token = default)
-            => ProcessPayload(async (SignalBroker signal) =>
+        => ProcessPayload(async (SignalBroker signal) =>
         {
             signal.Imei = imei;
             signal.CreatedOn = DateTime.Now;

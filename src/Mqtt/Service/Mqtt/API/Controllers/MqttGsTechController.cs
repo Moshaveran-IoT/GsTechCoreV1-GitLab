@@ -22,14 +22,15 @@ public class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMq
         => await ProcessServiceMethod(service.ProcessGeneralPlusPayload, "General Plus", IMEI, token);
 
     [MqttRoute("{IMEI}/GPS")]
-    public  async Task GPS(string IMEI, CancellationToken token = default)
+    public async Task GPS(string IMEI, CancellationToken token = default)
         => await ProcessServiceMethod(service.ProcessGpsPayload, "GPS", IMEI, token);
 
     [MqttRoute("{IMEI}/Image")]
     public void Image(string IMEI) => logger.LogInformation("*** Image Payload Received! IMEI: " + IMEI);
 
     [MqttRoute("{IMEI}/OBD")]
-    public void OBD(string IMEI) => logger.LogInformation("*** OBD Payload Received! IMEI: " + IMEI);
+    public async Task OBD(string IMEI, CancellationToken token = default)
+        => await ProcessServiceMethod(service.ProcessObdPayload, "OBD", IMEI, token);
 
     [MqttRoute("{IMEI}/Signal")]
     public async Task Signal(string IMEI, CancellationToken token = default)

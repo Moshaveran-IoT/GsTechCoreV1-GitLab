@@ -1,4 +1,5 @@
 ﻿using Moshaveran.API.Mqtt;
+using Moshaveran.API.Mqtt.Application.Services;
 using Moshaveran.Infrastructure;
 
 namespace Moshaveran.API;
@@ -30,6 +31,8 @@ public class Startup(IConfiguration configuration)
 
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddScoped<IGeocodingService>(_ => new GeocodingService());
+
         // Add project services
         _ = services.AddInfrastructureService()
             .AddMqttServices(configuration);
