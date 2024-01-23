@@ -87,44 +87,38 @@ public sealed class GsTechMqttService
         return result;
     }
 
-    public async Task<Result> ProcessGeneralPayload(byte[] payload, string imei, CancellationToken token = default)
-    {
-        var payloadMessage = Encoding.UTF8.GetString(payload);
-        if (!StringHelper.TryParseJson(payloadMessage, out GeneralBroker? genBro) || genBro == null)
+    public Task<Result> ProcessGeneralPayload(byte[] payload, string imei, CancellationToken token = default)
+        => ProcessPayload<GeneralBroker>(async genBro =>
         {
-            return await Task.FromResult(Result.Failed);
-        }
-        if (string.IsNullOrEmpty(genBro.InternetTotalVolume))
-        {
-            return await Task.FromResult(Result.Succeed);
-        }
-        genBro.Imei = imei;
-        genBro.CreatedOn = DateTime.Now;
-        genBro.InternetRemainingUssd = genBro.InternetTotalVolume;
-        var ussd = StringHelper.HexToUnicode(genBro.InternetTotalVolume);
-        if (ussd.Contains("صفر"))
-        {
-            genBro.InternetTotalVolume = "بدون بسته";
-            genBro.InternetRemainingTime = "---";
-            var match = ussd.Split(["اصلی"], StringSplitOptions.None)[1].Split("ریال")[0].Trim().Split(" ")[0];
-            genBro.InternetRemainingVolume = string.Concat(match, " ", "ریال");
-        }
-        else
-        {
-            genBro.InternetTotalVolume = ussd.Split(":")[0].Trim();
-            genBro.InternetRemainingVolume = ussd.Split(":")[1].Trim().Split("،")[0].Trim();
-            genBro.InternetRemainingTime = ussd.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
-        }
-        //await _mqttDbContext.General_Brokers.AddAsync(result);
-        //var dailydata = JsonConvert.DeserializeObject<General_Daily_Broker>(JsonConvert.SerializeObject(result));
-        //dailydata.Id = Guid.Empty;
-        //await _mqttDbContext.General_Daily_Brokers.AddAsync(dailydata);
-        //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
-        _ = await _genRepo.Insert(genBro, false, token);
-        var result = await _genRepo.SaveChanges(token);
-        var dailyData = _mapper.Map<GeneralDailyBroker>(result);
-        return result;
-    }
+            if (string.IsNullOrEmpty(genBro.InternetTotalVolume))
+            {
+                return;
+            }
+            genBro.Imei = imei;
+            genBro.CreatedOn = DateTime.Now;
+            genBro.InternetRemainingUssd = genBro.InternetTotalVolume;
+            var ussd = StringHelper.HexToUnicode(genBro.InternetTotalVolume);
+            if (ussd.Contains("صفر"))
+            {
+                genBro.InternetTotalVolume = "بدون بسته";
+                genBro.InternetRemainingTime = "---";
+                var match = ussd.Split(["اصلی"], StringSplitOptions.None)[1].Split("ریال")[0].Trim().Split(" ")[0];
+                genBro.InternetRemainingVolume = string.Concat(match, " ", "ریال");
+            }
+            else
+            {
+                genBro.InternetTotalVolume = ussd.Split(":")[0].Trim();
+                genBro.InternetRemainingVolume = ussd.Split(":")[1].Trim().Split("،")[0].Trim();
+                genBro.InternetRemainingTime = ussd.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
+            }
+            //await _mqttDbContext.General_Brokers.AddAsync(result);
+            //var dailydata = JsonConvert.DeserializeObject<General_Daily_Broker>(JsonConvert.SerializeObject(result));
+            //dailydata.Id = Guid.Empty;
+            //await _mqttDbContext.General_Daily_Brokers.AddAsync(dailydata);
+            //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
+            _ = await _genRepo.Insert(genBro, false, token);
+            var dailyData = _mapper.Map<GeneralDailyBroker>(genBro).With(x => x.Id = Guid.Empty);
+        }, payload);
 
     public Task<Result> ProcessGeneralPlusPayload(byte[] payload, string imei, CancellationToken token = default)
         => ProcessPayload(async (GeneralBroker result) =>
