@@ -1,27 +1,38 @@
-﻿using Moshaveran.Mqtt.DataAccess;
-
-using Moshaveran.WinService.Mqtt.Controllers;
-using Moshaveran.WinService.Mqtt.Services;
+﻿using Moshaveran.API.Mqtt.API.Controllers;
+using Moshaveran.API.Mqtt.Application.Services;
+using Moshaveran.Mqtt.DataAccess;
 
 using MQTTnet.AspNetCore;
 using MQTTnet.AspNetCore.AttributeRouting;
 using MQTTnet.AspNetCore.Extensions;
 
-namespace Moshaveran.WinService.Mqtt;
+namespace Moshaveran.API.Mqtt;
 
 public static class MqttConfigurator
 {
+    /// <summary>
+    /// Adds MQTT services.
+    /// </summary>
+    /// <param name="services">The services.</param>
+    /// <param name="configuration">The configuration.</param>
+    /// <returns></returns>
     public static IServiceCollection AddMqttServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<GsTechMqttService>();
-        _ = services.AddAutoMapper(typeof(Startup));
+        _ = services.AddScoped<IGeocodingService>(_ => new GeocodingService());
+        _ = services.AddScoped<GsTechMqttService>();
         _ = services.AddMqttNetServices();
         _ = services.AddMqttDataAccessServices(configuration);
         return services;
     }
 
-    public static IApplicationBuilder ConfigureMqtt(this IApplicationBuilder app, int portNo)
-        => app.UseEndpoints(endpoints =>
+    /// <summary>
+    /// Configures MQTT.
+    /// </summary>
+    /// <param name="app">The application.</param>
+    /// <param name="portNo">The port no.</param>
+    /// <returns></returns>
+    public static IApplicationBuilder ConfigureMqtt(this IApplicationBuilder app, int portNo) =>
+        app.UseEndpoints(endpoints =>
         {
             _ = endpoints.MapConnectionHandler<MqttConnectionHandler>("/mqtt", e => e.WebSockets.SubProtocolSelector = p => p.FirstOrDefault() ?? string.Empty);
         }).UseMqttServer(server =>

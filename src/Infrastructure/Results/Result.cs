@@ -32,8 +32,11 @@ public sealed class Result<TValue> : ResultBase
 
     public TValue? Value { get; init; }
 
-    public static implicit operator Result(Result<TValue?> value)
-        => Result.Create(value);
+    public static implicit operator Result(Result<TValue?> result)
+        => Result.Create(result);
+
+    public static implicit operator TValue?(Result<TValue?> result)
+        => result.Value;
 }
 
 public abstract class ResultBase
@@ -43,8 +46,4 @@ public abstract class ResultBase
     public bool IsSucceed { get; init; }
 
     public string? Message { get; init; }
-}
-
-public static class ResultFactory
-{
 }

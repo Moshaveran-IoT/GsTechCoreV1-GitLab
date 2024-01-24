@@ -1,4 +1,4 @@
-using Moshaveran.Infrastructure;
+using Moshaveran.Infrastructure.Mapping;
 
 namespace InfrastructureTests;
 
@@ -14,7 +14,7 @@ public class MapperTests
         var src = new Person("Ali", 20);
 
         // Act
-        var dst = mapper.Map(src);
+        var dst = mapper.Map<Person>(src);
 
         // Assert
         Assert.Equal(src.Name, dst.Name);
@@ -71,11 +71,11 @@ public class MapperTests
     {
         // Assign
         var mapper = IMapper.New()
-            .MapFor<Person, Person>(x => new Person(x.Name, x.Age));
+            .ConfigureMapFor<Person, Person>(x => new Person(x.Name, x.Age));
         var src = new Person("Ali", 20);
 
         // Act
-        var dst = mapper.Map(src);
+        var dst = mapper.Map<Person>(src);
 
         // Assert
         Assert.Equal(src.Name, dst.Name);
@@ -96,7 +96,7 @@ internal sealed class Person
     public string? Name { get; set; }
 
     public override bool Equals(object? obj) =>
-        Equals(obj as Person);
+        this.Equals(obj as Person);
 
     public override int GetHashCode() =>
         HashCode.Combine(this.Name?.GetHashCode() ?? 0, this.Age.GetHashCode());
