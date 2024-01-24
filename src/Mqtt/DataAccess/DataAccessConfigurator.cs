@@ -10,6 +10,12 @@ namespace Moshaveran.Mqtt.DataAccess;
 
 public static class DataAccessConfigurator
 {
+    /// <summary>
+    /// Adds the MQTT module's data access services.
+    /// </summary>
+    /// <param name="services">The services.</param>
+    /// <param name="configuration">The configuration.</param>
+    /// <returns></returns>
     public static IServiceCollection AddMqttDataAccessServices(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("ApplicationConnection");

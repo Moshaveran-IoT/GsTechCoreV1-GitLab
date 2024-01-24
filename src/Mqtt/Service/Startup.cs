@@ -31,8 +31,6 @@ public class Startup(IConfiguration configuration)
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddScoped<IGeocodingService>(_ => new GeocodingService());
-
         // Add project services
         _ = services.AddInfrastructureService()
             .AddMqttServices(configuration);
