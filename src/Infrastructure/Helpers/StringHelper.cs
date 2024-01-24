@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace Moshaveran.Infrastructure.Helpers;
+namespace Moshaveran.Infrastructure;
 
 public static partial class StringHelper
 {

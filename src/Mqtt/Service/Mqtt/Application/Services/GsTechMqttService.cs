@@ -3,7 +3,6 @@
 using Moshaveran.Infrastructure.ApplicationServices;
 using Moshaveran.Infrastructure.Helpers;
 using Moshaveran.Infrastructure.Mapping;
-using Moshaveran.Infrastructure.Results;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
 using Moshaveran.Mqtt.DataAccess.Repositories;
 
@@ -20,6 +19,7 @@ public sealed class GsTechMqttService : IBusinessService
     private readonly IRepository<ObdBroker> _obdRepo;
     private readonly IRepository<SignalBroker> _signalRepo;
     private readonly IRepository<VoltageBroker> _voltageRepo;
+
     public GsTechMqttService(
         ILogger<GsTechMqttService> logger,
         IMapper mapper,
@@ -54,9 +54,7 @@ public sealed class GsTechMqttService : IBusinessService
             const string VALID_HEX = "0123456789abcdefABCDEF";
             foreach (var app in dto.RootElement.EnumerateObject())
             {
-                var key = app.Name;
-                var rawValue = app.Value.GetRawText();
-                var value = rawValue.Trim('\"');
+                var (key, value) = (app.Name, app.Value.GetRawText().Trim('\"'));
                 var isHex = key.All(VALID_HEX.Contains) && value.All(VALID_HEX.Contains);
                 if (!isHex)
                 {
@@ -80,11 +78,10 @@ public sealed class GsTechMqttService : IBusinessService
                     CreatedOn = DateTime.Now,
                     Identifier = key,
                     Pgn = pgn,
-                    Value = rawValue,
+                    Value = value,
                     Imei = imei
                 };
                 _ = await _canRepo.Insert(canBroker, false, token);
-                var daily = _mapper.Map<CanDailyBroker>(canBroker).With(x => x.Id = Guid.Empty);
                 //await _mqttDbContext.CAN_Brokers.AddAsync(result);
                 //await _mQTTCacheRepository.TranslateData(result, false);
                 //var dailydata = JsonConvert.DeserializeObject<CAN_Daily_Broker>(JsonConvert.SerializeObject(result));
