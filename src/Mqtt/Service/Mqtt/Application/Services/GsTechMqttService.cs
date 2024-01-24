@@ -8,39 +8,26 @@ using Moshaveran.Mqtt.DataAccess.Repositories;
 
 namespace Moshaveran.API.Mqtt.Application.Services;
 
-public sealed class GsTechMqttService : IBusinessService
+public sealed class GsTechMqttService(
+    ILogger<GsTechMqttService> logger,
+    IMapper mapper,
+    IGeocodingService geocoding,
+    IRepository<CanBroker> canRepo,
+    IRepository<GeneralBroker> genRepo,
+    IRepository<SignalBroker> signalRepo,
+    IRepository<VoltageBroker> voltageRepo,
+    IRepository<ObdBroker> obdRepo,
+    IRepository<GpsBroker> gpsRepo) : IBusinessService
 {
-    private readonly IRepository<CanBroker> _canRepo;
-    private readonly IRepository<GeneralBroker> _genRepo;
-    private readonly IGeocodingService _geocoding;
-    private readonly IRepository<GpsBroker> _gpsRepo;
-    private readonly ILogger<GsTechMqttService> _logger;
-    private readonly IMapper _mapper;
-    private readonly IRepository<ObdBroker> _obdRepo;
-    private readonly IRepository<SignalBroker> _signalRepo;
-    private readonly IRepository<VoltageBroker> _voltageRepo;
-
-    public GsTechMqttService(
-        ILogger<GsTechMqttService> logger,
-        IMapper mapper,
-        IGeocodingService geocoding,
-        IRepository<CanBroker> canRepo,
-        IRepository<GeneralBroker> genRepo,
-        IRepository<SignalBroker> signalRepo,
-        IRepository<VoltageBroker> voltageRepo,
-        IRepository<ObdBroker> obdRepo,
-        IRepository<GpsBroker> gpsRepo)
-    {
-        this._logger = logger;
-        this._mapper = mapper;
-        this._geocoding = geocoding;
-        this._canRepo = canRepo;
-        this._genRepo = genRepo;
-        this._signalRepo = signalRepo;
-        this._voltageRepo = voltageRepo;
-        this._obdRepo = obdRepo;
-        this._gpsRepo = gpsRepo;
-    }
+    private readonly IRepository<CanBroker> _canRepo = canRepo;
+    private readonly IRepository<GeneralBroker> _genRepo = genRepo;
+    private readonly IGeocodingService _geocoding = geocoding;
+    private readonly IRepository<GpsBroker> _gpsRepo = gpsRepo;
+    private readonly ILogger<GsTechMqttService> _logger = logger;
+    private readonly IMapper _mapper = mapper;
+    private readonly IRepository<ObdBroker> _obdRepo = obdRepo;
+    private readonly IRepository<SignalBroker> _signalRepo = signalRepo;
+    private readonly IRepository<VoltageBroker> _voltageRepo = voltageRepo;
 
     public async Task<Result> ProcessCanPayload(byte[] payload, string imei, CancellationToken token = default)
     {
@@ -82,13 +69,6 @@ public sealed class GsTechMqttService : IBusinessService
                     Imei = imei
                 };
                 _ = await _canRepo.Insert(canBroker, false, token);
-                //await _mqttDbContext.CAN_Brokers.AddAsync(result);
-                //await _mQTTCacheRepository.TranslateData(result, false);
-                //var dailydata = JsonConvert.DeserializeObject<CAN_Daily_Broker>(JsonConvert.SerializeObject(result));
-                //dailydata.Id = Guid.Empty;
-                //await _mqttDbContext.CAN_Daily_Brokers.AddAsync(dailydata);
-                //var TranslateData = JsonConvert.DeserializeObject<CAN_Broker>(JsonConvert.SerializeObject(dailydata));
-                //await _mQTTCacheRepository.TranslateData(TranslateData, true);
             }
         }
 
@@ -120,11 +100,6 @@ public sealed class GsTechMqttService : IBusinessService
                 genBro.InternetRemainingVolume = ussd.Split(":")[1].Trim().Split("،")[0].Trim();
                 genBro.InternetRemainingTime = ussd.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
             }
-            //await _mqttDbContext.General_Brokers.AddAsync(result);
-            //var dailydata = JsonConvert.DeserializeObject<General_Daily_Broker>(JsonConvert.SerializeObject(result));
-            //dailydata.Id = Guid.Empty;
-            //await _mqttDbContext.General_Daily_Brokers.AddAsync(dailydata);
-            //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
             _ = await _genRepo.Insert(genBro, false, token);
             var dailyData = _mapper.Map<GeneralDailyBroker>(genBro).With(x => x.Id = Guid.Empty);
         }, payload);
@@ -135,19 +110,19 @@ public sealed class GsTechMqttService : IBusinessService
             gp.Imei = imei;
             gp.CreatedOn = DateTime.Now;
             gp.InternetRemainingUssd = gp.InternetTotalVolume;
-            var USSD = StringHelper.HexToUnicode(gp.InternetTotalVolume);
-            if (USSD.Contains("صفر"))
+            var ussd = StringHelper.HexToUnicode(gp.InternetTotalVolume);
+            if (ussd.Contains("صفر"))
             {
                 gp.InternetTotalVolume = "بدون بسته";
                 gp.InternetRemainingTime = "---";
-                var match = USSD.Split(["اصلی"], StringSplitOptions.None)[1].Split("ریال")[0].Trim().Split(" ")[0];
+                var match = ussd.Split(["اصلی"], StringSplitOptions.None)[1].Split("ریال")[0].Trim().Split(" ")[0];
                 gp.InternetRemainingVolume = string.Concat(match, " ", "ریال");
             }
             else
             {
-                gp.InternetTotalVolume = USSD.Split(":")[0].Trim();
-                gp.InternetRemainingVolume = USSD.Split(":")[1].Trim().Split("،")[0].Trim();
-                gp.InternetRemainingTime = USSD.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
+                gp.InternetTotalVolume = ussd.Split(":")[0].Trim();
+                gp.InternetRemainingVolume = ussd.Split(":")[1].Trim().Split("،")[0].Trim();
+                gp.InternetRemainingTime = ussd.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
             }
 
             if (!string.IsNullOrEmpty(gp.SimCardNumber))
@@ -158,12 +133,6 @@ public sealed class GsTechMqttService : IBusinessService
                     gp.SimCardNumber = splitSimCard[1].ToString().Substring(2, 11);
                 }
             }
-            //await _mqttDbContext.General_Brokers.AddAsync(result);
-            //var dailydata = JsonConvert.DeserializeObject<General_Daily_Broker>(JsonConvert.SerializeObject(result));
-            //dailydata.Id = Guid.Empty;
-            //await _mqttDbContext.General_Daily_Brokers.AddAsync(dailydata);
-            ////await _restrictionRepository.GetRestrictionItems(imei, result, "General_Brokers");
-            //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
             _ = await this._genRepo.Insert(gp);
         }, payload);
 
@@ -174,18 +143,8 @@ public sealed class GsTechMqttService : IBusinessService
             {
                 gps.Imei = imei;
                 gps.CreatedOn = DateTime.Now;
-                //ReverseGeocoding nr = await _geocoding.Reverse(result.Latitude, result.Longitude);
-                //result.Address = nr.Formatted_address;
                 var address = await _geocoding.Reverse(gps.Latitude, gps.Longitude);
                 gps.Address = address;
-                //await _mqttDbContext.GPS_Brokers.AddAsync(result);
-                //var dailydata = JsonConvert.DeserializeObject<GPS_Daily_Broker>(JsonConvert.SerializeObject(result));
-                //dailydata.Id = Guid.Empty;
-                //await _mqttDbContext.GPS_Daily_Brokers.AddAsync(dailydata);
-                //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
-
-                //var dailyData = _mapper.Map<GpsDailyBroker>(result).With(x => x.Id = Guid.Empty);
-
                 _ = await _gpsRepo.Insert(gps);
                 _logger.LogInformation($"*** GPS Payload Saved! IMEI: {imei}");
             }
@@ -203,13 +162,6 @@ public sealed class GsTechMqttService : IBusinessService
                 Imei = imei,
                 CreatedOn = DateTime.Now
             };
-            //result.Value = payloadMessage;
-            //await _mqttDbContext.OBD_Brokers.AddAsync(result);
-            //var dailydata = JsonConvert.DeserializeObject<OBD_Daily_Broker>(JsonConvert.SerializeObject(result));
-            //dailydata.Id = Guid.Empty;
-            //await _mqttDbContext.OBD_Daily_Brokers.AddAsync(dailydata);
-
-            //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
             _ = await _obdRepo.Insert(result);
         }, payload);
 
@@ -218,11 +170,6 @@ public sealed class GsTechMqttService : IBusinessService
         {
             signal.Imei = imei;
             signal.CreatedOn = DateTime.Now;
-            //await _mqttDbContext.Signal_Brokers.AddAsync(result);
-            //var dailydata = JsonConvert.DeserializeObject<Signal_Daily_Broker>(JsonConvert.SerializeObject(result));
-            //dailydata.Id = Guid.Empty;
-            //await _mqttDbContext.Signal_Daily_Brokers.AddAsync(dailydata);
-            //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
             _ = await _signalRepo.Insert(signal, token: token);
         }, payload);
 
@@ -231,11 +178,6 @@ public sealed class GsTechMqttService : IBusinessService
         {
             voltage.Imei = imei;
             voltage.CreatedOn = DateTime.Now;
-            //await _mqttDbContext.Voltage_Brokers.AddAsync(result);
-            //var dailydata = JsonConvert.DeserializeObject<Voltage_Daily_Broker>(JsonConvert.SerializeObject(result));
-            //dailydata.Id = Guid.Empty;
-            //await _mqttDbContext.Voltage_Daily_Brokers.AddAsync(dailydata);
-            //await _mqttDbContext.SaveChangesAsync(CancellationToken.None);
             _ = await _voltageRepo.Insert(voltage);
         }, payload);
 

@@ -3,7 +3,7 @@ using Moshaveran.Mqtt.DataAccess.DataSources.DbContexts;
 
 namespace Moshaveran.Mqtt.DataAccess.Repositories;
 
-public class GenericRepository<TModel> : IRepository<TModel>
+internal class GenericRepository<TModel> : IRepository<TModel>
 {
     public GenericRepository(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext)
         => (this.WriteDbContext, this.ReadDbContext) = (writeDbContext, readDbContext);

@@ -5,17 +5,11 @@ using Moshaveran.Mqtt.DataAccess.DataSources.DbContexts;
 
 namespace Moshaveran.Mqtt.DataAccess.Repositories;
 
-public abstract class BrokerRepositoryBase<TBroker> : GenericRepository<TBroker>
+internal abstract class BrokerRepositoryBase<TBroker>(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext) : GenericRepository<TBroker>(readDbContext, writeDbContext)
     where TBroker : class
 {
-    protected BrokerRepositoryBase(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext) : base(readDbContext, writeDbContext)
-    {
-    }
-
     protected override async Task<Result> OnSavingChanges(CancellationToken token)
     {
-        //return base.OnSavingChanges(token);
-
         try
         {
             await WriteDbContext.ChangeTracker
