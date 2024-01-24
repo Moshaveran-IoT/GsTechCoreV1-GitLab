@@ -16,9 +16,9 @@ internal sealed class MqttWriteDbContext : MqttDbContext
     {
     }
 
-    public async Task<int> SaveCanBrokerAsync(EntityEntry<CanBroker> canBroker, CancellationToken token = default)
+    public async Task<int> SaveCanBrokerAsync(EntityEntry<CanBroker> entry, CancellationToken token = default)
     {
-        var result = canBroker.Entity;
+        var result = entry.Entity;
         FormattableString statement = $@"
                 DELETE dbo.CAN_Daily_Brokers WHERE IMEI='{result.Imei}'
                 INSERT INTO dbo.CAN_Daily_Brokers(Id,IMEI,PGN,[Identifier],[Value],CreatedBy,CreatedOn,IsDelete, DeleteOn)
@@ -26,14 +26,25 @@ internal sealed class MqttWriteDbContext : MqttDbContext
         return await ExecuteSql(statement, token);
     }
 
-    public async Task<int> SaveGeneralBrokerAsync(EntityEntry<GeneralBroker> canBroker, CancellationToken token = default)
+    public async Task<int> SaveGeneralBrokerAsync(EntityEntry<GeneralBroker> entry, CancellationToken token = default)
     {
-        var result = canBroker.Entity;
+        var result = entry.Entity;
         FormattableString statement = $@"
                 DELETE dbo.General_Daily_Brokers WHERE IMEI='{result.Imei}'
                 INSERT INTO dbo.General_Daily_Brokers
                 (Id,Signal_Quality,DHT_Board_Status,DHT_Board_Temperature,IMEI,Version,SimCardNumber,InternetRemainingVolume,InternetRemainingTime,InternetRemainingUSSD,InternetTotalVolume,CreatedBy,CreatedOn,IsDelete,DeleteOn)
                 VALUES(NEWID(),0,0,0,'{result.Imei}','{result.Version}','{result.SimCardNumber}','{result.InternetRemainingVolume}','{result.InternetRemainingTime}','{result.InternetRemainingUssd}','{result.InternetTotalVolume}',NULL,'{result.CreatedOn}',0,NULL)";
+        return await ExecuteSql(statement, token);
+    }
+
+    public async Task<int> SaveGeneralPlusBrokerAsync(EntityEntry<GeneralBroker> entry, CancellationToken token = default)
+    {
+        var result = entry.Entity;
+        FormattableString statement = $@"
+                DELETE dbo.General_Daily_Brokers WHERE IMEI={result.Imei}
+                INSERT INTO dbo.General_Daily_Brokers
+                (Id,IMEI,Version,SimCardNumber,InternetRemainingVolume,InternetRemainingTime,InternetRemainingUSSD,InternetTotalVolume,CreatedBy,CreatedOn,IsDelete,DeleteOn)
+                VALUES(NEWID(),'{result.Imei}','{result.Version}','{result.SimCardNumber}','{result.InternetRemainingVolume}','{result.InternetRemainingTime}','{result.InternetRemainingUssd}','{result.InternetTotalVolume}',NULL,'{result.CreatedOn}',0,null)";
         return await ExecuteSql(statement, token);
     }
 
