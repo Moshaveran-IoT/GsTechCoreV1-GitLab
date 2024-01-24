@@ -17,37 +17,13 @@ public class GenericRepository<TModel> : IRepository<TModel>
     public Task<Result> Insert(TModel model, bool persist = true, CancellationToken token = default)
         => this.ManipulateModel(model, this.OnInserting, persist, token);
 
-    public async Task<Result<int>> SaveChanges(CancellationToken token = default)
-    {
-        var result = await this.WriteDbContext.SaveChangesAsync(token);
-        return Result.Create(result, result > 0);
-    }
+    public async Task<Result> SaveChanges(CancellationToken token = default) =>
+        await OnSavingChanges(token);
 
     public Task<Result> Update(TModel model, bool persist = true, CancellationToken token = default) =>
         this.ManipulateModel(model, this.OnUpdating, persist, token);
 
-    protected virtual Task<Result> OnDeleting(TModel model, CancellationToken token)
-    {
-        _ = this.WriteDbContext.Remove(model!);
-        return Task.FromResult(Result.Succeed);
-    }
-
-    protected virtual async Task<Result> OnInserting(TModel model, CancellationToken token = default)
-    {
-        _ = await this.WriteDbContext.AddAsync(model!, token);
-        return Result.Succeed;
-    }
-
-    protected virtual Task<Result> OnUpdating(TModel model, CancellationToken token = default)
-    {
-        _ = this.WriteDbContext.Update(model!);
-        return Task.FromResult(Result.Succeed);
-    }
-
-    protected virtual Result OnValidating(TModel? model, CancellationToken token = default)
-        => Result.Succeed;
-
-    private async Task<Result> ManipulateModel(TModel model, Func<TModel, CancellationToken, Task<Result>> action, bool persist = true, CancellationToken token = default)
+    protected virtual async Task<Result> ManipulateModel(TModel model, Func<TModel, CancellationToken, Task<Result>> action, bool persist = true, CancellationToken token = default)
     {
         var vr = this.OnValidating(model, token);
         if (vr?.IsSucceed != true)
@@ -66,4 +42,31 @@ public class GenericRepository<TModel> : IRepository<TModel>
         };
         return Result<int>.Succeed;
     }
+
+    protected virtual Task<Result> OnDeleting(TModel model, CancellationToken token)
+    {
+        _ = this.WriteDbContext.Remove(model!);
+        return Task.FromResult(Result.Succeed);
+    }
+
+    protected virtual async Task<Result> OnInserting(TModel model, CancellationToken token = default)
+    {
+        _ = await this.WriteDbContext.AddAsync(model!, token);
+        return Result.Succeed;
+    }
+
+    protected virtual async Task<Result> OnSavingChanges(CancellationToken token)
+    {
+        var result = await this.WriteDbContext.SaveChangesAsync(token);
+        return Result.Create(result > 0);
+    }
+
+    protected virtual Task<Result> OnUpdating(TModel model, CancellationToken token = default)
+    {
+        _ = this.WriteDbContext.Update(model!);
+        return Task.FromResult(Result.Succeed);
+    }
+
+    protected virtual Result OnValidating(TModel? model, CancellationToken token = default)
+        => Result.Succeed;
 }

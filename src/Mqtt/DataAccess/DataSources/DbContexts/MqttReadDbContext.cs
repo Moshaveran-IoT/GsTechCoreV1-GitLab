@@ -1,17 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
+using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
+
 namespace Moshaveran.Mqtt.DataAccess.DataSources.DbContexts;
-
-public sealed class MqttWriteDbContext : MqttDbContext
-{
-    public MqttWriteDbContext()
-    {
-    }
-
-    public MqttWriteDbContext(DbContextOptions<MqttDbContext> options) : base(options)
-    {
-    }
-}
 
 public sealed class MqttReadDbContext : MqttDbContext
 {

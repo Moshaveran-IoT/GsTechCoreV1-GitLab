@@ -29,7 +29,7 @@ public static class DataAccessConfigurator
                 }, ServiceLifetime.Transient)
             ;
 
-        _ = services.AddScoped<IRepository<CanBroker>>(x => new GenericRepository<CanBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
+        _ = services.AddScoped<IRepository<CanBroker>>(x => new CanBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
             .AddScoped<IRepository<GeneralBroker>>(x => new GenericRepository<GeneralBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
             .AddScoped<IRepository<SignalBroker>>(x => new GenericRepository<SignalBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
             .AddScoped<IRepository<VoltageBroker>>(x => new GenericRepository<VoltageBroker>(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))

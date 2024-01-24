@@ -29,7 +29,7 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
 
     public Task HandleClientConnectedAsync(MqttServerClientConnectedEventArgs eventArgs) => Task.Run(() =>
     {
-        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientConnectedAsync Handler Triggered");
+        logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientConnectedAsync Handler Triggered");
 
         if (_connectedClientIds.Count == 0)
         {
@@ -39,17 +39,17 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
         var clientId = eventArgs.ClientId;
         _connectedClientIds.Add(clientId);
 
-        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Connected:{_newLine} - ClientID = {clientId + _newLine}");
+        logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Connected:{_newLine} - ClientID = {clientId + _newLine}");
     });
 
     public Task HandleClientDisconnectedAsync(MqttServerClientDisconnectedEventArgs eventArgs) => Task.Run(() =>
     {
-        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientDisconnectedAsync Handler Triggered");
+        logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientDisconnectedAsync Handler Triggered");
 
         var clientId = eventArgs.ClientId;
         _ = _connectedClientIds.Remove(clientId);
 
-        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Disconnected:{_newLine} - ClientID = {clientId + _newLine}");
+        logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Disconnected:{_newLine} - ClientID = {clientId + _newLine}");
     });
 
     public async Task InterceptSubscriptionAsync(MqttSubscriptionInterceptorContext context)
@@ -81,7 +81,7 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                logger.LogInformation(e,$"Exception occurred on {nameof(SubscribeKiss)}");
             }
             finally
             {
@@ -99,7 +99,7 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
         {
             context.ReasonCode = MqttConnectReasonCode.Success;
         }
-        Console.WriteLine($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - " + "ValidateConnectionAsync Handler Triggered");
+        logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - " + "ValidateConnectionAsync Handler Triggered");
         return Task.CompletedTask;
     }
 
