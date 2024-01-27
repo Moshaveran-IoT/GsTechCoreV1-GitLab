@@ -1,6 +1,6 @@
 ﻿using Moshaveran.Infrastructure.Results;
 
-namespace Moshaveran.Mqtt.DataAccess.Repositories;
+namespace Moshaveran.Mqtt.DataAccess.Repositories.Bases;
 
 public interface IRepository<TModel>
 {

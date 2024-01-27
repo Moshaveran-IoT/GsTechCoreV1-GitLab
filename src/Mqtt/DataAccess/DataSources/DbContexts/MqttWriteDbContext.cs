@@ -58,7 +58,15 @@ internal sealed class MqttWriteDbContext : MqttDbContext
                 VALUES (NEWID(), '{result.Imei}', {result.SignalQuality}, NULL, {result.CreatedOn.ToSqlFormat()}, 0, NULL);";
         return await this.ExecuteSql(statement, token);
     }
-
+    public async Task<int> SaveVoltageBrokerAsync(EntityEntry<VoltageBroker> entry, CancellationToken token = default)
+    {
+        var result = entry.Entity;
+        FormattableString statement = $@"
+                DELETE dbo.Voltage_Daily_Brokers WHERE IMEI='{result.Imei}'
+                INSERT INTO dbo.Voltage_Daily_Brokers(Id,DHT_Board_Status,IMEI,InputVoltage,BatteryVoltage,CreatedBy,CreatedOn,IsDelete,DeleteOn)
+                VALUES(NEWID(),0,'{result.Imei}','{result.InputVoltage}','{result.BatteryVoltage}',NULL,{result.CreatedOn.ToSqlFormat()},0,NULL)";
+        return await this.ExecuteSql(statement, token);
+    }
     // Not working
     //x private Task<int> ExecuteSql(FormattableString statement, CancellationToken token) =>
     //x     this.Database.ExecuteSqlInterpolatedAsync(statement, token);

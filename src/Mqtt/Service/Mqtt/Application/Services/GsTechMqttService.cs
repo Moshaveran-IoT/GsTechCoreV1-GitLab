@@ -4,7 +4,7 @@ using Moshaveran.Infrastructure.ApplicationServices;
 using Moshaveran.Infrastructure.Helpers;
 using Moshaveran.Infrastructure.Mapping;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
-using Moshaveran.Mqtt.DataAccess.Repositories;
+using Moshaveran.Mqtt.DataAccess.Repositories.Bases;
 
 namespace Moshaveran.API.Mqtt.Application.Services;
 
