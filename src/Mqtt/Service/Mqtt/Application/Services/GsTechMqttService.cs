@@ -18,7 +18,8 @@ public sealed class GsTechMqttService(
     IRepository<VoltageBroker> voltageRepo,
     IRepository<ObdBroker> obdRepo,
     IRepository<GpsBroker> gpsRepo,
-    IRepository<TemperatureBroker> tempRepo) : IBusinessService
+    IRepository<TemperatureBroker> tempRepo,
+    IRepository<TpmsBroker> tpmsRepo) : IBusinessService
 {
     private readonly IRepository<CanBroker> _canRepo = canRepo;
     private readonly IRepository<GeneralBroker> _genRepo = genRepo;
@@ -29,6 +30,7 @@ public sealed class GsTechMqttService(
     private readonly IRepository<ObdBroker> _obdRepo = obdRepo;
     private readonly IRepository<SignalBroker> _signalRepo = signalRepo;
     private readonly IRepository<TemperatureBroker> _tempRepo = tempRepo;
+    private readonly IRepository<TpmsBroker> _tpmsRepo = tpmsRepo;
     private readonly IRepository<VoltageBroker> _voltageRepo = voltageRepo;
 
     public async Task<Result> ProcessCanPayload(byte[] payload, string imei, CancellationToken token = default)
@@ -157,12 +159,13 @@ public sealed class GsTechMqttService(
         }, payload);
 
     public Task<Result> ProcessObdPayload(byte[] payload, string imei, CancellationToken token = default)
-        => ProcessPayload(async (ObdBroker __) =>
+        => ProcessPayload(async (ObdBroker __, string payloadMessage) =>
         {
             var result = new ObdBroker
             {
                 Imei = imei,
-                CreatedOn = DateTime.Now
+                CreatedOn = DateTime.Now,
+                Value = payloadMessage
             };
             _ = await _obdRepo.Insert(result);
         }, payload);
@@ -181,6 +184,13 @@ public sealed class GsTechMqttService(
             broker.CreatedOn = DateTime.Now;
         }, payload, _tempRepo);
 
+    public Task<Result> ProcessTpmsPayload(byte[] payload, string imei, CancellationToken token = default)
+        => SavePayload(broker =>
+        {
+            broker.Imei = imei;
+            broker.CreatedOn = DateTime.Now;
+        }, payload, _tpmsRepo);
+
     public Task<Result> ProcessVoltagePayload(byte[] payload, string imei, CancellationToken token = default)
         => SavePayload(broker =>
         {
@@ -188,7 +198,10 @@ public sealed class GsTechMqttService(
             broker.CreatedOn = DateTime.Now;
         }, payload, _voltageRepo);
 
-    private static async Task<Result> ProcessPayload<TDbBroker>(Func<TDbBroker, Task> process, byte[] payload)
+    private static Task<Result> ProcessPayload<TDbBroker>(Func<TDbBroker, Task> process, byte[] payload)
+        => ProcessPayload(async (TDbBroker broker, string payloadMessage) => { await process(broker); }, payload);
+
+    private static async Task<Result> ProcessPayload<TDbBroker>(Func<TDbBroker, string, Task> process, byte[] payload)
     {
         var payloadMessage = Encoding.UTF8.GetString(payload);
         if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? result) || result == null)
@@ -197,7 +210,7 @@ public sealed class GsTechMqttService(
         }
         try
         {
-            await process(result);
+            await process(result, payloadMessage);
             return await Task.FromResult(Result.Succeed);
         }
         catch
@@ -207,7 +220,7 @@ public sealed class GsTechMqttService(
     }
 
     private static Task<Result> SavePayload<TDbBroker>(Action<TDbBroker> initialize, byte[] payload, IRepository<TDbBroker> repo)
-        => ProcessPayload<TDbBroker>(async result =>
+        => ProcessPayload(async (TDbBroker result, string __) =>
         {
             initialize(result);
             _ = await repo.Insert(result);

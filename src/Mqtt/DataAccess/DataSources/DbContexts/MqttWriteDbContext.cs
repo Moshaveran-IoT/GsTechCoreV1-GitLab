@@ -68,6 +68,17 @@ internal sealed class MqttWriteDbContext : MqttDbContext
         return await this.ExecuteSql(statement, token);
     }
 
+    public async Task<int> SaveSignalBrokerAsync(EntityEntry<SignalBroker> entry, CancellationToken token = default)
+    {
+        var result = entry.Entity;
+        FormattableString statement = $@"
+                DELETE FROM Signal_Daily_Brokers WHERE (IMEI = '{result.Imei}')
+
+                INSERT INTO Signal_Daily_Brokers (Id, IMEI, Signal_Quality, CreatedBy, CreatedOn, IsDelete, DeleteOn)
+                VALUES (NEWID(), '{result.Imei}', {result.SignalQuality}, NULL, {result.CreatedOn.ToSqlFormat()}, 0, NULL);";
+        return await this.ExecuteSql(statement, token);
+    }
+
     public async Task<int> SaveTemperatureBrokerAsync(EntityEntry<TemperatureBroker> entry, CancellationToken token = default)
     {
         var result = entry.Entity;
@@ -78,14 +89,13 @@ internal sealed class MqttWriteDbContext : MqttDbContext
         return await this.ExecuteSql(statement, token);
     }
 
-    public async Task<int> SaveSignalBrokerAsync(EntityEntry<SignalBroker> entry, CancellationToken token = default)
+    public async Task<int> SaveTpmsBrokerAsync(EntityEntry<TpmsBroker> entry, CancellationToken token = default)
     {
         var result = entry.Entity;
         FormattableString statement = $@"
-                DELETE FROM Signal_Daily_Brokers WHERE (IMEI = '{result.Imei}')
-
-                INSERT INTO Signal_Daily_Brokers (Id, IMEI, Signal_Quality, CreatedBy, CreatedOn, IsDelete, DeleteOn)
-                VALUES (NEWID(), '{result.Imei}', {result.SignalQuality}, NULL, {result.CreatedOn.ToSqlFormat()}, 0, NULL);";
+                DELETE dbo.TPMS_Daily_Brokers WHERE IMEI='{result.Imei}'
+                INSERT INTO dbo.TPMS_Daily_Brokers(Id, IMEI, SensorId, [Address], Pressure, Temperature, Voltage, CreatedBy, CreatedOn, LastModifiedBy, LastModifiedOn, IsDelete, DeleteOn)
+                VALUES(NEWID(),'{result.Imei}','{result.SensorId}','{result.Address}','{result.Pressure}','{result.Temperature}','{result.Voltage}',NULL,{result.CreatedOn.ToSqlFormat()},NULL,NULL,0,null)";
         return await this.ExecuteSql(statement, token);
     }
 
@@ -102,5 +112,6 @@ internal sealed class MqttWriteDbContext : MqttDbContext
     //x private Task<int> ExecuteSql(FormattableString statement, CancellationToken token) =>
     //x     this.Database.ExecuteSqlInterpolatedAsync(statement, token);
 
-    private Task<int> ExecuteSql(FormattableString statement, CancellationToken token) => this.Database.ExecuteSqlRawAsync(statement.ToString(), token);
+    private Task<int> ExecuteSql(FormattableString statement, CancellationToken token)
+        => this.Database.ExecuteSqlRawAsync(statement.ToString(), token);
 }
