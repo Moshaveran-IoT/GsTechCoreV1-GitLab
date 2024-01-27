@@ -150,7 +150,7 @@ public sealed class GsTechMqttService(
             }
             else
             {
-                _logger.LogInformation($"*** GPS Payload Not Saved! IMEI: {imei}");
+                _logger.LogWarning($"*** GPS Payload Not Saved! IMEI: {imei}");
             }
         }, payload);
 
