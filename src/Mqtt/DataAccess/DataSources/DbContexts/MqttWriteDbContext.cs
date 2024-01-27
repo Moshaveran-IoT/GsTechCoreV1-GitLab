@@ -76,6 +76,16 @@ internal sealed class MqttWriteDbContext : MqttDbContext
                 VALUES(NEWID(),'{result.Imei}',{result.GpsDateTime.ToSqlFormat()},'{result.Latitude}','{result.Longitude}','{result.Speed}','{result.Altitude}',N'{result.Address}','{result.Angle}',NULL,{result.CreatedOn.ToSqlFormat()},0,null)";
         return await this.ExecuteSql(statement, token);
     }
+
+    public async Task<int> SaveObdBrokerAsync(EntityEntry<ObdBroker> entry, CancellationToken token = default)
+    {
+        var result = entry.Entity;
+        FormattableString statement = $@"
+                DELETE dbo.OBD_Daily_Brokers WHERE IMEI='{result.Imei}'
+                INSERT INTO dbo.OBD_Daily_Brokers(Id,IMEI,Identifier,Value,CreatedBy,CreatedOn,IsDelete,DeleteOn)
+                VALUES(NEWID(),'{result.Imei}','{result.Identifier}','{result.Value}',NULL,{result.CreatedOn.ToSqlFormat()},0,NULL)";
+        return await this.ExecuteSql(statement, token);
+    }
     // Not working
     //x private Task<int> ExecuteSql(FormattableString statement, CancellationToken token) =>
     //x     this.Database.ExecuteSqlInterpolatedAsync(statement, token);
