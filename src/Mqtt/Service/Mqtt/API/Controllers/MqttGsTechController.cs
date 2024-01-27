@@ -25,7 +25,8 @@ public class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMq
         => ProcessServiceMethod(service.ProcessGpsPayload, "GPS", IMEI, token);
 
     [MqttRoute("{IMEI}/Image")]
-    public void Image(string IMEI) => logger.LogInformation("*** Image Payload Received! IMEI: " + IMEI);
+    public Task Image(string IMEI, CancellationToken token = default)
+        => ProcessServiceMethod(service.ProcessCameraPayload, "Camera", IMEI, token);
 
     [MqttRoute("{IMEI}/OBD")]
     public Task OBD(string IMEI, CancellationToken token = default)

@@ -19,8 +19,10 @@ public sealed class GsTechMqttService(
     IRepository<ObdBroker> obdRepo,
     IRepository<GpsBroker> gpsRepo,
     IRepository<TemperatureBroker> tempRepo,
-    IRepository<TpmsBroker> tpmsRepo) : IBusinessService
+    IRepository<TpmsBroker> tpmsRepo,
+    IRepository<CameraBroker> cameraRepo) : IBusinessService
 {
+    private readonly IRepository<CameraBroker> _cameraRepo = cameraRepo;
     private readonly IRepository<CanBroker> _canRepo = canRepo;
     private readonly IRepository<GeneralBroker> _genRepo = genRepo;
     private readonly IGeocodingService _geocoding = geocoding;
@@ -32,6 +34,14 @@ public sealed class GsTechMqttService(
     private readonly IRepository<TemperatureBroker> _tempRepo = tempRepo;
     private readonly IRepository<TpmsBroker> _tpmsRepo = tpmsRepo;
     private readonly IRepository<VoltageBroker> _voltageRepo = voltageRepo;
+
+    public Task<Result> ProcessCameraPayload(byte[] payload, string imei, CancellationToken token = default)
+        => SavePayload((broker, payloadMessage) =>
+        {
+            broker.Imei = imei;
+            broker.CreatedOn = DateTime.Now;
+            broker.Value = $"data:image/png;base64,{payloadMessage}";
+        }, payload, _cameraRepo);
 
     public async Task<Result> ProcessCanPayload(byte[] payload, string imei, CancellationToken token = default)
     {
@@ -81,7 +91,7 @@ public sealed class GsTechMqttService(
     }
 
     public Task<Result> ProcessGeneralPayload(byte[] payload, string imei, CancellationToken token = default)
-            => ProcessPayload<GeneralBroker>(async genBro =>
+        => ProcessPayload<GeneralBroker>(async genBro =>
         {
             if (string.IsNullOrEmpty(genBro.InternetTotalVolume))
             {
@@ -219,10 +229,16 @@ public sealed class GsTechMqttService(
         }
     }
 
-    private static Task<Result> SavePayload<TDbBroker>(Action<TDbBroker> initialize, byte[] payload, IRepository<TDbBroker> repo)
-        => ProcessPayload(async (TDbBroker result, string __) =>
+    private static Task<Result> SavePayload<TDbBroker>(Action<TDbBroker, string> initialize, byte[] payload, IRepository<TDbBroker> repo)
+        => ProcessPayload(async (TDbBroker result, string payloadMessage) =>
         {
-            initialize(result);
+            initialize(result, payloadMessage);
             _ = await repo.Insert(result);
         }, payload);
+
+    private static Task<Result> SavePayload<TDbBroker>(Action<TDbBroker> initialize, byte[] payload, IRepository<TDbBroker> repo)
+        => SavePayload((TDbBroker broker, string payloadMessage) =>
+        {
+            initialize(broker);
+        }, payload, repo);
 }
