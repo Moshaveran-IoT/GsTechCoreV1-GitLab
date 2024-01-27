@@ -40,7 +40,8 @@ public static class DataAccessConfigurator
             .AddScoped<IRepository<SignalBroker>>(x => new SignalBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
             .AddScoped<IRepository<VoltageBroker>>(x => new VoltageBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
             .AddScoped<IRepository<GpsBroker>>(x => new GpsBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
-            .AddScoped<IRepository<ObdBroker>>(x => new ObdBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()));
+            .AddScoped<IRepository<ObdBroker>>(x => new ObdBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
+            .AddScoped<IRepository<TemperatureBroker>>(x => new TemperatureBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()));
 
         return services;
     }
