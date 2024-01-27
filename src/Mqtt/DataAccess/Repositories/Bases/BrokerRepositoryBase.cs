@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
-
 using Moshaveran.Infrastructure.Helpers;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbContexts;
 
-namespace Moshaveran.Mqtt.DataAccess.Repositories;
+namespace Moshaveran.Mqtt.DataAccess.Repositories.Bases;
 
 internal abstract class BrokerRepositoryBase<TBroker>(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext) : GenericRepository<TBroker>(readDbContext, writeDbContext)
     where TBroker : class
