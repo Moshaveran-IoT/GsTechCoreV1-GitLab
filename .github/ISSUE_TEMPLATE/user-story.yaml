@@ -40,25 +40,6 @@ body:
       - Given that I do not have an account, when I click on the sign up button, then I should be redirected to the sign up page
   validations:
     required: true
-
-- type: textarea
-  id: priority
-  attributes:
-    label: Priority
-    description: Provide a priority level for the user story (High, Medium, Low)
-    placeholder: ex. High
-  validations:
-    required: true
-
-- type: textarea
-  id: estimate
-  attributes:
-    label: Estimate
-    description: Provide an estimate of the effort required to complete the user story in story points
-    placeholder: ex. 3
-  validations:
-    required: true
-
 - type: textarea
   id: screenshots
   attributes:
