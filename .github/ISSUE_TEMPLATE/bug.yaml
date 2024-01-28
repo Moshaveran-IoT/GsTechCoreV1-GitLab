@@ -2,7 +2,6 @@
 name: Bug
 title: "[BUG]: "
 description: "File a Bug"
-assignees: mirmostafa
 projects: [GSTechV3]
 body:
   - type: markdown
