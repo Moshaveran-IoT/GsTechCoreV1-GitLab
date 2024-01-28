@@ -10,7 +10,7 @@ body:
     value: |
       Please follow the template below to help us define the task. Thank you!
 
-- type: input
+- type: textarea
   id: title
   attributes:
     label: Title
