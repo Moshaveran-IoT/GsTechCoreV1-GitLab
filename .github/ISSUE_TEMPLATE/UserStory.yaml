@@ -1,0 +1,34 @@
+---
+name: User Story
+title: "[STORY]: "
+description: "Request a simple feature"
+assignees: mirmostafa
+projects: ["MES 2.0 Infrastructure"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## User Story Details
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: How do you see this bug?
+      placeholder: Click to add Repro Steps.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Acceptance criteria define the specific conditions that need to be met for a piece of work to be considered complete and accepted.
+  - type: markdown
+    attributes:
+      value: |
+        ## User Story Implementation
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks List
+      description: List of tasks that must be done to fix bugs
+---
