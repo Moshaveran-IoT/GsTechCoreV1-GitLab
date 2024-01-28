@@ -1,13 +1,83 @@
----
 name: Task
-description: 'A task to be done to fix a bug or implement a user story.'
-title: '[TASK]: '
-projects: ["GSTechV3"]
+description: Create a task for the project
+title: "[TASK] "
+labels: ["task", "scrum"]
+assignees: []
+
 body:
-  - type: textarea
-    id: description
-    attributes:
-      label: Description
----
+- type: markdown
+  attributes:
+    value: |
+      Please follow the template below to help us define the task. Thank you!
 
+- type: input
+  id: title
+  attributes:
+    label: Title
+    description: Provide a concise title for the task
+    placeholder: ex. Implement the login feature
+  validations:
+    required: true
 
+- type: textarea
+  id: description
+  attributes:
+    label: Description
+    description: Provide a detailed description of the task
+    placeholder: ex. Write the code for the login feature using the user story and acceptance criteria as a guide
+  validations:
+    required: true
+
+- type: textarea
+  id: status
+  attributes:
+    label: Status
+    description: Provide the current status of the task (To Do, In Progress, Done)
+    placeholder: ex. To Do
+  validations:
+    required: true
+
+- type: textarea
+  id: estimate
+  attributes:
+    label: Estimate
+    description: Provide an estimate of the effort required to complete the task in hours
+    placeholder: ex. 4
+  validations:
+    required: true
+
+- type: textarea
+  id: remaining
+  attributes:
+    label: Remaining
+    description: Provide the remaining effort required to complete the task in hours
+    placeholder: ex. 4
+  validations:
+    required: true
+
+- type: textarea
+  id: completed
+  attributes:
+    label: Completed
+    description: Provide the completed effort for the task in hours
+    placeholder: ex. 0
+  validations:
+    required: true
+
+- type: textarea
+  id: screenshots
+  attributes:
+    label: Screenshots
+    description: If applicable, add screenshots to help illustrate the task
+    placeholder: (Optional)
+  validations:
+    required: false
+
+- type: textarea
+  id: additional
+  attributes:
+    label: Additional context
+    description: Add any other context or information about the task here
+    placeholder: (Optional)
+  validations:
+    required: false
