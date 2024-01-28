@@ -3,6 +3,7 @@ name: Bug
 title: "[BUG]: "
 description: "File a Bug"
 assignees: mirmostafa
+Projects: GSTechV3
 projects: ["MES 2.0 Infrastructure"]
 body:
   - type: markdown
