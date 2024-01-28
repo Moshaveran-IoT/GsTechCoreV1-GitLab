@@ -31,7 +31,7 @@ body:
     attributes:
       value: |
         ## Bug Fix
-    - type: dropdown
+  - type: dropdown
     id: Estimate
     attributes:
       label: Estimate
