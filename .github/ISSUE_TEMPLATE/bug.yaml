@@ -31,12 +31,7 @@ body:
     attributes:
       value: |
         ## Bug Fix
-  - type: textarea
-    id: tasks
-    attributes:
-      label: Tasks List
-      description: List of tasks that must be done to fix bugs
-  - type: dropdown
+    - type: dropdown
     id: Estimate
     attributes:
       label: Estimate
@@ -51,5 +46,10 @@ body:
         - 13
         - 21
         - 34
-      default: 3     
+      default: 3
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks List
+      description: List of tasks that must be done to fix bugs
 ---
