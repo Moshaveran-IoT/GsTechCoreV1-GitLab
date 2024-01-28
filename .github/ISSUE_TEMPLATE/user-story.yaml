@@ -2,8 +2,7 @@
 name: User Story
 title: "[STORY]: "
 description: "Request a simple feature"
-assignees: mirmostafa
-projects: ["MES 2.0 Infrastructure"]
+projects: ["GSTechV3"]
 body:
   - type: markdown
     attributes:
