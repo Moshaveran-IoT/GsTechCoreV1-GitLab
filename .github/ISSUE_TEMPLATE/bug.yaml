@@ -37,18 +37,4 @@ body:
     attributes:
       label: Tasks List
       description: List of tasks that must be done to fix bugs
- - type: dropdown
-    id: work-item-type
-    attributes:
-      label: Work Item Type
-      description: Select the type of work item
-      options:
-        - Bug
-        - User Story
-        - Task
-        - Feature
-        - Epic
-      default: 0
-    validations:
-      required: true
 ---
