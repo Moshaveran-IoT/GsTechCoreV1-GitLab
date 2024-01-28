@@ -64,9 +64,9 @@ body:
   attributes:
     label: Environment
     description: Provide information about your environment, such as OS, browser, device, etc.
-    placeholder: ex. Windows 10, Chrome 88, iPhone 12
+    placeholder: (Optional) ex. Windows 10, Chrome 88, iPhone 12
   validations:
-    required: true
+    required: false
 
 - type: textarea
   id: additional
