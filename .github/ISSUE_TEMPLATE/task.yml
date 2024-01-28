@@ -1,0 +1,14 @@
+---
+name: Task
+description: 'A task to be done to fix a bug or implement a user story.'
+title: '[TASK]: '
+assignees: 'mirmostafa'
+projects: ["MES 2.0 Infrastructure"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+---
+
+
