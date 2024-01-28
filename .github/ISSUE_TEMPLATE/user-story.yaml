@@ -1,6 +1,6 @@
 ---
 name: User Story
-title: ""
+title: "[STORY]: "
 description: "Request a simple feature"
 assignees: mirmostafa
 projects: ["MES 2.0 Infrastructure"]
