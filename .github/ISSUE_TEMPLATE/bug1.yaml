@@ -1,5 +1,5 @@
 ---
-name: Bug Report
+name: Bug
 description: Report a bug in the project
 title: "[BUG] "
 labels: ["bug", "scrum"]
