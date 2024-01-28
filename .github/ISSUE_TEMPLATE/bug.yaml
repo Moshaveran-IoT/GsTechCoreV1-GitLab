@@ -36,4 +36,20 @@ body:
     attributes:
       label: Tasks List
       description: List of tasks that must be done to fix bugs
+ - type: dropdown
+    id: Estimate
+    attributes:
+      label: Estimate
+      description: Estimation
+      options:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 5
+        - 8
+        - 13
+        - 21
+        - 34
+      default: 3     
 ---
