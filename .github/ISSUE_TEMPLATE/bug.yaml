@@ -9,8 +9,8 @@ body:
 - type: markdown
   attributes:
     value: |
+      ## Bug Report
       Please follow the template below to help us fix the bug. Thank you!
-## Bug Report
 - type: input
   id: summary
   attributes:
@@ -76,7 +76,10 @@ body:
     placeholder: (Optional)
   validations:
     required: false
-## Bug Fix
+- type: markdown
+  attributes:
+    value: |
+      ## Bug Fix
 - type: textarea
   id: tasks
   attributes:
