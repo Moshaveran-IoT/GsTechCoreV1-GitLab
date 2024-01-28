@@ -11,10 +11,10 @@ body:
       Please follow the template below to help us define the task. Thank you!
 
 - type: textarea
-  id: title
+  id: description
   attributes:
-    label: Title
-    description: Provide a concise title for the task
+    label: Description
+    description: Provide a description for the task
     placeholder: ex. Implement the login feature
   validations:
     required: true
