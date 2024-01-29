@@ -1,0 +1,20 @@
+name: Task
+description: Create a task for the project
+title: "[TASK] "
+labels: ["task", "scrum"]
+assignees: []
+
+body:
+- type: markdown
+  attributes:
+    value: |
+      Please follow the template below to help us define the task. Thank you!
+
+- type: textarea
+  id: description
+  attributes:
+    label: Description
+    description: Provide a description for the task
+    placeholder: ex. Implement the login feature
+  validations:
+    required: true
