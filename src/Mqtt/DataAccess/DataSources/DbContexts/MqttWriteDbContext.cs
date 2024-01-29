@@ -19,9 +19,9 @@ internal sealed class MqttWriteDbContext : MqttDbContext
     public async Task<int> SaveCanBrokerAsync(EntityEntry<CanBroker> entry, CancellationToken token = default)
     {
         var result = entry.Entity;
-        FormattableString statement = $@"DELETE dbo.CAN_Daily_Brokers WHERE IMEI='{result.Imei}'
+        FormattableString statement = $@"DELETE dbo.CAN_Daily_Brokers WHERE IMEI={result.Imei}
                 INSERT INTO CAN_Daily_Brokers (Id, IMEI, PGN, Identifier, Value, CreatedBy, CreatedOn, IsDelete, DeleteOn)
-                VALUES (NEWID(), '{result.Imei}', {result.Pgn}, '{result.Identifier}', '{result.Value}', NULL, {result.CreatedOn.ToSqlFormat()}, 0, NULL)";
+                VALUES (NEWID(), {result.Imei}, {result.Pgn}, {result.Identifier}, {result.Value}, NULL, {result.CreatedOn.ToSqlFormat()}, 0, NULL)";
         return await this.ExecuteSql(statement, token);
     }
 
@@ -107,9 +107,6 @@ internal sealed class MqttWriteDbContext : MqttDbContext
         return await this.ExecuteSql(statement, token);
     }
 
-    //private Task<int> ExecuteSql(FormattableString statement, CancellationToken token) 
-    //    => this.Database.ExecuteSqlAsync(statement, token);
-
     private Task<int> ExecuteSql(FormattableString statement, CancellationToken token)
-        => this.Database.ExecuteSqlRawAsync(statement.ToString(), token);
+        => this.Database.ExecuteSqlInterpolatedAsync(statement, token);
 }
