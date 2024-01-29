@@ -93,29 +93,30 @@ public sealed class GsTechMqttService(
     public Task<Result> ProcessGeneralPayload(byte[] payload, string imei, CancellationToken token = default)
         => ProcessPayload<GeneralBroker>(async genBro =>
         {
-            if (string.IsNullOrEmpty(genBro.InternetTotalVolume))
-            {
-                return;
-            }
+            //if (string.IsNullOrEmpty(genBro.InternetTotalVolume))
+            //{
+            //    return;
+            //}
             genBro.Imei = imei;
             genBro.CreatedOn = DateTime.Now;
             genBro.InternetRemainingUssd = genBro.InternetTotalVolume;
-            var ussd = StringHelper.HexToUnicode(genBro.InternetTotalVolume);
-            if (ussd.Contains("صفر"))
-            {
-                genBro.InternetTotalVolume = "بدون بسته";
-                genBro.InternetRemainingTime = "---";
-                var match = ussd.Split(["اصلی"], StringSplitOptions.None)[1].Split("ریال")[0].Trim().Split(" ")[0];
-                genBro.InternetRemainingVolume = string.Concat(match, " ", "ریال");
-            }
-            else
-            {
-                genBro.InternetTotalVolume = ussd.Split(":")[0].Trim();
-                genBro.InternetRemainingVolume = ussd.Split(":")[1].Trim().Split("،")[0].Trim();
-                genBro.InternetRemainingTime = ussd.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
-            }
+            //var ussd = StringHelper.HexToUnicode(genBro.InternetTotalVolume);
+            //if (ussd.Contains("صفر"))
+            //{
+            //    genBro.InternetTotalVolume = "بدون بسته";
+            //    genBro.InternetRemainingTime = "---";
+            //    var match = ussd.Split(["اصلی"], StringSplitOptions.None)[1].Split("ریال")[0].Trim().Split(" ")[0];
+            //    genBro.InternetRemainingVolume = string.Concat(match, " ", "ریال");
+            //}
+            //else
+            //{
+            //    genBro.InternetTotalVolume = ussd.Split(":")[0].Trim();
+            //    genBro.InternetRemainingVolume = ussd.Split(":")[1].Trim().Split("،")[0].Trim();
+            //    genBro.InternetRemainingTime = ussd.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
+            //}
             _ = await _genRepo.Insert(genBro, false, token);
-            var dailyData = _mapper.Map<GeneralDailyBroker>(genBro).With(x => x.Id = Guid.Empty);
+            
+            await _genRepo.SaveChanges(token);
         }, payload);
 
     public Task<Result> ProcessGeneralPlusPayload(byte[] payload, string imei, CancellationToken token = default)
