@@ -2,8 +2,8 @@ using Moshaveran.Infrastructure.Mapping;
 
 namespace InfrastructureTests;
 
-//[Trait("Category", nameof(Moshaveran.Infrastructure))]
-//[Trait("Category", nameof(IMapper))]
+[Trait("Category", nameof(Moshaveran.Infrastructure))]
+[Trait("Category", nameof(IMapper))]
 public class MapperTests
 {
     [Fact]
@@ -29,11 +29,11 @@ public class MapperTests
         var src = new { Name = "Ali", Age = 20 };
 
         // Act
-        var dst = mapper.Map(src, new Person());
 
         // Assert
-        Assert.Equal(src.Name, dst.Name);
-        Assert.Equal(src.Age, dst.Age);
+        _ = Assert.Throws<NotSupportedException>(dst);
+
+        Person dst() => mapper.Map<Person>(src);
     }
 
     [Fact]
@@ -44,7 +44,7 @@ public class MapperTests
         var src = new Person("Ali", 20);
 
         // Act
-        var dst = mapper.Map(src, new Person());
+        var dst = mapper.Map(src, x => new Person(x.Name, x.Age));
 
         // Assert
         Assert.Equal(src.Name, dst.Name);
@@ -55,8 +55,10 @@ public class MapperTests
     public void BasicTest4()
     {
         // Assign
-        var mapper = IMapper.New();
-        var src = new { Name = "Ali", Age = 20 };
+        var mapper = IMapper.New()
+            .ConfigureMapFor<(string Name, int Age), Person>(x => new Person(x.Name, x.Age));
+
+        var src = (Name: "Ali", Age: 20);
 
         // Act
         var dst = mapper.Map<Person>(src);
@@ -83,29 +85,4 @@ public class MapperTests
     }
 }
 
-internal sealed class Person
-{
-    public Person()
-    {
-    }
-
-    public Person(string? name, int age) =>
-        (this.Name, this.Age) = (name, age);
-
-    public int Age { get; set; }
-    public string? Name { get; set; }
-
-    public override bool Equals(object? obj) =>
-        this.Equals(obj as Person);
-
-    public override int GetHashCode() =>
-        HashCode.Combine(this.Name?.GetHashCode() ?? 0, this.Age.GetHashCode());
-}
-
-public static class SimpleEquitable
-{
-    public new static bool Equals(this object? me, object? other) =>
-        me == null
-            ? other == null
-            : other != null && me.GetHashCode() == other.GetHashCode();
-}
+file sealed record Person(string? Name, int Age);
