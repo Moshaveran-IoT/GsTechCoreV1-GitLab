@@ -2,12 +2,18 @@
 using Moshaveran.API.Mqtt.Application.Services;
 using Moshaveran.Infrastructure;
 
+using Prometheus;
+
 namespace Moshaveran.API;
 
 public class Startup(IConfiguration configuration)
 {
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
+        // Add Prometheus metrics service
+        app.UseHttpMetrics();
+        //app.MapMetrics();
+
         if (env.IsDevelopment())
         {
             _ = app.UseDeveloperExceptionPage();
@@ -31,6 +37,9 @@ public class Startup(IConfiguration configuration)
 
     public void ConfigureServices(IServiceCollection services)
     {
+        // // Add Prometheus metrics service
+        services.AddMetricServer(options => { options.Port = 5678; });
+
         // Add project services
         _ = services.AddInfrastructureService()
             .AddMqttServices(configuration);

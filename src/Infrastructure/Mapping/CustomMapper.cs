@@ -2,7 +2,8 @@
 
 namespace Moshaveran.Infrastructure.Mapping;
 
-public sealed class CustomMapper : IEquatable<CustomMapper>
+public sealed class CustomMapper
+    : IEquatable<CustomMapper>
     , IEquatable<(Type SourceType, Type DestinationType)>
     , IEqualityOperators<CustomMapper, CustomMapper, bool>
     , IEqualityOperators<CustomMapper, (Type SourceType, Type DestinationType, int ParamsCount), bool>
@@ -52,12 +53,6 @@ public sealed class CustomMapper : IEquatable<CustomMapper>
 
     public static bool operator ==(CustomMapper? left, (Type SourceType, Type DestinationType, int ParamsCount) right)
         => Equals(left, right);
-
-    public void Deconstruct(out Type source, out Type destination)
-        => (source, destination) = (this._sourceType, this._destinationType);
-
-    public void Deconstruct(out Type source, out Type destination, out Delegate map)
-        => (source, destination, map) = (this._sourceType, this._destinationType, this.Map);
 
     public bool Equals(CustomMapper? other)
         => Equals(this, other);
