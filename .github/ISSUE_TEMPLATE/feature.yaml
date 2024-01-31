@@ -1,0 +1,77 @@
+name: Feature
+description: Define a new feature for the project
+title: "[FEATURE] "
+labels: ["feature", "scrum"]
+assignees: []
+
+body:
+- type: markdown
+  attributes:
+    value: |
+      Please follow the template below to help us define the feature. Thank you!
+
+- type: input
+  id: title
+  attributes:
+    label: Title
+    description: Provide a concise title for the feature
+    placeholder: ex. Add support for two-factor authentication
+  validations:
+    required: true
+
+- type: textarea
+  id: description
+  attributes:
+    label: Description
+    description: Provide a detailed description of the feature
+    placeholder: ex. As a user, I want to be able to enable two-factor authentication for my account, so that I can add an extra layer of security to my login process
+  validations:
+    required: true
+
+- type: textarea
+  id: acceptance
+  attributes:
+    label: Acceptance criteria
+    description: Provide a list of conditions that must be met for the feature to be considered done
+    placeholder: |
+      - Given that I have an account, when I enable two-factor authentication, then I should be prompted to enter a verification code
+      - Given that I have an account, when I enter an incorrect verification code, then I should see an error message
+      - Given that I have an account, when I disable two-factor authentication, then I should no longer be prompted to enter a verification code
+  validations:
+    required: true
+
+- type: textarea
+  id: priority
+  attributes:
+    label: Priority
+    description: Provide a priority level for the feature (High, Medium, Low)
+    placeholder: ex. High
+  validations:
+    required: true
+
+- type: textarea
+  id: estimate
+  attributes:
+    label: Estimate
+    description: Provide an estimate of the effort required to complete the feature in story points
+    placeholder: ex. 5
+  validations:
+    required: true
+
+- type: textarea
+  id: screenshots
+  attributes:
+    label: Screenshots
+    description: If applicable, add screenshots to help illustrate the feature
+    placeholder: (Optional)
+  validations:
+    required: false
+
+- type: textarea
+  id: additional
+  attributes:
+    label: Additional context
+    description: Add any other context or information about the feature here
+    placeholder: (Optional)
+  validations:
+    required: false
