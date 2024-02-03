@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option csharp_namespace = "Moshaveran.API.Mqtt.GrpcServices.Protos";
+
+
+package MqttProtos;
+
+service MqqtReceiveSrvice{
+	rpc CANReceived(CANReceivedParams) returns (CANReceivedResult);
+}
+
+message CANReceivedParams{
+
+}
+
+message CANReceivedResult{
+
+}

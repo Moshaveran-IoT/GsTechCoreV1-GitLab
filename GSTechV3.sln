@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		src\Solution Items\GlobalUsings.cs = src\Solution Items\GlobalUsings.cs
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrpcServices", "src\Mqtt\GrpcServices\GrpcServices.csproj", "{78B6B729-7A61-443E-98E5-896B8A9C85C6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{35AFB99B-CF2F-46C1-9033-2307BCCA1CFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35AFB99B-CF2F-46C1-9033-2307BCCA1CFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35AFB99B-CF2F-46C1-9033-2307BCCA1CFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78B6B729-7A61-443E-98E5-896B8A9C85C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78B6B729-7A61-443E-98E5-896B8A9C85C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78B6B729-7A61-443E-98E5-896B8A9C85C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78B6B729-7A61-443E-98E5-896B8A9C85C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,6 +61,7 @@ Global
 		{5864FEBC-B96E-46B1-9216-48B5385836F9} = {C6FAA3E0-AC87-4FEA-9699-3AC9534FBA0D}
 		{C4562913-07E9-4C4D-8700-DB3D82AF5B3B} = {C1434590-A95C-47AE-A3D6-EDC1FE9D7AF3}
 		{35AFB99B-CF2F-46C1-9033-2307BCCA1CFC} = {00A02AAD-F349-4E36-83E2-2CC02AE68AA7}
+		{78B6B729-7A61-443E-98E5-896B8A9C85C6} = {C6FAA3E0-AC87-4FEA-9699-3AC9534FBA0D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ED29EBFA-1421-4541-BBEE-C22996291CDC}

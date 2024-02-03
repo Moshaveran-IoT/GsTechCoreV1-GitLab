@@ -22,6 +22,9 @@ public interface IMapper
     TDestination Map<TDestination>(in object source, Func<object, TDestination> getDestination)
         => Map<object, TDestination>(source, getDestination);
 
+    IEnumerable<TDestination> Map<TSource, TDestination>(IEnumerable<TSource> items, Func<TSource, TDestination> getDestination)
+        => items.Select(x => Map(x, getDestination));
+
     [return: NotNullIfNotNull(nameof(destination))]
     TDestination? Map<TDestination>(object source, in TDestination destination);
 }
