@@ -18,6 +18,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D3E94627-409F-46CB-833A-A65969507AD6}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		src\Solution Items\GlobalSuppressions.cs = src\Solution Items\GlobalSuppressions.cs
 		src\Solution Items\GlobalUsings.cs = src\Solution Items\GlobalUsings.cs
 	EndProjectSection
 EndProject

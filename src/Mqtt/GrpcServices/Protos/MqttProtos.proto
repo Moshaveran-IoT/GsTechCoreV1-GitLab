@@ -9,18 +9,18 @@ option csharp_namespace = "Moshaveran.API.Mqtt.GrpcServices.Protos";
 package MqttProtos;
 
 service MqqtReceiveSrvice {
-	rpc CANReceived(CANReceivedParams) returns (CANReceivedResult);
+	rpc PayloadReceived(PayloadReceivedParams) returns (PayloadReceivedResult);
 }
 
-message CANReceivedParams  {
+message PayloadReceivedParams  {
 	string IMEI = 1;
-	bytes Payload = 2;
-	google.protobuf.Timestamp Time = 3;
-	SaveStatus SaveStatus = 4;
+	google.protobuf.Timestamp Time = 2;
+	SaveStatus SaveStatus = 3;
+	string Log = 4;
+	string BrokerType = 5;
 }
 
-message CANReceivedResult {
+message PayloadReceivedResult {
 	string Message = 1;
-	CANReceivedStatus Status = 2;
-	reserved 3,4;
+	PayloadReceivedStatus Status = 2;
 }

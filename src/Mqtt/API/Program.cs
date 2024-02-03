@@ -24,6 +24,9 @@ internal static class Program
             })
             .UseWindowsService();
 
-    public static void Main(string[] args) =>
+    public static void Main(string[] args)
+    {
+        Console.Title = "GSTech Service SAMPLE Host";
         CreateHostBuilder(args).Build().Run();
+    }
 }

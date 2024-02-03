@@ -1,48 +1,79 @@
 ﻿using System.Text;
 
+using Google.Protobuf.WellKnownTypes;
+
+using Grpc.Net.Client;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
+using Moshaveran.API.Mqtt.GrpcServices.Protos;
 using Moshaveran.Infrastructure.Helpers;
-using Moshaveran.Infrastructure.Mapping;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
 using Moshaveran.Mqtt.DataAccess.Repositories.Bases;
 using Moshaveran.Mqtt.Domain.Services;
 
-namespace Moshaveran.IoT.Application.Services;
+namespace Application.Services;
 
-public sealed class GsTechMqttService(
-    ILogger<GsTechMqttService> logger,
-    IMapper mapper,
-    IGeocodingService geocoding,
-    IRepository<CanBroker> canRepo,
-    IRepository<GeneralBroker> genRepo,
-    IRepository<SignalBroker> signalRepo,
-    IRepository<VoltageBroker> voltageRepo,
-    IRepository<ObdBroker> obdRepo,
-    IRepository<GpsBroker> gpsRepo,
-    IRepository<TemperatureBroker> tempRepo,
-    IRepository<TpmsBroker> tpmsRepo,
-    IRepository<CameraBroker> cameraRepo) : IGsTechMqttService
+public sealed class GsTechMqttService : IGsTechMqttService
 {
-    private readonly IRepository<CameraBroker> _cameraRepo = cameraRepo;
-    private readonly IRepository<CanBroker> _canRepo = canRepo;
-    private readonly IRepository<GeneralBroker> _genRepo = genRepo;
-    private readonly IGeocodingService _geocoding = geocoding;
-    private readonly IRepository<GpsBroker> _gpsRepo = gpsRepo;
-    private readonly ILogger<GsTechMqttService> _logger = logger;
-    private readonly IRepository<ObdBroker> _obdRepo = obdRepo;
-    private readonly IRepository<SignalBroker> _signalRepo = signalRepo;
-    private readonly IRepository<TemperatureBroker> _tempRepo = tempRepo;
-    private readonly IRepository<TpmsBroker> _tpmsRepo = tpmsRepo;
-    private readonly IRepository<VoltageBroker> _voltageRepo = voltageRepo;
+    private readonly IRepository<CameraBroker> _cameraRepo;
+    private readonly IRepository<CanBroker> _canRepo;
+    private readonly IConfiguration _configuration;
+    private readonly IRepository<GeneralBroker> _genRepo;
+    private readonly IGeocodingService _geocoding;
+    private readonly IRepository<GpsBroker> _gpsRepo;
+    private readonly MqqtReceiveSrvice.MqqtReceiveSrviceClient _grpcClient = default!;
+    private readonly ILogger<GsTechMqttService> _logger;
+    private readonly IRepository<ObdBroker> _obdRepo;
+    private readonly IRepository<SignalBroker> _signalRepo;
+    private readonly IRepository<TemperatureBroker> _tempRepo;
+    private readonly IRepository<TpmsBroker> _tpmsRepo;
+    private readonly IRepository<VoltageBroker> _voltageRepo;
+
+    public GsTechMqttService(
+        ILogger<GsTechMqttService> logger,
+        IGeocodingService geocoding,
+        IRepository<CanBroker> canRepo,
+        IRepository<GeneralBroker> genRepo,
+        IRepository<SignalBroker> signalRepo,
+        IRepository<VoltageBroker> voltageRepo,
+        IRepository<ObdBroker> obdRepo,
+        IRepository<GpsBroker> gpsRepo,
+        IRepository<TemperatureBroker> tempRepo,
+        IRepository<TpmsBroker> tpmsRepo,
+        IRepository<CameraBroker> cameraRepo,
+        IConfiguration configuration)
+    {
+        _configuration = configuration;
+        this._cameraRepo = cameraRepo;
+        this._canRepo = canRepo;
+        this._genRepo = genRepo;
+        this._geocoding = geocoding;
+        this._gpsRepo = gpsRepo;
+        this._logger = logger;
+        this._obdRepo = obdRepo;
+        this._signalRepo = signalRepo;
+        this._tempRepo = tempRepo;
+        this._tpmsRepo = tpmsRepo;
+        this._voltageRepo = voltageRepo;
+        _grpcClient = createGrpcClient();
+
+        MqqtReceiveSrvice.MqqtReceiveSrviceClient createGrpcClient()
+        {
+            var channel = GrpcChannel.ForAddress(_configuration["GrpcServiceSettings:ServerUrl"]!);
+            return new MqqtReceiveSrvice.MqqtReceiveSrviceClient(channel);
+        }
+    }
 
     public Task<Result> ProcessCameraPayload(byte[] payload, string imei, CancellationToken token = default)
-        => SavePayload((broker, payloadMessage) =>
+        => Save((broker, payloadMessage) =>
         {
             broker.Imei = imei;
             broker.CreatedOn = DateTime.Now;
             broker.Value = $"data:image/png;base64,{payloadMessage}";
-        }, payload, _cameraRepo);
+            return Result.CreateSucceed(broker);
+        }, "Camera", payload, _cameraRepo);
 
     public async Task<Result> ProcessCanPayload(byte[] payload, string imei, CancellationToken token = default)
     {
@@ -62,7 +93,7 @@ public sealed class GsTechMqttService(
                 {
                     continue;
                 }
-                var binaryString = string.Join(string.Empty, key.PadLeft(8, '0').Select(c => Convert.ToString(Convert.ToInt32(c.ToString(), 16), 2).PadLeft(4, '0')));
+                var binaryString = string.Concat(key.PadLeft(8, '0').Select(c => Convert.ToString(Convert.ToInt32(c.ToString(), 16), 2).PadLeft(4, '0')));
                 //var Priority = binaryString[..6];
                 var reserved = binaryString[6..7];
                 var dataPage = binaryString[7..8];
@@ -83,24 +114,23 @@ public sealed class GsTechMqttService(
                     Value = value,
                     Imei = imei
                 };
-                _ = await _canRepo.Insert(canBroker, false, token).ConfigureAwait(false);
+                _ = await _canRepo.Insert(canBroker, false, token);
             }
         }
 
-        var result = await _canRepo.SaveChanges(token).ConfigureAwait(false);
-        return result;
+        return await _canRepo.SaveChanges(token);
     }
 
     public Task<Result> ProcessGeneralPayload(byte[] payload, string imei, CancellationToken token = default)
-        => ProcessPayload<GeneralBroker>(async genBro =>
+        => Save(broker =>
         {
             //if (string.IsNullOrEmpty(genBro.InternetTotalVolume))
             //{
             //    return;
             //}
-            genBro.Imei = imei;
-            genBro.CreatedOn = DateTime.Now;
-            genBro.InternetRemainingUssd = genBro.InternetTotalVolume;
+            broker.Imei = imei;
+            broker.CreatedOn = DateTime.Now;
+            broker.InternetRemainingUssd = broker.InternetTotalVolume;
             //var ussd = StringHelper.HexToUnicode(genBro.InternetTotalVolume);
             //if (ussd.Contains("صفر"))
             //{
@@ -115,132 +145,149 @@ public sealed class GsTechMqttService(
             //    genBro.InternetRemainingVolume = ussd.Split(":")[1].Trim().Split("،")[0].Trim();
             //    genBro.InternetRemainingTime = ussd.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
             //}
-            _ = await _genRepo.Insert(genBro, false, token).ConfigureAwait(false);
-
-            _ = await _genRepo.SaveChanges(token).ConfigureAwait(false);
-        }, payload);
+            return Result.CreateSucceed(broker);
+        }, "General", payload, _genRepo);
 
     public Task<Result> ProcessGeneralPlusPayload(byte[] payload, string imei, CancellationToken token = default)
-        => ProcessPayload(async (GeneralBroker gp) =>
+        => Save(broker =>
         {
-            gp.Imei = imei;
-            gp.CreatedOn = DateTime.Now;
-            gp.InternetRemainingUssd = gp.InternetTotalVolume;
-            var ussd = StringHelper.HexToUnicode(gp!.InternetTotalVolume);
+            broker.Imei = imei;
+            broker.CreatedOn = DateTime.Now;
+            broker.InternetRemainingUssd = broker.InternetTotalVolume;
+            var ussd = StringHelper.HexToUnicode(broker!.InternetTotalVolume!);
             if (ussd.Contains("صفر"))
             {
-                gp.InternetTotalVolume = "بدون بسته";
-                gp.InternetRemainingTime = "---";
+                broker.InternetTotalVolume = "بدون بسته";
+                broker.InternetRemainingTime = "---";
                 var match = ussd.Split(["اصلی"], StringSplitOptions.None)[1].Split("ریال")[0].Trim().Split(" ")[0];
-                gp.InternetRemainingVolume = string.Concat(match, " ", "ریال");
+                broker.InternetRemainingVolume = string.Concat(match, " ", "ریال");
             }
             else
             {
-                gp.InternetTotalVolume = ussd.Split(":")[0].Trim();
-                gp.InternetRemainingVolume = ussd.Split(":")[1].Trim().Split("،")[0].Trim();
-                gp.InternetRemainingTime = ussd.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
+                broker.InternetTotalVolume = ussd.Split(":")[0].Trim();
+                broker.InternetRemainingVolume = ussd.Split(":")[1].Trim().Split("،")[0].Trim();
+                broker.InternetRemainingTime = ussd.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
             }
 
-            if (!string.IsNullOrEmpty(gp.SimCardNumber))
+            if (!string.IsNullOrEmpty(broker.SimCardNumber))
             {
-                var splitSimCard = StringHelper.HexToUnicode(gp.SimCardNumber).Split("\n");
+                var splitSimCard = StringHelper.HexToUnicode(broker.SimCardNumber).Split("\n");
                 if (splitSimCard.ToList().Count > 0)
                 {
-                    gp.SimCardNumber = splitSimCard[1].ToString().Substring(2, 11);
+                    broker.SimCardNumber = splitSimCard[1].Substring(2, 11);
                 }
             }
-            _ = await this._genRepo.Insert(gp).ConfigureAwait(false);
-        }, payload);
+            return Result.CreateSucceed(broker);
+        }, "GeneralPlus", payload, _genRepo);
 
     public Task<Result> ProcessGpsPayload(byte[] payload, string imei, CancellationToken token = default)
-        => ProcessPayload(async (GpsBroker gps) =>
+        => Save(async (GpsBroker broker, string _) =>
         {
-            if (gps.Latitude is >= -90 and <= 90 && gps.Longitude is >= -180 and <= 180 && gps.Latitude.ToString().Length != 1 && gps.Longitude.ToString().Length != 1)
+            if (broker.Latitude is >= -90 and <= 90 && broker.Longitude is >= -180 and <= 180 && broker.Latitude.ToString().Length != 1 && broker.Longitude.ToString().Length != 1)
             {
-                gps.Imei = imei;
-                gps.CreatedOn = DateTime.Now;
-                var address = await _geocoding.Reverse(gps.Latitude, gps.Longitude).ConfigureAwait(false);
-                gps.Address = address;
-                _ = await _gpsRepo.Insert(gps).ConfigureAwait(false);
-                _logger.LogInformation($"*** GPS Payload Saved! IMEI: {imei}");
+                broker.Imei = imei;
+                broker.CreatedOn = DateTime.Now;
+                broker.Address = await _geocoding.Reverse(broker.Latitude, broker.Longitude);
+                return Result.CreateSucceed(broker);
             }
             else
             {
-                _logger.LogWarning($"*** GPS Payload Not Saved! IMEI: {imei}");
+                return Result.CreateFailure(broker);
             }
-        }, payload);
+        }, imei, payload, _gpsRepo);
 
     public Task<Result> ProcessObdPayload(byte[] payload, string imei, CancellationToken token = default)
-        => ProcessPayload(async (ObdBroker __, string payloadMessage) =>
+        => Save((ObdBroker _, string payloadMessage) =>
         {
-            var result = new ObdBroker
+            var broker = new ObdBroker
             {
                 Imei = imei,
                 CreatedOn = DateTime.Now,
                 Value = payloadMessage
             };
-            _ = await _obdRepo.Insert(result).ConfigureAwait(false);
-        }, payload);
+            return Result.CreateSucceed(broker);
+        }, imei, payload, _obdRepo);
 
     public Task<Result> ProcessSignalPayload(byte[] payload, string imei, CancellationToken token = default)
-        => SavePayload(broker =>
+        => Save(broker =>
         {
             broker.Imei = imei;
             broker.CreatedOn = DateTime.Now;
-        }, payload, _signalRepo);
+            return Result.CreateSucceed(broker);
+        }, imei, payload, _signalRepo);
 
     public Task<Result> ProcessTemperaturePayload(byte[] payload, string imei, CancellationToken token = default)
-        => SavePayload(broker =>
+        => Save(broker =>
         {
             broker.Imei = imei;
             broker.CreatedOn = DateTime.Now;
-        }, payload, _tempRepo);
+            return Result.CreateSucceed(broker);
+        }, imei, payload, _tempRepo);
 
     public Task<Result> ProcessTpmsPayload(byte[] payload, string imei, CancellationToken token = default)
-        => SavePayload(broker =>
+        => Save(broker =>
         {
             broker.Imei = imei;
             broker.CreatedOn = DateTime.Now;
-        }, payload, _tpmsRepo);
+            return Result.CreateSucceed(broker);
+        }, imei, payload, _tpmsRepo);
 
     public Task<Result> ProcessVoltagePayload(byte[] payload, string imei, CancellationToken token = default)
-        => SavePayload(broker =>
+        => Save(broker =>
         {
             broker.Imei = imei;
             broker.CreatedOn = DateTime.Now;
-        }, payload, _voltageRepo);
+            return Result.CreateSucceed(broker);
+        }, imei, payload, _voltageRepo);
 
-    private static Task<Result> ProcessPayload<TDbBroker>(Func<TDbBroker, Task> process, byte[] payload)
-        => ProcessPayload(async (TDbBroker broker, string payloadMessage) => { await process(broker).ConfigureAwait(false); }, payload);
-
-    private static async Task<Result> ProcessPayload<TDbBroker>(Func<TDbBroker, string, Task> process, byte[] payload)
+    private async Task<Result> InnerSave<TDbBroker>(Func<TDbBroker, string, Task<Result<TDbBroker>>> initialize, string imei, byte[] payload, IRepository<TDbBroker> repo)
     {
         var payloadMessage = Encoding.UTF8.GetString(payload);
-        if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? result) || result == null)
+        if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null)
         {
-            return await Task.FromResult(Result.Failed).ConfigureAwait(false);
+            return await Task.FromResult(Result.Failed);
         }
+
+        var grpcRequest = new PayloadReceivedParams
+        {
+            IMEI = imei,
+            Time = Timestamp.FromDateTime(DateTime.UtcNow),
+            BrokerType = typeof(TDbBroker).Name,
+        };
+
         try
         {
-            await process(result, payloadMessage).ConfigureAwait(false);
-            return await Task.FromResult(Result.Succeed).ConfigureAwait(false);
+            var initResult = await initialize(broker, payloadMessage);
+            grpcRequest.SaveStatus = SaveStatus.SaveSuccess;
+            grpcRequest.Log = "Hi";
+            return initResult.IsSucceed ? await repo.Insert(initResult.Value!) : Result.Failed;
         }
         catch
         {
-            return await Task.FromResult(Result.Failed).ConfigureAwait(false);
+            grpcRequest.SaveStatus = SaveStatus.SaveFailure;
+            grpcRequest.Log = "Bye";
+            return Result.Failed;
+        }
+        finally
+        {
+            _ = await this._grpcClient.PayloadReceivedAsync(grpcRequest);
         }
     }
 
-    private static Task<Result> SavePayload<TDbBroker>(Action<TDbBroker, string> initialize, byte[] payload, IRepository<TDbBroker> repo)
-        => ProcessPayload(async (TDbBroker result, string payloadMessage) =>
-        {
-            initialize(result, payloadMessage);
-            _ = await repo.Insert(result).ConfigureAwait(false);
-        }, payload);
+    private async Task<Result> Save<TDbBroker>(Func<TDbBroker, string, Task<Result<TDbBroker>>> initialize, string imei, byte[] payload, IRepository<TDbBroker> repo) =>
+        await InnerSave(initialize, imei, payload, repo);
 
-    private static Task<Result> SavePayload<TDbBroker>(Action<TDbBroker> initialize, byte[] payload, IRepository<TDbBroker> repo)
-        => SavePayload((broker, payloadMessage) =>
+    private Task<Result> Save<TDbBroker>(Func<TDbBroker, Result<TDbBroker>> initialize, string imei, byte[] payload, IRepository<TDbBroker> repo)
+        => InnerSave((broker, _) =>
         {
-            initialize(broker);
-        }, payload, repo);
+            var result = initialize(broker);
+            return Task.FromResult(result);
+        }, imei, payload, repo);
+
+    private Task<Result> Save<TDbBroker>(Func<TDbBroker, string, Result<TDbBroker>> initialize, string imei, byte[] payload, IRepository<TDbBroker> repo) 
+        => InnerSave((broker, payloadMessage) =>
+        {
+            var result = initialize(broker, payloadMessage);
+            return Task.FromResult(result);
+        }, imei, payload, repo);
 }

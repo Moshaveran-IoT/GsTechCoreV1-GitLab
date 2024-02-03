@@ -6,15 +6,15 @@ namespace GrpcServices.Services;
 
 public sealed class MqqtGrpcService(ILogger<MqqtGrpcService> logger) : MqqtReceiveSrvice.MqqtReceiveSrviceBase
 {
-    public override Task<CANReceivedResult> CANReceived(CANReceivedParams request, ServerCallContext context)
+    public override Task<PayloadReceivedResult> PayloadReceived(PayloadReceivedParams request, ServerCallContext context)
     {
-        var result = new CANReceivedResult
+        var result = new PayloadReceivedResult
         {
-            Status = CANReceivedStatus.ReceivedSuccess,
+            Status = PayloadReceivedStatus.ReceivedSuccess,
         };
         if (request.SaveStatus == SaveStatus.SaveSuccess)
         {
-            logger.LogInformation("*** CAN Payload Received! IMEI: {IMEI} at {Time}", request.IMEI, request.Time.ToDateTime());
+            logger.LogInformation("[{Time}][{Imei}][{BrokerType}] : {log}", request.Time.ToDateTime(), request.IMEI, request.BrokerType, request.Log);
         }
         return Task.FromResult(result);
     }
