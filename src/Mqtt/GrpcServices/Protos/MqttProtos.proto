@@ -1,18 +1,26 @@
 syntax = "proto3";
 
+import "enums.proto";
+import "google/protobuf/timestamp.proto";
+
 option csharp_namespace = "Moshaveran.API.Mqtt.GrpcServices.Protos";
 
 
 package MqttProtos;
 
-service MqqtReceiveSrvice{
+service MqqtReceiveSrvice {
 	rpc CANReceived(CANReceivedParams) returns (CANReceivedResult);
 }
 
-message CANReceivedParams{
-
+message CANReceivedParams  {
+	string IMEI = 1;
+	bytes Payload = 2;
+	google.protobuf.Timestamp Time = 3;
+	SaveStatus SaveStatus = 4;
 }
 
-message CANReceivedResult{
-
+message CANReceivedResult {
+	string Message = 1;
+	CANReceivedStatus Status = 2;
+	reserved 3,4;
 }
