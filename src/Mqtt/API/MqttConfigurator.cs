@@ -1,12 +1,12 @@
-﻿using Moshaveran.API.Mqtt.API.Controllers;
-using Moshaveran.API.Mqtt.Application.Services;
+﻿using Moshaveran.API.Controllers;
+using Moshaveran.IoT.Application.Services;
 using Moshaveran.Mqtt.DataAccess;
-
+using Moshaveran.Mqtt.Domain.Services;
 using MQTTnet.AspNetCore;
 using MQTTnet.AspNetCore.AttributeRouting;
 using MQTTnet.AspNetCore.Extensions;
 
-namespace Moshaveran.API.Mqtt;
+namespace Moshaveran.API;
 
 public static class MqttConfigurator
 {

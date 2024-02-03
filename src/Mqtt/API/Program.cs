@@ -1,8 +1,8 @@
-using Moshaveran.API;
+using Moshaveran.Mqtt.API;
 
 using MQTTnet.AspNetCore.Extensions;
 
-internal class Program
+internal static class Program
 {
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
@@ -13,7 +13,7 @@ internal class Program
                     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                     .Build();
 
-                var appPort = int.Parse(config["AppPort"]);
+                var appPort = int.Parse(config!["AppPort"]);
                 _ = webBuilder.UseKestrel(o =>
                 {
                     o.ListenAnyIP(1885, l => l.UseMqtt());

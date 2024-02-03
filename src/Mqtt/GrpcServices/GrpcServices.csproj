@@ -4,6 +4,8 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<AssemblyName>Moshaveran.IoT.$(MSBuildProjectName)</AssemblyName>
+		<RootNamespace>Moshaveran.Mqtt.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -12,8 +14,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Protobuf Include="Protos\greet.proto" GrpcServices="Server" ProtoRoot="Protos\"/>
-		<Protobuf Include="Protos\MqttProtos.proto" GrpcServices="Server" ProtoRoot="Protos\"/>
+		<Protobuf Include="Protos\greet.proto" GrpcServices="Server" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos\MqttProtos.proto" GrpcServices="Server" ProtoRoot="Protos\" />
 		<Protobuf Include="Protos\enums.proto" GrpcServices="None" />
 	</ItemGroup>
 

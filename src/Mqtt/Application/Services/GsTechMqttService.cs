@@ -1,12 +1,14 @@
 ﻿using System.Text;
 
-using Moshaveran.Infrastructure.ApplicationServices;
+using Microsoft.Extensions.Logging;
+
 using Moshaveran.Infrastructure.Helpers;
 using Moshaveran.Infrastructure.Mapping;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
 using Moshaveran.Mqtt.DataAccess.Repositories.Bases;
+using Moshaveran.Mqtt.Domain.Services;
 
-namespace Moshaveran.API.Mqtt.Application.Services;
+namespace Moshaveran.IoT.Application.Services;
 
 public sealed class GsTechMqttService(
     ILogger<GsTechMqttService> logger,
@@ -20,7 +22,7 @@ public sealed class GsTechMqttService(
     IRepository<GpsBroker> gpsRepo,
     IRepository<TemperatureBroker> tempRepo,
     IRepository<TpmsBroker> tpmsRepo,
-    IRepository<CameraBroker> cameraRepo) : IBusinessService
+    IRepository<CameraBroker> cameraRepo) : IGsTechMqttService
 {
     private readonly IRepository<CameraBroker> _cameraRepo = cameraRepo;
     private readonly IRepository<CanBroker> _canRepo = canRepo;
@@ -28,7 +30,6 @@ public sealed class GsTechMqttService(
     private readonly IGeocodingService _geocoding = geocoding;
     private readonly IRepository<GpsBroker> _gpsRepo = gpsRepo;
     private readonly ILogger<GsTechMqttService> _logger = logger;
-    private readonly IMapper _mapper = mapper;
     private readonly IRepository<ObdBroker> _obdRepo = obdRepo;
     private readonly IRepository<SignalBroker> _signalRepo = signalRepo;
     private readonly IRepository<TemperatureBroker> _tempRepo = tempRepo;
@@ -82,11 +83,11 @@ public sealed class GsTechMqttService(
                     Value = value,
                     Imei = imei
                 };
-                _ = await _canRepo.Insert(canBroker, false, token);
+                _ = await _canRepo.Insert(canBroker, false, token).ConfigureAwait(false);
             }
         }
 
-        var result = await _canRepo.SaveChanges(token);
+        var result = await _canRepo.SaveChanges(token).ConfigureAwait(false);
         return result;
     }
 
@@ -114,9 +115,9 @@ public sealed class GsTechMqttService(
             //    genBro.InternetRemainingVolume = ussd.Split(":")[1].Trim().Split("،")[0].Trim();
             //    genBro.InternetRemainingTime = ussd.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
             //}
-            _ = await _genRepo.Insert(genBro, false, token);
-            
-            await _genRepo.SaveChanges(token);
+            _ = await _genRepo.Insert(genBro, false, token).ConfigureAwait(false);
+
+            _ = await _genRepo.SaveChanges(token).ConfigureAwait(false);
         }, payload);
 
     public Task<Result> ProcessGeneralPlusPayload(byte[] payload, string imei, CancellationToken token = default)
@@ -125,7 +126,7 @@ public sealed class GsTechMqttService(
             gp.Imei = imei;
             gp.CreatedOn = DateTime.Now;
             gp.InternetRemainingUssd = gp.InternetTotalVolume;
-            var ussd = StringHelper.HexToUnicode(gp.InternetTotalVolume);
+            var ussd = StringHelper.HexToUnicode(gp!.InternetTotalVolume);
             if (ussd.Contains("صفر"))
             {
                 gp.InternetTotalVolume = "بدون بسته";
@@ -148,19 +149,19 @@ public sealed class GsTechMqttService(
                     gp.SimCardNumber = splitSimCard[1].ToString().Substring(2, 11);
                 }
             }
-            _ = await this._genRepo.Insert(gp);
+            _ = await this._genRepo.Insert(gp).ConfigureAwait(false);
         }, payload);
 
     public Task<Result> ProcessGpsPayload(byte[] payload, string imei, CancellationToken token = default)
         => ProcessPayload(async (GpsBroker gps) =>
         {
-            if ((gps.Latitude is >= -90 and <= 90) && (gps.Longitude is >= -180 and <= 180) && (gps.Latitude.ToString().Length != 1) && (gps.Longitude.ToString().Length != 1))
+            if (gps.Latitude is >= -90 and <= 90 && gps.Longitude is >= -180 and <= 180 && gps.Latitude.ToString().Length != 1 && gps.Longitude.ToString().Length != 1)
             {
                 gps.Imei = imei;
                 gps.CreatedOn = DateTime.Now;
-                var address = await _geocoding.Reverse(gps.Latitude, gps.Longitude);
+                var address = await _geocoding.Reverse(gps.Latitude, gps.Longitude).ConfigureAwait(false);
                 gps.Address = address;
-                _ = await _gpsRepo.Insert(gps);
+                _ = await _gpsRepo.Insert(gps).ConfigureAwait(false);
                 _logger.LogInformation($"*** GPS Payload Saved! IMEI: {imei}");
             }
             else
@@ -178,7 +179,7 @@ public sealed class GsTechMqttService(
                 CreatedOn = DateTime.Now,
                 Value = payloadMessage
             };
-            _ = await _obdRepo.Insert(result);
+            _ = await _obdRepo.Insert(result).ConfigureAwait(false);
         }, payload);
 
     public Task<Result> ProcessSignalPayload(byte[] payload, string imei, CancellationToken token = default)
@@ -210,23 +211,23 @@ public sealed class GsTechMqttService(
         }, payload, _voltageRepo);
 
     private static Task<Result> ProcessPayload<TDbBroker>(Func<TDbBroker, Task> process, byte[] payload)
-        => ProcessPayload(async (TDbBroker broker, string payloadMessage) => { await process(broker); }, payload);
+        => ProcessPayload(async (TDbBroker broker, string payloadMessage) => { await process(broker).ConfigureAwait(false); }, payload);
 
     private static async Task<Result> ProcessPayload<TDbBroker>(Func<TDbBroker, string, Task> process, byte[] payload)
     {
         var payloadMessage = Encoding.UTF8.GetString(payload);
         if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? result) || result == null)
         {
-            return await Task.FromResult(Result.Failed);
+            return await Task.FromResult(Result.Failed).ConfigureAwait(false);
         }
         try
         {
-            await process(result, payloadMessage);
-            return await Task.FromResult(Result.Succeed);
+            await process(result, payloadMessage).ConfigureAwait(false);
+            return await Task.FromResult(Result.Succeed).ConfigureAwait(false);
         }
         catch
         {
-            return await Task.FromResult(Result.Failed);
+            return await Task.FromResult(Result.Failed).ConfigureAwait(false);
         }
     }
 
@@ -234,11 +235,11 @@ public sealed class GsTechMqttService(
         => ProcessPayload(async (TDbBroker result, string payloadMessage) =>
         {
             initialize(result, payloadMessage);
-            _ = await repo.Insert(result);
+            _ = await repo.Insert(result).ConfigureAwait(false);
         }, payload);
 
     private static Task<Result> SavePayload<TDbBroker>(Action<TDbBroker> initialize, byte[] payload, IRepository<TDbBroker> repo)
-        => SavePayload((TDbBroker broker, string payloadMessage) =>
+        => SavePayload((broker, payloadMessage) =>
         {
             initialize(broker);
         }, payload, repo);

@@ -3,11 +3,14 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
 using MQTTnet;
 using MQTTnet.Protocol;
 using MQTTnet.Server;
 
-namespace Moshaveran.API.Mqtt.Application.Services;
+namespace Moshaveran.IoT.Application.Services;
 
 public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorService> logger, IServiceScopeFactory scopeFactory) :
     IMqttServerConnectionValidator,
@@ -81,7 +84,7 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
             }
             catch (Exception e)
             {
-                logger.LogInformation(e,$"Exception occurred on {nameof(SubscribeKiss)}");
+                logger.LogInformation(e, $"Exception occurred on {nameof(SubscribeKiss)}");
             }
             finally
             {

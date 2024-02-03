@@ -1,8 +1,8 @@
-﻿using Moshaveran.API.Mqtt.Application.Services;
+﻿using Moshaveran.IoT.Application.Services;
 
 using MQTTnet.AspNetCore.AttributeRouting;
 
-namespace Moshaveran.API.Mqtt.API.Controllers;
+namespace Moshaveran.API.Controllers;
 
 [MqttController]
 [MqttRoute("Gs")]
@@ -61,7 +61,7 @@ public class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMq
         }
         else
         {
-            await this.BadMessage();
+            await BadMessage();
         }
     }
 }
