@@ -13,6 +13,6 @@ enum PayloadReceivedStatus {
 
 enum SaveStatus {
 	SAVE_SUCCESS = 0;
-	SAVE_INVALID = 1;
+	INVALID_REQUEST = 1;
 	SAVE_FAILURE = 2;
 }

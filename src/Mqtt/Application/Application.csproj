@@ -57,15 +57,15 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Infrastructure\Infrastructure.csproj" />
-		<ProjectReference Include="..\Contracts\Domain.csproj" />
 		<ProjectReference Include="..\DataAccess\DataAccess.csproj" />
+		<ProjectReference Include="..\Domain\Domain.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Protobuf Include="..\GrpcServices\Protos\enums.proto" GrpcServices="None">
+	  <Protobuf Include="..\Listener\Protos\enums.proto" GrpcServices="None">
 	    <Link>Protos\enums.proto</Link>
 	  </Protobuf>
-	  <Protobuf Include="..\GrpcServices\Protos\MqttProtos.proto" GrpcServices="Client">
+	  <Protobuf Include="..\Listener\Protos\MqttProtos.proto" GrpcServices="Client">
 	    <Link>Protos\MqttProtos.proto</Link>
 	  </Protobuf>
 	</ItemGroup>

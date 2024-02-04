@@ -84,21 +84,21 @@ public sealed class GsTechMqttService : IGsTechMqttService
         }
         using (dto)
         {
-            const string VALID_HEX = "0123456789abcdefABCDEF";
+            const string VALID_HEX_CHARS = "0123456789abcdefABCDEF";
             foreach (var app in dto.RootElement.EnumerateObject())
             {
                 var (key, value) = (app.Name, app.Value.GetRawText().Trim('\"'));
-                var isHex = key.All(VALID_HEX.Contains) && value.All(VALID_HEX.Contains);
+                var isHex = key.All(VALID_HEX_CHARS.Contains) && value.All(VALID_HEX_CHARS.Contains);
                 if (!isHex)
                 {
                     continue;
                 }
                 var binaryString = string.Concat(key.PadLeft(8, '0').Select(c => Convert.ToString(Convert.ToInt32(c.ToString(), 16), 2).PadLeft(4, '0')));
-                //var Priority = binaryString[..6];
+                //x var Priority = binaryString[..6];
                 var reserved = binaryString[6..7];
                 var dataPage = binaryString[7..8];
                 var pduFormat = binaryString[8..16];
-                //var sourceAddress = binaryString[24..32];
+                //x var sourceAddress = binaryString[24..32];
                 var decPduFormat = Convert.ToInt64(pduFormat, 2);
                 var pduSpecific = decPduFormat >= 240
                     ? binaryString[16..24]
@@ -242,35 +242,50 @@ public sealed class GsTechMqttService : IGsTechMqttService
 
     private async Task<Result> InnerSave<TDbBroker>(Func<TDbBroker, string, Task<Result<TDbBroker>>> initialize, string imei, byte[] payload, IRepository<TDbBroker> repo)
     {
-        var payloadMessage = Encoding.UTF8.GetString(payload);
-        if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null)
-        {
-            return await Task.FromResult(Result.Failed);
-        }
-
         var grpcRequest = new PayloadReceivedParams
         {
             IMEI = imei,
             Time = Timestamp.FromDateTime(DateTime.UtcNow),
             BrokerType = typeof(TDbBroker).Name,
         };
-
         try
         {
+            var payloadMessage = Encoding.UTF8.GetString(payload);
+            if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null)
+            {
+                grpcRequest.SaveStatus = SaveStatus.InvalidRequest;
+                grpcRequest.Log = "Invalid JSON format.";
+                return await Task.FromResult(Result.Failed);
+            }
+
             var initResult = await initialize(broker, payloadMessage);
-            grpcRequest.SaveStatus = SaveStatus.SaveSuccess;
-            grpcRequest.Log = "Hi";
-            return initResult.IsSucceed ? await repo.Insert(initResult.Value!) : Result.Failed;
+            if (initResult.IsSucceed)
+            {
+                var result = await repo.Insert(initResult.Value!);
+                grpcRequest.Log = result.Message ?? (result.IsSucceed ? "Payload saved successfully." : "Payload not saved");
+                return result;
+            }
+            else
+            {
+                grpcRequest.Log = initResult.Message ?? "Invalid payload.";
+                return initResult!;
+            }
         }
-        catch
+        catch (Exception ex)
         {
             grpcRequest.SaveStatus = SaveStatus.SaveFailure;
-            grpcRequest.Log = "Bye";
+            grpcRequest.Log = ex.GetBaseException().Message;
             return Result.Failed;
         }
         finally
         {
-            _ = await this._grpcClient.PayloadReceivedAsync(grpcRequest);
+            try
+            {
+                _ = this._grpcClient.PayloadReceivedAsync(grpcRequest);
+            }
+            catch
+            {
+            }
         }
     }
 
@@ -284,7 +299,7 @@ public sealed class GsTechMqttService : IGsTechMqttService
             return Task.FromResult(result);
         }, imei, payload, repo);
 
-    private Task<Result> Save<TDbBroker>(Func<TDbBroker, string, Result<TDbBroker>> initialize, string imei, byte[] payload, IRepository<TDbBroker> repo) 
+    private Task<Result> Save<TDbBroker>(Func<TDbBroker, string, Result<TDbBroker>> initialize, string imei, byte[] payload, IRepository<TDbBroker> repo)
         => InnerSave((broker, payloadMessage) =>
         {
             var result = initialize(broker, payloadMessage);

@@ -14,7 +14,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Protobuf Include="Protos\greet.proto" GrpcServices="Server" ProtoRoot="Protos\" />
 		<Protobuf Include="Protos\MqttProtos.proto" GrpcServices="Server" ProtoRoot="Protos\" />
 		<Protobuf Include="Protos\enums.proto" GrpcServices="None" />
 	</ItemGroup>
