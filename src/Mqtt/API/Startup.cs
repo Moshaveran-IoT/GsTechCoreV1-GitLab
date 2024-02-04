@@ -1,6 +1,4 @@
-﻿using Moshaveran.API;
-
-using Prometheus;
+﻿using Prometheus;
 
 namespace Moshaveran.Mqtt.API;
 

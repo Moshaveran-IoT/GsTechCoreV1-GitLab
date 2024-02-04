@@ -3,12 +3,13 @@
     "Name": "GRPC Activated",
     "Projects": [
       {
-        "Name": "src\\Mqtt\\GrpcServices\\GrpcServices.csproj",
+        "Name": "src\\Mqtt\\Listener\\Listener.csproj",
         "Action": "Start"
       },
       {
         "Name": "src\\Mqtt\\API\\API.csproj",
-        "Action": "Start"
+        "Action": "Start",
+        "DebugTarget": ""
       }
     ]
   }

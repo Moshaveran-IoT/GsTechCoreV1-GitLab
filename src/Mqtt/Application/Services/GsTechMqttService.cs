@@ -1,8 +1,6 @@
 ﻿using System.Text;
 
-using Google.Protobuf.WellKnownTypes;
-
-using Grpc.Net.Client;
+using Application.Interfaces;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -23,7 +21,7 @@ public sealed class GsTechMqttService : IGsTechMqttService
     private readonly IRepository<GeneralBroker> _genRepo;
     private readonly IGeocodingService _geocoding;
     private readonly IRepository<GpsBroker> _gpsRepo;
-    private readonly MqqtReceiveSrvice.MqqtReceiveSrviceClient _grpcClient = default!;
+    private readonly IListenerService _listenerService;
     private readonly ILogger<GsTechMqttService> _logger;
     private readonly IRepository<ObdBroker> _obdRepo;
     private readonly IRepository<SignalBroker> _signalRepo;
@@ -43,9 +41,11 @@ public sealed class GsTechMqttService : IGsTechMqttService
         IRepository<TemperatureBroker> tempRepo,
         IRepository<TpmsBroker> tpmsRepo,
         IRepository<CameraBroker> cameraRepo,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IListenerService listenerService)
     {
-        _configuration = configuration;
+        this._configuration = configuration;
+        this._listenerService = listenerService;
         this._cameraRepo = cameraRepo;
         this._canRepo = canRepo;
         this._genRepo = genRepo;
@@ -57,13 +57,6 @@ public sealed class GsTechMqttService : IGsTechMqttService
         this._tempRepo = tempRepo;
         this._tpmsRepo = tpmsRepo;
         this._voltageRepo = voltageRepo;
-        _grpcClient = createGrpcClient();
-
-        MqqtReceiveSrvice.MqqtReceiveSrviceClient createGrpcClient()
-        {
-            var channel = GrpcChannel.ForAddress(_configuration["GrpcServiceSettings:ServerUrl"]!);
-            return new MqqtReceiveSrvice.MqqtReceiveSrviceClient(channel);
-        }
     }
 
     public Task<Result> ProcessCameraPayload(byte[] payload, string imei, CancellationToken token = default)
@@ -75,23 +68,22 @@ public sealed class GsTechMqttService : IGsTechMqttService
             return Result.CreateSucceed(broker);
         }, "Camera", payload, _cameraRepo);
 
-    public async Task<Result> ProcessCanPayload(byte[] payload, string imei, CancellationToken token = default)
-    {
-        var payloadMessage = Encoding.UTF8.GetString(payload);
-        if (!JsonDocumentHelpers.TryParse(payloadMessage, out var dto))
+    public Task<Result> ProcessCanPayload(byte[] payload, string imei, CancellationToken token = default)
+        => this.Save((broker, payloadMessage) =>
         {
-            return Result.Failed;
-        }
-        using (dto)
-        {
-            const string VALID_HEX_CHARS = "0123456789abcdefABCDEF";
-            foreach (var app in dto.RootElement.EnumerateObject())
+            if (!JsonDocumentHelpers.TryParse(payloadMessage, out var dto))
             {
+                return Result.CreateFailure(broker);
+            }
+            using (dto)
+            {
+                const string VALID_HEX_CHARS = "0123456789abcdefABCDEF";
+                var app = dto.RootElement.EnumerateObject().FirstOrDefault();
                 var (key, value) = (app.Name, app.Value.GetRawText().Trim('\"'));
                 var isHex = key.All(VALID_HEX_CHARS.Contains) && value.All(VALID_HEX_CHARS.Contains);
                 if (!isHex)
                 {
-                    continue;
+                    return Result.CreateFailure(broker);
                 }
                 var binaryString = string.Concat(key.PadLeft(8, '0').Select(c => Convert.ToString(Convert.ToInt32(c.ToString(), 16), 2).PadLeft(4, '0')));
                 //x var Priority = binaryString[..6];
@@ -114,12 +106,9 @@ public sealed class GsTechMqttService : IGsTechMqttService
                     Value = value,
                     Imei = imei
                 };
-                _ = await _canRepo.Insert(canBroker, false, token);
+                return Result.CreateSucceed(canBroker);
             }
-        }
-
-        return await _canRepo.SaveChanges(token);
-    }
+        }, imei, payload, _canRepo);
 
     public Task<Result> ProcessGeneralPayload(byte[] payload, string imei, CancellationToken token = default)
         => Save(broker =>
@@ -242,19 +231,15 @@ public sealed class GsTechMqttService : IGsTechMqttService
 
     private async Task<Result> InnerSave<TDbBroker>(Func<TDbBroker, string, Task<Result<TDbBroker>>> initialize, string imei, byte[] payload, IRepository<TDbBroker> repo)
     {
-        var grpcRequest = new PayloadReceivedParams
-        {
-            IMEI = imei,
-            Time = Timestamp.FromDateTime(DateTime.UtcNow),
-            BrokerType = typeof(TDbBroker).Name,
-        };
+        var logMessage = string.Empty;
+        var status = SaveStatus.SaveSuccess;
         try
         {
             var payloadMessage = Encoding.UTF8.GetString(payload);
             if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null)
             {
-                grpcRequest.SaveStatus = SaveStatus.InvalidRequest;
-                grpcRequest.Log = "Invalid JSON format.";
+                status = SaveStatus.InvalidRequest;
+                logMessage = "Invalid JSON format.";
                 return await Task.FromResult(Result.Failed);
             }
 
@@ -262,30 +247,26 @@ public sealed class GsTechMqttService : IGsTechMqttService
             if (initResult.IsSucceed)
             {
                 var result = await repo.Insert(initResult.Value!);
-                grpcRequest.Log = result.Message ?? (result.IsSucceed ? "Payload saved successfully." : "Payload not saved");
+                status = result.IsSucceed ? SaveStatus.SaveSuccess : SaveStatus.SaveFailure;
+                logMessage = result.Message ?? (result.IsSucceed ? "Payload saved successfully." : "Payload not saved");
                 return result;
             }
             else
             {
-                grpcRequest.Log = initResult.Message ?? "Invalid payload.";
+                status = SaveStatus.InvalidRequest;
+                logMessage = initResult.Message ?? "Invalid payload.";
                 return initResult!;
             }
         }
         catch (Exception ex)
         {
-            grpcRequest.SaveStatus = SaveStatus.SaveFailure;
-            grpcRequest.Log = ex.GetBaseException().Message;
+            status = SaveStatus.SaveFailure;
+            logMessage = ex.GetBaseException().Message;
             return Result.Failed;
         }
         finally
         {
-            try
-            {
-                _ = this._grpcClient.PayloadReceivedAsync(grpcRequest);
-            }
-            catch
-            {
-            }
+            await this._listenerService.LogPayloadReceivedAsync(new LogPayloadReceivedArgs<TDbBroker>(imei, logMessage, status));
         }
     }
 
