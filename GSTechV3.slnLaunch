@@ -4,7 +4,8 @@
     "Projects": [
       {
         "Name": "src\\Mqtt\\Listener\\Listener.csproj",
-        "Action": "Start"
+        "Action": "Start",
+        "DebugTarget": ""
       },
       {
         "Name": "src\\Mqtt\\API\\API.csproj",

@@ -2,14 +2,17 @@ syntax = "proto3";
 
 import "enums.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 option csharp_namespace = "Moshaveran.API.Mqtt.GrpcServices.Protos";
 
 
 package MqttProtos;
 
-service MqqtReceiveSrvice {
+service MqqtReceiveService {
 	rpc PayloadReceived(PayloadReceivedParams) returns (PayloadReceivedResult);
+	rpc ClientConnected(ClientConnectedArgs) returns (google.protobuf.Empty);
+	rpc ClientDisconnected(ClientDisconnectedArgs) returns (google.protobuf.Empty);
 }
 
 message PayloadReceivedParams  {
@@ -23,4 +26,13 @@ message PayloadReceivedParams  {
 message PayloadReceivedResult {
 	string Message = 1;
 	PayloadReceivedStatus Status = 2;
+}
+
+message ClientConnectedArgs{
+	google.protobuf.Timestamp Time = 2;
+	string ClientId = 1;
+}
+message ClientDisconnectedArgs{
+	google.protobuf.Timestamp Time = 2;
+	string ClientId = 1;
 }

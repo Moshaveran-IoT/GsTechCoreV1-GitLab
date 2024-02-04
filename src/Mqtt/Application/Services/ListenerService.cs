@@ -5,6 +5,7 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
 
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 using Moshaveran.API.Mqtt.GrpcServices.Protos;
 
@@ -12,20 +13,47 @@ namespace Application.Services;
 
 public sealed class ListenerService : IListenerService
 {
-    private readonly MqqtReceiveSrvice.MqqtReceiveSrviceClient _grpcClient;
+    private readonly MqqtReceiveService.MqqtReceiveServiceClient _grpcClient;
+    private readonly ILogger<ListenerService> _logger;
 
-    public ListenerService(IConfiguration configuration)
+    public ListenerService(IConfiguration configuration, ILogger<ListenerService> logger)
     {
         _grpcClient = createGrpcClient();
 
-        MqqtReceiveSrvice.MqqtReceiveSrviceClient createGrpcClient()
+        MqqtReceiveService.MqqtReceiveServiceClient createGrpcClient()
         {
             var channel = GrpcChannel.ForAddress(configuration["GrpcServiceSettings:ServerUrl"]!);
-            return new MqqtReceiveSrvice.MqqtReceiveSrviceClient(channel);
+            return new MqqtReceiveService.MqqtReceiveServiceClient(channel);
+        }
+
+        this._logger = logger;
+    }
+
+    public async Task LogClientConnectedAsync(string clientId, CancellationToken token = default)
+    {
+        try
+        {
+            _ = await _grpcClient.ClientConnectedAsync(new() { ClientId = clientId, Time = Now() }, cancellationToken: token);
+        }
+        catch
+        {
+            
         }
     }
 
-    public async Task LogPayloadReceivedAsync<TBroker>(LogPayloadReceivedArgs<TBroker> args)
+    public async Task LogClientDisconnectedAsync(string clientId, CancellationToken token = default)
+    {
+        try
+        {
+            _ = await _grpcClient.ClientDisconnectedAsync(new() { ClientId = clientId, Time = Now() }, cancellationToken: token);
+        }
+        catch
+        {
+
+        }
+    }
+
+    public async Task LogPayloadReceivedAsync<TBroker>(LogPayloadReceivedArgs<TBroker> args, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(args);
         try
@@ -33,15 +61,18 @@ public sealed class ListenerService : IListenerService
             var grpcRequest = new PayloadReceivedParams
             {
                 IMEI = args.Imei,
-                Time = Timestamp.FromDateTime(DateTime.UtcNow),
+                Time = Now(),
                 BrokerType = typeof(TBroker).Name,
                 Log = args.LogMessage,
                 SaveStatus = args.Status,
             };
-            _ = await this._grpcClient.PayloadReceivedAsync(grpcRequest);
+            _ = await this._grpcClient.PayloadReceivedAsync(grpcRequest, cancellationToken: token);
         }
         catch
         {
+
         }
     }
+
+    private static Timestamp Now() => Timestamp.FromDateTime(DateTime.UtcNow);
 }
