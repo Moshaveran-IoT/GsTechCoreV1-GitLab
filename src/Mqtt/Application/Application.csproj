@@ -51,10 +51,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="..\..\..\.gitignore" Link=".gitignore" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<ProjectReference Include="..\..\Infrastructure\Infrastructure.csproj" />
 		<ProjectReference Include="..\DataAccess\DataAccess.csproj" />
 		<ProjectReference Include="..\Domain\Domain.csproj" />
