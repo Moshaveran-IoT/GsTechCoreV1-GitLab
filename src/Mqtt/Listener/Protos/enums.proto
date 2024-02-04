@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option csharp_namespace = "Moshaveran.API.Mqtt.GrpcServices.Protos";
+
+
+package MqttProtos;
+
+enum PayloadReceivedStatus {
+	RECEIVED_SUCCESS = 0;
+	RECEIVED_INVALID = 1;
+	RECEIVED_FAILURE = 2;
+}
+
+enum SaveStatus {
+	SAVE_SUCCESS = 0;
+	INVALID_REQUEST = 1;
+	SAVE_FAILURE = 2;
+}

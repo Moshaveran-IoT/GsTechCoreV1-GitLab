@@ -1,8 +1,9 @@
-﻿using Moshaveran.Infrastructure.Results;
+﻿
+using Moshaveran.Mqtt.Domain.Services;
 
-namespace Moshaveran.API.Mqtt.Application.Services;
+namespace Moshaveran.IoT.Application.Services;
 
-internal sealed class GeocodingService : IGeocodingService
+public sealed class GeocodingService : IGeocodingService
 {
     public Task<Result<GeoCode?>> Forward(string address) => Task.FromResult(Result.Create<GeoCode?>(new GeoCode(0, 0), true));
 

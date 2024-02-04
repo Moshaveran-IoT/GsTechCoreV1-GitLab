@@ -1,8 +1,8 @@
-﻿using Moshaveran.API.Mqtt.Application.Services;
+﻿using Application.Services;
 
 using MQTTnet.AspNetCore.AttributeRouting;
 
-namespace Moshaveran.API.Mqtt.API.Controllers;
+namespace Moshaveran.API.Controllers;
 
 [MqttController]
 [MqttRoute("Gs")]
@@ -48,20 +48,16 @@ public class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMq
     public Task Voltage(string IMEI, CancellationToken token = default)
         => ProcessServiceMethod(service.ProcessVoltagePayload, "Voltage", IMEI, token);
 
-    private Task ProcessServiceMethod(Func<byte[], string, CancellationToken, Task<Result>> method, string payloadName, string imei, CancellationToken token = default)
-        => ProcessServiceMethod(() => method(Message.Payload, imei, token), payloadName, imei);
-
-    private async Task ProcessServiceMethod(Func<Task<Result>> method, string payloadName, string imei)
+    private async Task ProcessServiceMethod(Func<byte[], string, CancellationToken, Task<Result>> method, string _, string imei, CancellationToken token = default)
     {
-        logger.LogInformation($"*** {payloadName} Payload Received! IMEI: {imei}");
-        var result = await method();
+        var result = await method(Message.Payload, imei, token);
         if (result.IsSucceed)
         {
             await Ok();
         }
         else
         {
-            await this.BadMessage();
+            await BadMessage();
         }
     }
 }

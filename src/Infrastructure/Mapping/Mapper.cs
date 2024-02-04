@@ -70,25 +70,26 @@ public sealed class Mapper : IMapper
         var name = (mapping is { } info) && (info.SourceClassName is null || info.SourceClassName == typeof(TDestination).Name)
                 ? info.SourcePropertyName ?? dstProp.Name
                 : dstProp.Name;
-        if (source!.GetType().GetProperty(name) is { } srcProp)
+        if (source!.GetType().GetProperty(name) is not { } srcProp)
         {
-            try
+            return;
+        }
+        try
+        {
+            var match = srcProp.GetValue(source) == dstProp.GetValue(destination);
+            if (!match)
             {
-                var match = srcProp.GetValue(source) == dstProp.GetValue(destination);
-                if (!match)
+                try
                 {
-                    try
-                    {
-                        dstProp.SetValue(destination, srcProp.GetValue(source));
-                    }
-                    catch
-                    {
-                    }
+                    dstProp.SetValue(destination, srcProp.GetValue(source));
+                }
+                catch
+                {
                 }
             }
-            catch
-            {
-            }
+        }
+        catch
+        {
         }
     }
 

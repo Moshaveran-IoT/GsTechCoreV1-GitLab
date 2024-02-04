@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<AssemblyName>Moshaveran.IoT.$(MSBuildProjectName)</AssemblyName>
+		<RootNamespace>Moshaveran.Mqtt.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="Protos\enums.proto" />
+		<None Remove="Protos\MqttProtos.proto" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Protobuf Include="Protos\MqttProtos.proto" GrpcServices="Server" ProtoRoot="Protos\" />
+		<Protobuf Include="Protos\enums.proto" GrpcServices="None" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Grpc.AspNetCore" Version="2.57.0" />
+	</ItemGroup>
+
+</Project>

@@ -3,21 +3,25 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
+using Application.Interfaces;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
 using MQTTnet;
 using MQTTnet.Protocol;
 using MQTTnet.Server;
 
-namespace Moshaveran.API.Mqtt.Application.Services;
+namespace Application.Services;
 
-public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorService> logger, IServiceScopeFactory scopeFactory) :
+public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorService> logger, IServiceScopeFactory scopeFactory, IListenerService listenerService) :
     IMqttServerConnectionValidator,
     IMqttServerSubscriptionInterceptor,
     IMqttServerClientConnectedHandler,
     IMqttServerClientDisconnectedHandler
 {
-    private static readonly string _newLine = Environment.NewLine;
     private readonly Collection<string> _connectedClientIds = [];
-
+    private readonly IListenerService _listenerService = listenerService;
     private IMqttServer? _server;
 
     public void ConfigureMqttServer(IMqttServer mqtt)
@@ -27,9 +31,23 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
         mqtt.ClientDisconnectedHandler = this;
     }
 
-    public Task HandleClientConnectedAsync(MqttServerClientConnectedEventArgs eventArgs) => Task.Run(() =>
+    //public Task HandleClientConnectedAsync(MqttServerClientConnectedEventArgs eventArgs) => Task.Run(() =>
+    //{
+    //    logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientConnectedAsync Handler Triggered");
+
+    //    if (_connectedClientIds.Count == 0)
+    //    {
+    //        SubscribeKiss();
+    //    }
+
+    //    var clientId = eventArgs.ClientId;
+    //    _connectedClientIds.Add(clientId);
+    //    _ = _listenerService.LogClientConnectedAsync(clientId);
+    //    //logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Connected:{_newLine} - ClientID = {clientId + _newLine}");
+    //});
+    public Task HandleClientConnectedAsync(MqttServerClientConnectedEventArgs eventArgs)
     {
-        logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientConnectedAsync Handler Triggered");
+        //logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientConnectedAsync Handler Triggered");
 
         if (_connectedClientIds.Count == 0)
         {
@@ -38,18 +56,18 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
 
         var clientId = eventArgs.ClientId;
         _connectedClientIds.Add(clientId);
-
-        logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Connected:{_newLine} - ClientID = {clientId + _newLine}");
-    });
+        return _listenerService.LogClientConnectedAsync(clientId);
+        //logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Connected:{_newLine} - ClientID = {clientId + _newLine}");
+    }
 
     public Task HandleClientDisconnectedAsync(MqttServerClientDisconnectedEventArgs eventArgs) => Task.Run(() =>
     {
-        logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientDisconnectedAsync Handler Triggered");
+        //logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - HandleClientDisconnectedAsync Handler Triggered");
 
         var clientId = eventArgs.ClientId;
         _ = _connectedClientIds.Remove(clientId);
-
-        logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Disconnected:{_newLine} - ClientID = {clientId + _newLine}");
+        _ = _listenerService.LogClientDisconnectedAsync(clientId);
+        //logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Disconnected:{_newLine} - ClientID = {clientId + _newLine}");
     });
 
     public async Task InterceptSubscriptionAsync(MqttSubscriptionInterceptorContext context)
@@ -81,7 +99,7 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
             }
             catch (Exception e)
             {
-                logger.LogInformation(e,$"Exception occurred on {nameof(SubscribeKiss)}");
+                logger.LogInformation(e, $"Exception occurred on {nameof(SubscribeKiss)}");
             }
             finally
             {
@@ -99,7 +117,7 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
         {
             context.ReasonCode = MqttConnectReasonCode.Success;
         }
-        logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - " + "ValidateConnectionAsync Handler Triggered");
+        //logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - " + "ValidateConnectionAsync Handler Triggered");
         return Task.CompletedTask;
     }
 

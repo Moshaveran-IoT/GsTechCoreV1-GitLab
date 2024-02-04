@@ -4,8 +4,8 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<AssemblyName>Moshaveran.$(MSBuildProjectName)</AssemblyName>
-		<RootNamespace>Moshaveran.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+		<AssemblyName>Moshaveran.IoT.$(MSBuildProjectName)</AssemblyName>
+		<RootNamespace>Moshaveran.Mqtt.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 		<Title>Moshaveran GS-Tech Worker Service</Title>
 		<Authors>Mirmostafa</Authors>
 		<Company>Moshaveran</Company>
@@ -24,14 +24,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Remove="Mqtt\API\Controllers\MqttGsTechController.old.cs" />
+		<Compile Remove="Controllers\MqttGsTechController.old.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Include="..\..\Solution Items\GlobalUsings.cs" Link="GlobalUsings.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
+		<PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
 		<PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
@@ -50,16 +47,23 @@
 
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\DataAccess\DataAccess.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<Folder Include="Mqtt\API\Models\" />
-		<Folder Include="Mqtt\Application\Commands\" />
-		<Folder Include="Mqtt\Application\Interfaces\" />
-		<Folder Include="Mqtt\Application\Queries\" />
+		<Folder Include="Models\" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="..\..\..\.editorconfig" Link=".editorconfig" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Infrastructure\Infrastructure.csproj" />
+	  <ProjectReference Include="..\Application\Application.csproj" />
+	  <ProjectReference Include="..\Domain\Domain.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Using Include="Moshaveran.Infrastructure" />
+	  <Using Include="Moshaveran.Infrastructure.Coding" />
+	  <Using Include="Moshaveran.Infrastructure.Coding.CodeHelper">
+	    <Static>True</Static>
+	  </Using>
+	  <Using Include="Moshaveran.Infrastructure.Results" />
 	</ItemGroup>
 
 </Project>

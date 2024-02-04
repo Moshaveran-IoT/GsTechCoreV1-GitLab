@@ -1,7 +1,7 @@
 ﻿using Moshaveran.Infrastructure.ApplicationServices;
 using Moshaveran.Infrastructure.Results;
 
-namespace Moshaveran.API.Mqtt.Application.Services;
+namespace Moshaveran.Mqtt.Domain.Services;
 
 public interface IGeocodingService : IBusinessService
 {
