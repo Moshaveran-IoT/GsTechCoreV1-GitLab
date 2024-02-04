@@ -17,7 +17,7 @@ public sealed class CustomMapper
         this._destinationType = DestinationType;
         this._sourceType = sourceType;
         this.Map = map;
-        _paramsCount = map.Method.GetParameters().Count();
+        _paramsCount = map.Method.GetParameters().Length;
     }
 
     public Delegate Map { get; }

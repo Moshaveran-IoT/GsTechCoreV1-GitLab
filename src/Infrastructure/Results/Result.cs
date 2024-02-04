@@ -13,17 +13,12 @@ public sealed class Result : ResultBase
     {
     }
 
-    public static Result Failed => _failed ??= Create(true);
+    public static Result Failed => _failed ??= InnerCreate(true);
 
-    public static Result Succeed => _succeed ??= Create(true);
-
-    public static Result<TValue> CreateSucceed<TValue>(TValue value)
-        => InnerCreate(value, true);
-    public static Result<TValue> CreateFailure<TValue>(TValue value)
-        => InnerCreate(value, false);
+    public static Result Succeed => _succeed ??= InnerCreate(true);
 
     public static Result Create(bool isSucceed)
-        => new(isSucceed);
+        => InnerCreate(isSucceed);
 
     public static Result Create(bool isSucceed, string? message)
         => InnerCreate(isSucceed, message);
@@ -31,8 +26,8 @@ public sealed class Result : ResultBase
     public static Result Create(Exception? exception)
         => InnerCreate(false, exception: exception);
 
-    public static Result Create<TValue>(Result<TValue> result)
-        => Create(result.IsSucceed, result.Message);
+    public static Result<TValue> Create<TValue>(Result<TValue> result)
+        => InnerCreate(result.Value, result.IsSucceed, result.Message, result.Exception);
 
     public static Result<TValue> Create<TValue>(TValue value, bool isSucceed)
         => InnerCreate(value, isSucceed);
@@ -47,7 +42,16 @@ public sealed class Result : ResultBase
         => InnerCreate(isSucceed, exception: exception);
 
     public static Result<TValue> Create<TValue>(TValue value, Result result)
-        => Create(value, result.IsSucceed, result.Message);
+        => InnerCreate(value, result.IsSucceed, result.Message);
+
+    public static Result<TValue> CreateFailure<TValue>(TValue value)
+        => InnerCreate(value, false);
+
+    public static Result<TValue> CreateSucceed<TValue>(TValue value)
+        => InnerCreate(value, true);
+
+    public static Result<TValue> CreateWitValue<TValue>(Result<TValue> result, TValue value)
+        => InnerCreate(value, result.IsSucceed, result.Message, result.Exception);
 
     public Result WithMessage([DisallowNull] string message)
         => InnerCreate(this.IsSucceed, message, this.Exception);
@@ -69,14 +73,14 @@ public sealed class Result : ResultBase
 
 public sealed class Result<TValue> : ResultBase
 {
-    private static Result<TValue?>? _failed;
-    private static Result<TValue?>? _succeed;
+    private static Result<TValue>? _failed;
+    private static Result<TValue>? _succeed;
 
-    internal Result(TValue? value, bool isSucceed)
+    internal Result(TValue value, bool isSucceed)
         : base(isSucceed) => this.Value = value;
 
-    public static Result<TValue?> Failed => _failed ??= Result.Create<TValue?>(default, false);
-    public static Result<TValue?> Succeed => _succeed ??= Result.Create<TValue?>(default, true);
+    public static Result<TValue> Failed => _failed ??= Result.Create<TValue>(default!, false);
+    public static Result<TValue> Succeed => _succeed ??= Result.Create<TValue>(default!, true);
 
     public TValue? Value { get; }
 
@@ -85,24 +89,18 @@ public sealed class Result<TValue> : ResultBase
 
     public static implicit operator TValue?(Result<TValue?> result)
         => result.Value;
+
+    public Result<TValue> WithValue(TValue value)
+        => Result.CreateWitValue<TValue>(this, value);
 }
 
-public abstract class ResultBase
+public abstract class ResultBase(bool isSucceed)
 {
-    protected ResultBase(bool isSucceed)
-        => this.IsSucceed = isSucceed;
-
-    protected ResultBase(bool isSucceed, string? message)
-        => (this.IsSucceed, this.Message) = (isSucceed, message);
-
-    protected ResultBase(bool isSucceed, Exception? exception)
-        => (this.IsSucceed, this.Exception) = (isSucceed, exception);
-
-    public Exception? Exception { get; set; }
+    public Exception? Exception { get; init; }
 
     public bool IsFailure => !this.IsSucceed;
 
-    public bool IsSucceed { get; init; }
+    public bool IsSucceed { get; init; } = isSucceed;
 
     public string? Message { get; init; }
 

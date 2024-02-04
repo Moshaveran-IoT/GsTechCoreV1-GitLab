@@ -48,6 +48,7 @@ public sealed class ListenerService : IListenerService
 
     public Task LogClientDisconnectedAsync(string clientId, CancellationToken token = default)
     {
+        ArgumentException.ThrowIfNullOrEmpty(clientId);
         try
         {
             _ = _grpcClient.ClientDisconnectedAsync(new() { ClientId = clientId, Time = Now() }, cancellationToken: token);

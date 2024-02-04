@@ -2,18 +2,16 @@
 
 namespace Moshaveran.Infrastructure.Coding;
 
+[DebuggerStepThrough]
+[StackTraceHidden]
 public static class CodeHelper
 {
-    [DebuggerStepThrough]
-    [StackTraceHidden]
     public static T With<T>(this T o, in Action<T> action)
     {
         action?.Invoke(o);
         return o;
     }
 
-    [DebuggerStepThrough]
-    [StackTraceHidden]
     public static T With<T>(this T o, in Func<T, T> action)
     {
         var result = o;
