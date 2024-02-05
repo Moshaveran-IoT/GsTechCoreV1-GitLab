@@ -17,4 +17,4 @@ public interface IListenerService : IBusinessService
     Task LogPayloadReceivedAsync<TBroker>(LogPayloadReceivedArgs<TBroker> args, CancellationToken token = default);
 }
 
-public sealed record LogPayloadReceivedArgs<TBroker>(string Imei, string LogMessage, SaveStatus Status);
+public sealed record LogPayloadReceivedArgs<TBroker>(string ClientId, string Imei, string LogMessage, SaveStatus Status);
