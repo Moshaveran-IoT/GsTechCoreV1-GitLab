@@ -76,6 +76,7 @@ public sealed class ListenerService : IListenerService
         {
             var grpcRequest = new PayloadReceivedParams
             {
+                ClientID = args.ClientId,
                 IMEI = args.Imei,
                 Time = Now(),
                 BrokerType = typeof(TBroker).Name,

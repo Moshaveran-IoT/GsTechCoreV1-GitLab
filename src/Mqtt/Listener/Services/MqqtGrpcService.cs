@@ -19,14 +19,14 @@ public sealed class MqqtGrpcService(ILogger<MqqtGrpcService> logger) : MqqtRecei
         logger.LogInformation("[{Time}][{ClientId}] : Disconnected", request.Time.ToDateTime(), request.ClientId);
         return Task.FromResult(new Empty());
     }
-    
+
     public override Task<PayloadReceivedResult> PayloadReceived(PayloadReceivedParams request, ServerCallContext context)
     {
         var result = new PayloadReceivedResult
         {
             Status = PayloadReceivedStatus.ReceivedSuccess,
         };
-        logger.LogInformation("[{Time}][{Imei}][{BrokerType}] : {log}", request.Time.ToDateTime(), request.IMEI, request.BrokerType, request.Log);
+        logger.LogInformation("[{Time}][ClientID: {ClientId}][IMEI: {Imei}][{BrokerType}] : {log}", request.Time.ToDateTime(), request.ClientID, request.IMEI, request.BrokerType, request.Log);
         return Task.FromResult(result);
     }
 }
