@@ -35,11 +35,16 @@ public sealed class ListenerService : IListenerService
 
     public Task LogClientConnectedAsync(string clientId, CancellationToken token = default)
     {
+        ArgumentException.ThrowIfNullOrEmpty(clientId);
         try
         {
-            _ = _grpcClient.ClientConnectedAsync(new() { ClientId = clientId, Time = Now() }, cancellationToken: token);
+            _ = _grpcClient.ClientConnectedAsync(new()
+            {
+                ClientId = clientId,
+                Time = Now()
+            }, cancellationToken: token);
         }
-        catch (Exception)
+        catch
         {
             //_logger.LogDebug(ex, "Exception on {method}", nameof(LogClientConnectedAsync));
         }
@@ -51,9 +56,13 @@ public sealed class ListenerService : IListenerService
         ArgumentException.ThrowIfNullOrEmpty(clientId);
         try
         {
-            _ = _grpcClient.ClientDisconnectedAsync(new() { ClientId = clientId, Time = Now() }, cancellationToken: token);
+            _ = _grpcClient.ClientDisconnectedAsync(new()
+            {
+                ClientId = clientId,
+                Time = Now()
+            }, cancellationToken: token);
         }
-        catch (Exception)
+        catch
         {
             //_logger.LogDebug(ex, "Exception on {method}", nameof(LogClientDisconnectedAsync));
         }
@@ -75,7 +84,7 @@ public sealed class ListenerService : IListenerService
             };
             _ = this._grpcClient.PayloadReceivedAsync(grpcRequest, cancellationToken: token);
         }
-        catch (Exception)
+        catch
         {
             //_logger.LogDebug(ex, "Exception on {method}", nameof(LogPayloadReceivedAsync));
         }

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Immutable;
+using System.Text;
 
 using Application.Interfaces;
 
@@ -69,46 +70,56 @@ public sealed class GsTechMqttService : IGsTechMqttService
         }, "Camera", payload, _cameraRepo);
 
     public Task<Result> ProcessCanPayload(byte[] payload, string imei, CancellationToken token = default)
-        => this.Save((broker, payloadMessage) =>
+        => this.InnerSave(payloadMessage =>
         {
-            if (!JsonDocumentHelpers.TryParse(payloadMessage, out var dto))
+            Result<IEnumerable<CanBroker>> result;
+            if (!JsonDocumentHelpers.TryParse(payloadMessage, out var dto) || dto == null)
             {
-                return Result.CreateFailure(broker);
+                result = Result.CreateFailure<IEnumerable<CanBroker>>([]);
             }
-            using (dto)
+            else
+            {
+                using (dto)
+                    result = Result.Create(processDto(imei, dto).ToArray().AsEnumerable(), true);
+            }
+
+            return Task.FromResult(result);
+
+            static IEnumerable<CanBroker> processDto(string imei, System.Text.Json.JsonDocument dto)
             {
                 const string VALID_HEX_CHARS = "0123456789abcdefABCDEF";
-                var app = dto.RootElement.EnumerateObject().FirstOrDefault();
-                var (key, value) = (app.Name, app.Value.GetRawText().Trim('\"'));
-                var isHex = key.All(VALID_HEX_CHARS.Contains) && value.All(VALID_HEX_CHARS.Contains);
-                if (!isHex)
+                foreach (var app in dto.RootElement.EnumerateObject())
                 {
-                    return Result.CreateFailure(broker);
-                }
-                var binaryString = string.Concat(key.PadLeft(8, '0').Select(c => Convert.ToString(Convert.ToInt32(c.ToString(), 16), 2).PadLeft(4, '0')));
-                //x var Priority = binaryString[..6];
-                var reserved = binaryString[6..7];
-                var dataPage = binaryString[7..8];
-                var pduFormat = binaryString[8..16];
-                //x var sourceAddress = binaryString[24..32];
-                var decPduFormat = Convert.ToInt64(pduFormat, 2);
-                var pduSpecific = decPduFormat >= 240
-                    ? binaryString[16..24]
-                    : $"000000{reserved}{dataPage}{pduFormat}00000000";
-                var binaryPgn = $"000000{reserved}{dataPage}{pduFormat}{pduSpecific}";
-                var pgn = Convert.ToInt64(binaryPgn, 2);
+                    var (key, value) = (app.Name, app.Value.GetRawText().Trim('\"'));
+                    var isHex = key.All(VALID_HEX_CHARS.Contains) && value.All(VALID_HEX_CHARS.Contains);
+                    if (!isHex)
+                    {
+                        continue;
+                    }
+                    var binaryString = string.Concat(key.PadLeft(8, '0').Select(c => Convert.ToString(Convert.ToInt32(c.ToString(), 16), 2).PadLeft(4, '0')));
+                    //x var Priority = binaryString[..6];
+                    var reserved = binaryString[6..7];
+                    var dataPage = binaryString[7..8];
+                    var pduFormat = binaryString[8..16];
+                    //x var sourceAddress = binaryString[24..32];
+                    var decPduFormat = Convert.ToInt64(pduFormat, 2);
+                    var pduSpecific = decPduFormat >= 240
+                        ? binaryString[16..24]
+                        : $"000000{reserved}{dataPage}{pduFormat}00000000";
+                    var binaryPgn = $"000000{reserved}{dataPage}{pduFormat}{pduSpecific}";
+                    var pgn = Convert.ToInt64(binaryPgn, 2);
 
-                var canBroker = new CanBroker()
-                {
-                    CreatedOn = DateTime.Now,
-                    Identifier = key,
-                    Pgn = pgn,
-                    Value = value,
-                    Imei = imei
-                };
-                return Result.CreateSucceed(canBroker);
+                    yield return new CanBroker()
+                    {
+                        CreatedOn = DateTime.Now,
+                        Identifier = key,
+                        Pgn = pgn,
+                        Value = value,
+                        Imei = imei
+                    };
+                }
             }
-        }, imei, payload, _canRepo);
+        }, imei, payload, this._canRepo);
 
     public Task<Result> ProcessGeneralPayload(byte[] payload, string imei, CancellationToken token = default)
         => Save(broker =>
@@ -229,33 +240,45 @@ public sealed class GsTechMqttService : IGsTechMqttService
             return Result.CreateSucceed(broker);
         }, imei, payload, _voltageRepo);
 
-    private async Task<Result> InnerSave<TDbBroker>(Func<TDbBroker, string, Task<Result<TDbBroker>>> initialize, string imei, byte[] payload, IRepository<TDbBroker> repo)
+    private async Task<Result> InnerSave<TDbBroker>(Func<string, Task<Result<IEnumerable<TDbBroker>>>> initialize, string imei, byte[] payload, IRepository<TDbBroker> repo)
     {
         var logMessage = string.Empty;
         var status = SaveStatus.SaveSuccess;
         try
         {
             var payloadMessage = Encoding.UTF8.GetString(payload);
-            if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null)
+            var initBrokers = await initialize(payloadMessage);
+            if (initBrokers.IsSucceed && initBrokers.Value?.Any() is true)
             {
-                status = SaveStatus.InvalidRequest;
-                logMessage = "Invalid JSON format.";
-                return await Task.FromResult(Result.Failed);
-            }
+                foreach (var broker in initBrokers.Value)
+                {
+                    var result = await repo.Insert(broker, false);
+                    if (!result.IsSucceed)
+                    {
+                        status = SaveStatus.SaveFailure;
+                        logMessage = result.Message ?? "Payload not saved";
+                        return result;
+                    }
+                }
+                var saveResult = await repo.SaveChanges();
+                if(saveResult.IsSucceed)
+                {
+                    status = SaveStatus.SaveSuccess;
+                    logMessage = saveResult.Message ?? "Payload saved successfully.";
 
-            var initResult = await initialize(broker, payloadMessage);
-            if (initResult.IsSucceed)
-            {
-                var result = await repo.Insert(initResult.Value!);
-                status = result.IsSucceed ? SaveStatus.SaveSuccess : SaveStatus.SaveFailure;
-                logMessage = result.Message ?? (result.IsSucceed ? "Payload saved successfully." : "Payload not saved");
-                return result;
+                }
+                else
+                {
+                    status = SaveStatus.SaveFailure;
+                    logMessage = saveResult.Message ?? "Payload cannot be saved.";
+                }
+                return Result.Succeed;
             }
             else
             {
                 status = SaveStatus.InvalidRequest;
-                logMessage = initResult.Message ?? "Invalid payload.";
-                return initResult!;
+                logMessage = initBrokers.Message ?? "Invalid payload or no payload received.";
+                return initBrokers!;
             }
         }
         catch (Exception ex)
@@ -269,6 +292,17 @@ public sealed class GsTechMqttService : IGsTechMqttService
             await this._listenerService.LogPayloadReceivedAsync(new LogPayloadReceivedArgs<TDbBroker>(imei, logMessage, status));
         }
     }
+
+    private async Task<Result> InnerSave<TDbBroker>(Func<TDbBroker, string, Task<Result<TDbBroker>>> initialize, string imei, byte[] payload, IRepository<TDbBroker> repo)
+        => await InnerSave(async p =>
+        {
+            if (!StringHelper.TryParseJson(p, out TDbBroker? broker) || broker == null)
+            {
+                return Result.CreateFailure<IEnumerable<TDbBroker>>([], "Invalid JSON format.");
+            }
+            var initResult = await initialize(broker, p);
+            return initResult.WithValue(EnumerableHelper.ToEnumerable(initResult.Value!));
+        }, imei, payload, repo);
 
     private async Task<Result> Save<TDbBroker>(Func<TDbBroker, string, Task<Result<TDbBroker>>> initialize, string imei, byte[] payload, IRepository<TDbBroker> repo) =>
         await InnerSave(initialize, imei, payload, repo);

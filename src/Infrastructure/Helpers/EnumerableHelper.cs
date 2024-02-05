@@ -31,4 +31,9 @@ public static class EnumerableHelper
             await action(enumerator.Current, token);
         }
     }
+
+    public static IEnumerable<T> ToEnumerable<T>(T item)
+    {
+        yield return item;
+    }
 }
