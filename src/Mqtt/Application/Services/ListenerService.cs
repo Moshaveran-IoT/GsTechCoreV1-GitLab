@@ -36,40 +36,44 @@ public sealed class ListenerService : IListenerService
     public Task LogClientConnectedAsync(string clientId, CancellationToken token = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(clientId);
-        try
+        return Task.Run(() =>
         {
-            _ = _grpcClient.ClientConnectedAsync(new()
+            try
             {
-                ClientId = clientId,
-                Time = Now()
-            }, cancellationToken: token);
-        }
-        catch
-        {
-            //_logger.LogDebug(ex, "Exception on {method}", nameof(LogClientConnectedAsync));
-        }
-        return Task.CompletedTask;
+                _ = _grpcClient.ClientConnectedAsync(new()
+                {
+                    ClientId = clientId,
+                    Time = Now()
+                }, cancellationToken: token);
+            }
+            catch
+            {
+                _logger.LogInformation("Client connected: {ClientId}", clientId);
+            }
+        }, token);
     }
 
     public Task LogClientDisconnectedAsync(string clientId, CancellationToken token = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(clientId);
-        try
+        return Task.Run(() =>
         {
-            _ = _grpcClient.ClientDisconnectedAsync(new()
+            try
             {
-                ClientId = clientId,
-                Time = Now()
-            }, cancellationToken: token);
-        }
-        catch
-        {
-            //_logger.LogDebug(ex, "Exception on {method}", nameof(LogClientDisconnectedAsync));
-        }
-        return Task.CompletedTask;
+                _ = _grpcClient.ClientDisconnectedAsync(new()
+                {
+                    ClientId = clientId,
+                    Time = Now()
+                }, cancellationToken: token);
+            }
+            catch
+            {
+                _logger.LogInformation("Client disconnected: {ClientId}", clientId);
+            }
+        }, token);
     }
 
-    public Task LogPayloadReceivedAsync<TBroker>(LogPayloadReceivedArgs<TBroker> args, CancellationToken token = default)
+    public async Task LogPayloadReceivedAsync<TBroker>(LogPayloadReceivedArgs<TBroker> args, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(args);
         try
@@ -83,13 +87,12 @@ public sealed class ListenerService : IListenerService
                 Log = args.LogMessage,
                 SaveStatus = args.Status,
             };
-            _ = this._grpcClient.PayloadReceivedAsync(grpcRequest, cancellationToken: token);
+            await this._grpcClient.PayloadReceivedAsync(grpcRequest, cancellationToken: token);
         }
         catch
         {
-            //_logger.LogDebug(ex, "Exception on {method}", nameof(LogPayloadReceivedAsync));
+            _logger.LogInformation("[ID: {ClientId}][IMES: {IMEI}]: {LogMessage}", args.ClientId, args.Imei, args.LogMessage);
         }
-        return Task.CompletedTask;
     }
 
     private static Timestamp Now() => Timestamp.FromDateTime(DateTime.UtcNow);

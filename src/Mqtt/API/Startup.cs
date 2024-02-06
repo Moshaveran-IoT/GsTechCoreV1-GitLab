@@ -4,7 +4,7 @@ namespace Moshaveran.Mqtt.API;
 
 public class Startup(IConfiguration configuration)
 {
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IConfiguration configuration)
     {
         // Add Prometheus metrics service
         _ = app.UseHttpMetrics();
@@ -25,7 +25,7 @@ public class Startup(IConfiguration configuration)
             _ = endpoints.MapGet("Hi", () => "Hello from Mohammad");
         });
 
-        _ = app.ConfigureMqtt(1545);
+        _ = app.ConfigureMqtt(int.Parse(configuration["AppPort"]!));
     }
 
     public void ConfigureServices(IServiceCollection services)
