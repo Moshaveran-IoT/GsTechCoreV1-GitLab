@@ -2,8 +2,6 @@
 
 using Application.Interfaces;
 
-using Microsoft.Extensions.Configuration;
-
 using Moshaveran.API.Mqtt.GrpcServices.Protos;
 using Moshaveran.Infrastructure.Helpers;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
@@ -282,7 +280,7 @@ public sealed class GsTechMqttService(
             return initResult.WithValue(EnumerableHelper.ToEnumerable(initResult.Value!));
         }, args, repo);
 
-    private Task<Result> Save<TDbBroker>(Func<TDbBroker, string, Task<Result<TDbBroker>>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo) 
+    private Task<Result> Save<TDbBroker>(Func<TDbBroker, string, Task<Result<TDbBroker>>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
         => InnerSave(initialize, args, repo);
 
     private Task<Result> Save<TDbBroker>(Func<TDbBroker, Result<TDbBroker>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)

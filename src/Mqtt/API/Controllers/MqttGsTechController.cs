@@ -8,7 +8,7 @@ namespace Moshaveran.API.Controllers;
 
 [MqttController]
 [MqttRoute("Gs")]
-public class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMqttService service) : MqttBaseController
+public class MqttGsTechController(GsTechMqttService service) : MqttBaseController
 {
     [MqttRoute("{IMEI}/CAN")]
     public Task CAN(string IMEI, CancellationToken token = default)

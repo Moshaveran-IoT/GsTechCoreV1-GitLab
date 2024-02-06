@@ -1,17 +1,19 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Moshaveran.Infrastructure;
 
+[DebuggerStepThrough]
+[StackTraceHidden]
 public static partial class StringHelper
 {
     public static string HexToUnicode(string hex)
     {
         var bytes = hexToUnicodeRegex().Matches(hex).OfType<Match>().Select(m => Convert.ToByte(m.Groups["hex"].Value, 16)).ToArray();
         var chars = Encoding.BigEndianUnicode.GetChars(bytes);
-        var result = string.Join("", chars);
-        return result;
+        return string.Join("", chars);
     }
 
     public static bool TryParseJson<T>(string @this, out T? result)
