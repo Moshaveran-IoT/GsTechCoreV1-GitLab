@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Moshaveran.Infrastructure.Helpers;
@@ -7,6 +8,10 @@ namespace Moshaveran.Infrastructure.Helpers;
 [StackTraceHidden]
 public static class EnumerableHelper
 {
+    [return: NotNullIfNotNull(nameof(values))]
+    public static IEnumerable<T>? Build<T>(this IEnumerable<T>? values)
+        => values?.ToImmutableArray().AsEnumerable();
+
     /// <summary>
     /// Returns an IEnumerable of non-null elements from the given IEnumerable of nullable elements.
     /// </summary>
