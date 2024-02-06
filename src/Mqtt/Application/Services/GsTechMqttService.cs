@@ -3,7 +3,6 @@
 using Application.Interfaces;
 
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 using Moshaveran.API.Mqtt.GrpcServices.Protos;
 using Moshaveran.Infrastructure.Helpers;
@@ -13,51 +12,30 @@ using Moshaveran.Mqtt.Domain.Services;
 
 namespace Application.Services;
 
-public sealed class GsTechMqttService : IGsTechMqttService
+public sealed class GsTechMqttService(
+    IGeocodingService geocoding,
+    IRepository<CanBroker> canRepo,
+    IRepository<GeneralBroker> genRepo,
+    IRepository<SignalBroker> signalRepo,
+    IRepository<VoltageBroker> voltageRepo,
+    IRepository<ObdBroker> obdRepo,
+    IRepository<GpsBroker> gpsRepo,
+    IRepository<TemperatureBroker> tempRepo,
+    IRepository<TpmsBroker> tpmsRepo,
+    IRepository<CameraBroker> cameraRepo,
+    IListenerService listenerService) : IGsTechMqttService
 {
-    private readonly IRepository<CameraBroker> _cameraRepo;
-    private readonly IRepository<CanBroker> _canRepo;
-    private readonly IConfiguration _configuration;
-    private readonly IRepository<GeneralBroker> _genRepo;
-    private readonly IGeocodingService _geocoding;
-    private readonly IRepository<GpsBroker> _gpsRepo;
-    private readonly IListenerService _listenerService;
-    private readonly ILogger<GsTechMqttService> _logger;
-    private readonly IRepository<ObdBroker> _obdRepo;
-    private readonly IRepository<SignalBroker> _signalRepo;
-    private readonly IRepository<TemperatureBroker> _tempRepo;
-    private readonly IRepository<TpmsBroker> _tpmsRepo;
-    private readonly IRepository<VoltageBroker> _voltageRepo;
-
-    public GsTechMqttService(
-        ILogger<GsTechMqttService> logger,
-        IGeocodingService geocoding,
-        IRepository<CanBroker> canRepo,
-        IRepository<GeneralBroker> genRepo,
-        IRepository<SignalBroker> signalRepo,
-        IRepository<VoltageBroker> voltageRepo,
-        IRepository<ObdBroker> obdRepo,
-        IRepository<GpsBroker> gpsRepo,
-        IRepository<TemperatureBroker> tempRepo,
-        IRepository<TpmsBroker> tpmsRepo,
-        IRepository<CameraBroker> cameraRepo,
-        IConfiguration configuration,
-        IListenerService listenerService)
-    {
-        this._configuration = configuration;
-        this._listenerService = listenerService;
-        this._cameraRepo = cameraRepo;
-        this._canRepo = canRepo;
-        this._genRepo = genRepo;
-        this._geocoding = geocoding;
-        this._gpsRepo = gpsRepo;
-        this._logger = logger;
-        this._obdRepo = obdRepo;
-        this._signalRepo = signalRepo;
-        this._tempRepo = tempRepo;
-        this._tpmsRepo = tpmsRepo;
-        this._voltageRepo = voltageRepo;
-    }
+    private readonly IRepository<CameraBroker> _cameraRepo = cameraRepo;
+    private readonly IRepository<CanBroker> _canRepo = canRepo;
+    private readonly IRepository<GeneralBroker> _genRepo = genRepo;
+    private readonly IGeocodingService _geocoding = geocoding;
+    private readonly IRepository<GpsBroker> _gpsRepo = gpsRepo;
+    private readonly IListenerService _listenerService = listenerService;
+    private readonly IRepository<ObdBroker> _obdRepo = obdRepo;
+    private readonly IRepository<SignalBroker> _signalRepo = signalRepo;
+    private readonly IRepository<TemperatureBroker> _tempRepo = tempRepo;
+    private readonly IRepository<TpmsBroker> _tpmsRepo = tpmsRepo;
+    private readonly IRepository<VoltageBroker> _voltageRepo = voltageRepo;
 
     public Task<Result> ProcessCameraPayload(ProcessPayloadArgs args)
         => Save((broker, payloadMessage) =>
@@ -80,7 +58,7 @@ public sealed class GsTechMqttService : IGsTechMqttService
             {
                 using (dto)
                 {
-                    result = Result.Create(processDto(args.Imei, dto).ToArray().AsEnumerable(), true);
+                    result = Result.Create(processDto(args.Imei, dto).Build(), true);
                 }
             }
 
@@ -110,7 +88,7 @@ public sealed class GsTechMqttService : IGsTechMqttService
                     var binaryPgn = $"000000{reserved}{dataPage}{pduFormat}{pduSpecific}";
                     var pgn = Convert.ToInt64(binaryPgn, 2);
 
-                    yield return new CanBroker()
+                    yield return new CanBroker
                     {
                         CreatedOn = DateTime.Now,
                         Identifier = key,
@@ -125,27 +103,27 @@ public sealed class GsTechMqttService : IGsTechMqttService
     public Task<Result> ProcessGeneralPayload(ProcessPayloadArgs args)
         => Save(broker =>
         {
-            //if (string.IsNullOrEmpty(genBro.InternetTotalVolume))
-            //{
-            //    return;
-            //}
+            if (string.IsNullOrEmpty(broker.InternetTotalVolume))
+            {
+                return Result<GeneralBroker>.Failed;
+            }
             broker.Imei = args.Imei;
             broker.CreatedOn = DateTime.Now;
             broker.InternetRemainingUssd = broker.InternetTotalVolume;
-            //var ussd = StringHelper.HexToUnicode(genBro.InternetTotalVolume);
-            //if (ussd.Contains("صفر"))
-            //{
-            //    genBro.InternetTotalVolume = "بدون بسته";
-            //    genBro.InternetRemainingTime = "---";
-            //    var match = ussd.Split(["اصلی"], StringSplitOptions.None)[1].Split("ریال")[0].Trim().Split(" ")[0];
-            //    genBro.InternetRemainingVolume = string.Concat(match, " ", "ریال");
-            //}
-            //else
-            //{
-            //    genBro.InternetTotalVolume = ussd.Split(":")[0].Trim();
-            //    genBro.InternetRemainingVolume = ussd.Split(":")[1].Trim().Split("،")[0].Trim();
-            //    genBro.InternetRemainingTime = ussd.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
-            //}
+            var ussd = StringHelper.HexToUnicode(broker.InternetTotalVolume);
+            if (ussd.Contains("صفر"))
+            {
+                broker.InternetTotalVolume = "بدون بسته";
+                broker.InternetRemainingTime = "---";
+                var match = ussd.Split(["اصلی"], StringSplitOptions.None)[1].Split("ریال")[0].Trim().Split(" ")[0];
+                broker.InternetRemainingVolume = string.Concat(match, " ", "ریال");
+            }
+            else
+            {
+                broker.InternetTotalVolume = ussd.Split(":")[0].Trim();
+                broker.InternetRemainingVolume = ussd.Split(":")[1].Trim().Split("،")[0].Trim();
+                broker.InternetRemainingTime = ussd.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
+            }
             return Result.CreateSucceed(broker);
         }, args, _genRepo);
 
@@ -294,18 +272,18 @@ public sealed class GsTechMqttService : IGsTechMqttService
     }
 
     private async Task<Result> InnerSave<TDbBroker>(Func<TDbBroker, string, Task<Result<TDbBroker>>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
-        => await InnerSave(async p =>
+        => await InnerSave(async payloadMessage =>
         {
-            if (!StringHelper.TryParseJson(p, out TDbBroker? broker) || broker == null)
+            if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null)
             {
                 return Result.CreateFailure<IEnumerable<TDbBroker>>([], "Invalid JSON format.");
             }
-            var initResult = await initialize(broker, p);
+            var initResult = await initialize(broker, payloadMessage);
             return initResult.WithValue(EnumerableHelper.ToEnumerable(initResult.Value!));
         }, args, repo);
 
-    private async Task<Result> Save<TDbBroker>(Func<TDbBroker, string, Task<Result<TDbBroker>>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo) =>
-        await InnerSave(initialize, args, repo);
+    private Task<Result> Save<TDbBroker>(Func<TDbBroker, string, Task<Result<TDbBroker>>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo) 
+        => InnerSave(initialize, args, repo);
 
     private Task<Result> Save<TDbBroker>(Func<TDbBroker, Result<TDbBroker>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
         => InnerSave((broker, _) =>
