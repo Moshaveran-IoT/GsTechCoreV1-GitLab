@@ -11,8 +11,7 @@ internal static class Program
 
         static IHostBuilder createHostBuilder(string[] args)
             => Host.CreateDefaultBuilder(args)
-                   .ConfigureWebHostDefaults(webBuilder
-                    =>
+                   .ConfigureWebHostDefaults(webBuilder =>
                    {
                        var config = new ConfigurationBuilder()
                            .SetBasePath(Directory.GetCurrentDirectory())
@@ -28,7 +27,7 @@ internal static class Program
 
                        _ = webBuilder.UseStartup<Startup>();
                    })
-                   //.UseWindowsService()
+            //.UseWindowsService()
             ;
     }
 }

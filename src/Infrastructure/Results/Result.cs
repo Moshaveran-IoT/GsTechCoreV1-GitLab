@@ -42,6 +42,9 @@ public sealed class Result(bool isSucceed, string? message = null, Exception? ex
     public static Result<TValue> CreateFailure<TValue>(TValue value)
         => new(value, false);
 
+    public static Result CreateFailure(Exception exception)
+        => new(false,exception: exception);
+
     public static Result<TValue> CreateFailure<TValue>(TValue value, string message)
         => new(value, false, message);
 

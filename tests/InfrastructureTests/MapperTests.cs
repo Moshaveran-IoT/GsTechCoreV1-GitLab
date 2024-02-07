@@ -1,3 +1,5 @@
+using FluentAssertions;
+
 using Moshaveran.Infrastructure.Mapping;
 
 namespace InfrastructureTests;
@@ -17,8 +19,9 @@ public class MapperTests
         var dst = mapper.Map<Person>(src);
 
         // Assert
-        Assert.Equal(src.Name, dst.Name);
-        Assert.Equal(src.Age, dst.Age);
+        _ = dst.Should().NotBeNull();
+        _ = dst.Name.Should().Match(src.Name);
+        _ = dst.Age.Should().Be(src.Age);
     }
 
     [Fact]
@@ -85,4 +88,18 @@ public class MapperTests
     }
 }
 
-file sealed record Person(string? Name, int Age);
+internal sealed class Person
+{
+    public Person()
+    {
+    }
+
+    public Person(string? name, int age)
+    {
+        this.Name = name;
+        this.Age = age;
+    }
+
+    public int Age { get; set; }
+    public string? Name { get; set; }
+}

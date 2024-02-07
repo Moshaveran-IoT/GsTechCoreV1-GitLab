@@ -1,13 +1,12 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 using Moshaveran.Infrastructure.Helpers;
 
 namespace Moshaveran.Infrastructure.Mapping;
 
-[DebuggerStepThrough]
-[StackTraceHidden]
+//[DebuggerStepThrough]
+//[StackTraceHidden]
 public sealed class Mapper : IMapper
 {
     private static readonly HashSet<CustomMapper> _customMappers = [];
@@ -94,5 +93,5 @@ public sealed class Mapper : IMapper
     }
 
     private static CustomMapper? FindCustomMapper(Type sourceType, Type destinationType, int paramsCount)
-            => _customMappers.FirstOrDefault(x => x == (sourceType, destinationType, paramsCount));
+        => _customMappers.FirstOrDefault(x => x == (sourceType, destinationType, paramsCount));
 }

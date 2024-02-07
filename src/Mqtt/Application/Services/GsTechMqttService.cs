@@ -158,7 +158,7 @@ public sealed class GsTechMqttService(
         }, args, _genRepo);
 
     public Task<Result> ProcessGpsPayload(ProcessPayloadArgs args)
-        => Save(async (GpsBroker broker, string _) =>
+        => InnerSave(async (GpsBroker broker, string _) =>
         {
             if (broker.Latitude is >= -90 and <= 90 && broker.Longitude is >= -180 and <= 180 && broker.Latitude.ToString().Length != 1 && broker.Longitude.ToString().Length != 1)
             {
@@ -279,9 +279,6 @@ public sealed class GsTechMqttService(
             var initResult = await initialize(broker, payloadMessage);
             return initResult.WithValue(EnumerableHelper.ToEnumerable(initResult.Value!));
         }, args, repo);
-
-    private Task<Result> Save<TDbBroker>(Func<TDbBroker, string, Task<Result<TDbBroker>>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
-        => InnerSave(initialize, args, repo);
 
     private Task<Result> Save<TDbBroker>(Func<TDbBroker, Result<TDbBroker>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
         => InnerSave((broker, _) =>
