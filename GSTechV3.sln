@@ -26,9 +26,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "src\Mqtt\App
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API", "src\Mqtt\API\API.csproj", "{010F76AF-9AA1-44AF-9B4B-CE7561679B48}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Listener", "src\Mqtt\Listener\Listener.csproj", "{262352C3-CDCA-4B5E-9E17-A1F44D2B12ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monitor", "src\Mqtt\Listener\Monitor.csproj", "{262352C3-CDCA-4B5E-9E17-A1F44D2B12ED}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "src\Mqtt\Domain\Domain.csproj", "{55293127-19B9-466C-9A7F-F6F6493B9A2F}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{A49B0884-D7D4-476A-8C22-8D601AC339FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +66,10 @@ Global
 		{55293127-19B9-466C-9A7F-F6F6493B9A2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55293127-19B9-466C-9A7F-F6F6493B9A2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55293127-19B9-466C-9A7F-F6F6493B9A2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A49B0884-D7D4-476A-8C22-8D601AC339FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A49B0884-D7D4-476A-8C22-8D601AC339FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A49B0884-D7D4-476A-8C22-8D601AC339FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A49B0884-D7D4-476A-8C22-8D601AC339FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

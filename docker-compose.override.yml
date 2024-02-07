@@ -1,0 +1,19 @@
+version: '3.4'
+
+services:
+  api:
+    container_name: GSTechAPI
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+    ports:
+      - "8000:8080"
+      - "8001:8081"
+      - "5076:5076"
+      - "1885:1885"
+      - "1545:1545"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro

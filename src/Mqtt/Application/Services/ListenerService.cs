@@ -18,7 +18,8 @@ public sealed class ListenerService : IListenerService
 
     public ListenerService(IConfiguration configuration, ILogger<ListenerService> logger, ILoggerFactory loggerFactory)
     {
-        _grpcClient = createGrpcClient();
+        this._logger = logger;
+        this._grpcClient = createGrpcClient();
 
         MqqtReceiveService.MqqtReceiveServiceClient createGrpcClient()
         {
@@ -29,8 +30,6 @@ public sealed class ListenerService : IListenerService
             var channel = GrpcChannel.ForAddress(configuration["GrpcServiceSettings:ServerUrl"]!, opt);
             return new MqqtReceiveService.MqqtReceiveServiceClient(channel);
         }
-
-        this._logger = logger;
     }
 
     public Task LogClientConnectedAsync(string clientId, CancellationToken token = default)
@@ -40,7 +39,7 @@ public sealed class ListenerService : IListenerService
         {
             try
             {
-                _ = _grpcClient.ClientConnectedAsync(new()
+                _ = this._grpcClient.ClientConnectedAsync(new()
                 {
                     ClientId = clientId,
                     Time = Now()
@@ -48,7 +47,7 @@ public sealed class ListenerService : IListenerService
             }
             catch
             {
-                _logger.LogInformation("Client connected: {ClientId}", clientId);
+                this._logger.LogInformation("Client connected: {ClientId}", clientId);
             }
         }, token);
     }
@@ -60,7 +59,7 @@ public sealed class ListenerService : IListenerService
         {
             try
             {
-                _ = _grpcClient.ClientDisconnectedAsync(new()
+                _ = this._grpcClient.ClientDisconnectedAsync(new()
                 {
                     ClientId = clientId,
                     Time = Now()
@@ -68,7 +67,7 @@ public sealed class ListenerService : IListenerService
             }
             catch
             {
-                _logger.LogInformation("Client disconnected: {ClientId}", clientId);
+                this._logger.LogInformation("Client disconnected: {ClientId}", clientId);
             }
         }, token);
     }
@@ -87,11 +86,11 @@ public sealed class ListenerService : IListenerService
                 Log = args.LogMessage,
                 SaveStatus = args.Status,
             };
-            await this._grpcClient.PayloadReceivedAsync(grpcRequest, cancellationToken: token);
+            _ = await this._grpcClient.PayloadReceivedAsync(grpcRequest, cancellationToken: token);
         }
         catch
         {
-            _logger.LogInformation("[ID: {ClientId}][IMES: {IMEI}]: {LogMessage}", args.ClientId, args.Imei, args.LogMessage);
+            this._logger.LogInformation("[ID: {ClientId}][IMES: {IMEI}]: {LogMessage}", args.ClientId, args.Imei, args.LogMessage);
         }
     }
 

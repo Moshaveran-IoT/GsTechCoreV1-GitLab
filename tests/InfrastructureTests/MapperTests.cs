@@ -8,15 +8,18 @@ namespace InfrastructureTests;
 [Trait("Category", nameof(IMapper))]
 public class MapperTests
 {
+    private readonly IMapper _mapper;
+
+    public MapperTests(IMapper mapper) => this._mapper = mapper;
+
     [Fact]
     public void BasicTest1()
     {
         // Assign
-        var mapper = IMapper.New();
         var src = new Person("Ali", 20);
 
         // Act
-        var dst = mapper.Map<Person>(src);
+        var dst = this._mapper.Map<Person>(src);
 
         // Assert
         _ = dst.Should().NotBeNull();
@@ -28,26 +31,24 @@ public class MapperTests
     public void BasicTest2()
     {
         // Assign
-        var mapper = IMapper.New();
-        var src = new { Name = "Ali", Age = 20 };
+        var src = new Animal("Cat");
 
         // Act
 
         // Assert
         _ = Assert.Throws<NotSupportedException>(dst);
 
-        Person dst() => mapper.Map<Person>(src);
+        Animal dst() => this._mapper.Map<Animal>(src);  
     }
 
     [Fact]
     public void BasicTest3()
     {
         // Assign
-        var mapper = IMapper.New();
         var src = new Person("Ali", 20);
 
         // Act
-        var dst = mapper.Map(src, x => new Person(x.Name, x.Age));
+        var dst = this._mapper.Map(src, x => new Person(x.Name, x.Age));
 
         // Assert
         Assert.Equal(src.Name, dst.Name);
@@ -58,13 +59,12 @@ public class MapperTests
     public void BasicTest4()
     {
         // Assign
-        var mapper = IMapper.New()
-            .ConfigureMapFor<(string Name, int Age), Person>(x => new Person(x.Name, x.Age));
+        _ = this._mapper.ConfigureMapFor<(string Name, int Age), Person>(x => new Person(x.Name, x.Age));
 
         var src = (Name: "Ali", Age: 20);
 
         // Act
-        var dst = mapper.Map<Person>(src);
+        var dst = this._mapper.Map<Person>(src);
 
         // Assert
         Assert.Equal(src.Name, dst.Name);
@@ -75,12 +75,11 @@ public class MapperTests
     public void BasicTest5()
     {
         // Assign
-        var mapper = IMapper.New()
-            .ConfigureMapFor<Person, Person>(x => new Person(x.Name, x.Age));
+        _ = this._mapper.ConfigureMapFor<Person, Person>(x => new Person(x.Name, x.Age));
         var src = new Person("Ali", 20);
 
         // Act
-        var dst = mapper.Map<Person>(src);
+        var dst = this._mapper.Map<Person>(src);
 
         // Assert
         Assert.Equal(src.Name, dst.Name);
@@ -102,4 +101,14 @@ internal sealed class Person
 
     public int Age { get; set; }
     public string? Name { get; set; }
+}
+
+sealed class Animal
+{
+    private readonly string _name;
+
+    public Animal(string name)
+    {
+        this._name = name;
+    }
 }

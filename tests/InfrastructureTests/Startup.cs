@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
+using Moshaveran.Infrastructure;
+using Moshaveran.Infrastructure.Mapping;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +14,6 @@ public sealed class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        
+        services.AddInfrastructureService();
     }
 }
