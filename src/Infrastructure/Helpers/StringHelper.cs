@@ -9,7 +9,24 @@ namespace Moshaveran.Infrastructure;
 [StackTraceHidden]
 public static partial class StringHelper
 {
-    public static string HexToUnicode(string hex)
+    public static StringBuilder AppendAllLine(this StringBuilder sb, in IEnumerable<string?> lines)
+    {
+        foreach (var line in lines)
+        {
+            _ = sb.AppendLine(line);
+        }
+        return sb;
+    }
+    public static StringBuilder AppendAll(this StringBuilder sb, in IEnumerable<string?> lines)
+    {
+        foreach (var line in lines)
+        {
+            _ = sb.Append(line);
+        }
+        return sb;
+    }
+
+    public static string HexToUnicode(in string hex)
     {
         var bytes = hexToUnicodeRegex().Matches(hex).OfType<Match>().Select(m => Convert.ToByte(m.Groups["hex"].Value, 16)).ToArray();
         var chars = Encoding.BigEndianUnicode.GetChars(bytes);

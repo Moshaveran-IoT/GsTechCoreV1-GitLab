@@ -18,7 +18,7 @@ public static class EnumerableHelper
     [return: NotNull]
     public static IEnumerable<TSource> Compact<TSource>(this IEnumerable<TSource?>? items) where TSource : class =>
         items?
-             .Where([DebuggerStepThrough] (x) => x is not null)
+             .Where([DebuggerStepThrough] (x) => x != null)
              .Select([DebuggerStepThrough] (x) => x!)
         ?? [];
 

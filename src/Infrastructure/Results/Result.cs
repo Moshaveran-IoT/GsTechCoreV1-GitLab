@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace Moshaveran.Infrastructure.Results;
+﻿namespace Moshaveran.Infrastructure.Results;
 
 public sealed class Result(bool isSucceed, string? message = null, Exception? exception = null) : ResultBase(isSucceed, message, exception)
 {
@@ -21,9 +19,6 @@ public sealed class Result(bool isSucceed, string? message = null, Exception? ex
     public static Result Create(Exception? exception)
         => new(false, exception: exception);
 
-    public static Result<TValue> Create<TValue>(Result<TValue> result)
-        => new(result.Value, result.IsSucceed, result.Message, result.Exception);
-
     public static Result<TValue> Create<TValue>(TValue value, bool isSucceed)
         => new(value, isSucceed);
 
@@ -33,32 +28,17 @@ public sealed class Result(bool isSucceed, string? message = null, Exception? ex
     public static Result<TValue> Create<TValue>(TValue value, bool isSucceed, string? message)
         => new(value, isSucceed, message);
 
-    public static Result Create(bool isSucceed, Exception? exception)
-        => new(isSucceed, exception: exception);
-
-    public static Result<TValue> Create<TValue>(TValue value, Result result)
-        => new(value, result.IsSucceed, result.Message);
-
     public static Result<TValue> CreateFailure<TValue>(TValue value)
         => new(value, false);
 
     public static Result CreateFailure(Exception exception)
-        => new(false,exception: exception);
+        => new(false, exception: exception);
 
     public static Result<TValue> CreateFailure<TValue>(TValue value, string message)
         => new(value, false, message);
 
     public static Result<TValue> CreateSucceed<TValue>(TValue value)
         => new(value, true);
-
-    public static Result<TValue1> CreateWitValue<TValue1>(Result<TValue1> result, TValue1 value)
-        => new(value, result.IsSucceed, result.Message, result.Exception);
-
-    public static Result<TValue2> CreateWitValue<TValue1, TValue2>(Result<TValue1> result, TValue2 value)
-        => new(value, result.IsSucceed, result.Message, result.Exception);
-
-    public Result WithMessage([DisallowNull] string message)
-        => new(this.IsSucceed, message, this.Exception);
 }
 
 public sealed class Result<TValue>(TValue value, bool isSucceed, string? message = null, Exception? exception = null) : ResultBase(isSucceed, message, exception)
@@ -94,5 +74,5 @@ public abstract class ResultBase(bool isSucceed, string? message = null, Excepti
 
     public string? Message { get; } = message;
 
-    public object? State => (object?)Exception ?? Message;
+    public object? State => (object?)this.Exception ?? this.Message;
 }

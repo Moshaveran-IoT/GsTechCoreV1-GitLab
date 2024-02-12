@@ -17,5 +17,5 @@ public static class SqlTypeHelper
             : date.Value.ToSqlFormat(isForInterpolation: isForInterpolation);
 
     private static string GetDbNullForDateTime(bool isForInterpolation)
-        => isForInterpolation ? string.Empty : $"NULL";
+        => isForInterpolation ? string.Empty : "NULL";
 }
