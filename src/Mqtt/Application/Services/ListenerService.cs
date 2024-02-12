@@ -1,6 +1,4 @@
-﻿using Application.Interfaces;
-
-using Google.Protobuf.WellKnownTypes;
+﻿using Google.Protobuf.WellKnownTypes;
 
 using Grpc.Net.Client;
 
@@ -8,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using Moshaveran.API.Mqtt.GrpcServices.Protos;
+using Moshaveran.GsTech.Mqtt.Application.Interfaces;
 
 namespace Application.Services;
 

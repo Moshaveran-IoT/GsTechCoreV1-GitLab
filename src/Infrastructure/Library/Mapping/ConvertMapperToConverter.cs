@@ -1,8 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Moshaveran.Library.Interfaces;
 
-using Moshaveran.Infrastructure.Interfaces;
-
-namespace Moshaveran.Infrastructure.Mapping;
+namespace Moshaveran.Library.Mapping;
 
 internal sealed class ConvertMapperToConverter<TSelf, TDestination, TMapper>(TSelf self, [DisallowNull] TMapper mapper) : IConvertible<TDestination?>
     where TMapper : IMappable<TSelf, TDestination>

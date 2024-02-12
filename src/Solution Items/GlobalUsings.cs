@@ -1,5 +1,5 @@
-﻿global using Moshaveran.Infrastructure;
-global using Moshaveran.Infrastructure.Results;
-global using Moshaveran.Infrastructure.Coding;
+﻿global using Moshaveran.Library;
+global using Moshaveran.Library.Results;
+global using Moshaveran.Library.Coding;
 
-global using static Moshaveran.Infrastructure.Coding.CodeHelper;
+global using static Moshaveran.Library.Coding.CodeHelper;

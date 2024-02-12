@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-using Moshaveran.Infrastructure.Helpers;
+using Moshaveran.Library.Helpers;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
 
 namespace Moshaveran.Mqtt.DataAccess.DataSources.DbContexts;
@@ -108,5 +108,5 @@ internal sealed class MqttWriteDbContext : MqttDbContext
     }
 
     private Task<int> ExecuteSql(FormattableString statement, CancellationToken token)
-        => this.Database.ExecuteSqlInterpolatedAsync(statement, token);
+       => this.Database.ExecuteSqlInterpolatedAsync(statement, token);
 }

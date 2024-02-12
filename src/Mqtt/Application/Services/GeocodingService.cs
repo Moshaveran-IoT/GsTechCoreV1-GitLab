@@ -1,7 +1,7 @@
-﻿
+﻿using Moshaveran.Library.Results;
 using Moshaveran.Mqtt.Domain.Services;
 
-namespace Moshaveran.IoT.Application.Services;
+namespace Moshaveran.GsTech.Mqtt.Application.Services;
 
 public sealed class GeocodingService : IGeocodingService
 {

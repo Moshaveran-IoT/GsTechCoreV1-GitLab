@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace Moshaveran.Infrastructure.Mapping;
+namespace Moshaveran.Library.Mapping;
 
 public sealed class CustomMapper
     : IEquatable<CustomMapper>
@@ -14,9 +14,9 @@ public sealed class CustomMapper
 
     private CustomMapper(in Type sourceType, in Type DestinationType, in Delegate map)
     {
-        this._destinationType = DestinationType;
-        this._sourceType = sourceType;
-        this.Map = map;
+        _destinationType = DestinationType;
+        _sourceType = sourceType;
+        Map = map;
         _paramsCount = map.Method.GetParameters().Length;
     }
 
@@ -64,7 +64,7 @@ public sealed class CustomMapper
         => Equals(this, other);
 
     public override int GetHashCode()
-        => GetHashCode(_sourceType, this._destinationType, _paramsCount);
+        => GetHashCode(_sourceType, _destinationType, _paramsCount);
 
     private static int GetHashCode(Type sourceType, Type destinationType, int paramsCount)
         => HashCode.Combine(sourceType, destinationType, paramsCount);

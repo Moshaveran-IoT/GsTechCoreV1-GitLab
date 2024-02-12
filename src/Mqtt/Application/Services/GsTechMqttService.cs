@@ -1,11 +1,11 @@
 ﻿using System.Text;
 
-using Application.Interfaces;
-
 using Moshaveran.API.Mqtt.GrpcServices.Protos;
-using Moshaveran.Infrastructure.Helpers;
+using Moshaveran.GsTech.Mqtt.Application.Interfaces;
+using Moshaveran.Library.Data;
+using Moshaveran.Library.Helpers;
+using Moshaveran.Library.Results;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
-using Moshaveran.Mqtt.DataAccess.Repositories.Bases;
 using Moshaveran.Mqtt.Domain.Services;
 
 namespace Application.Services;
@@ -36,13 +36,13 @@ public sealed class GsTechMqttService(
     private readonly IRepository<VoltageBroker> _voltageRepo = voltageRepo;
 
     public Task<Result> ProcessCameraPayload(ProcessPayloadArgs args)
-        => Save((broker, payloadMessage) =>
+        => this.Save((broker, payloadMessage) =>
         {
             broker.Imei = args.Imei;
             broker.CreatedOn = DateTime.Now;
             broker.Value = $"data:image/png;base64,{payloadMessage}";
             return Result.CreateSucceed(broker);
-        }, args, _cameraRepo);
+        }, args, this._cameraRepo);
 
     public Task<Result> ProcessCanPayload(ProcessPayloadArgs args)
         => this.InnerSave(payloadMessage =>
@@ -99,7 +99,7 @@ public sealed class GsTechMqttService(
         }, args, this._canRepo);
 
     public Task<Result> ProcessGeneralPayload(ProcessPayloadArgs args)
-        => Save(broker =>
+        => this.Save(broker =>
         {
             if (string.IsNullOrEmpty(broker.InternetTotalVolume))
             {
@@ -123,10 +123,10 @@ public sealed class GsTechMqttService(
                 broker.InternetRemainingTime = ussd.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
             }
             return Result.CreateSucceed(broker);
-        }, args, _genRepo);
+        }, args, this._genRepo);
 
     public Task<Result> ProcessGeneralPlusPayload(ProcessPayloadArgs args)
-        => Save(broker =>
+        => this.Save(broker =>
         {
             broker.Imei = args.Imei;
             broker.CreatedOn = DateTime.Now;
@@ -155,26 +155,26 @@ public sealed class GsTechMqttService(
                 }
             }
             return Result.CreateSucceed(broker);
-        }, args, _genRepo);
+        }, args, this._genRepo);
 
     public Task<Result> ProcessGpsPayload(ProcessPayloadArgs args)
-        => InnerSave(async (GpsBroker broker, string _) =>
+        => this.InnerSave(async (GpsBroker broker, string _) =>
         {
             if (broker.Latitude is >= -90 and <= 90 && broker.Longitude is >= -180 and <= 180 && broker.Latitude.ToString().Length != 1 && broker.Longitude.ToString().Length != 1)
             {
                 broker.Imei = args.Imei;
                 broker.CreatedOn = DateTime.Now;
-                broker.Address = await _geocoding.Reverse(broker.Latitude, broker.Longitude);
+                broker.Address = await this._geocoding.Reverse(broker.Latitude, broker.Longitude);
                 return Result.CreateSucceed(broker);
             }
             else
             {
                 return Result.CreateFailure(broker);
             }
-        }, args, _gpsRepo);
+        }, args, this._gpsRepo);
 
     public Task<Result> ProcessObdPayload(ProcessPayloadArgs args)
-        => Save((ObdBroker _, string payloadMessage) =>
+        => this.Save((ObdBroker _, string payloadMessage) =>
         {
             var broker = new ObdBroker
             {
@@ -183,44 +183,43 @@ public sealed class GsTechMqttService(
                 Value = payloadMessage
             };
             return Result.CreateSucceed(broker);
-        }, args, _obdRepo);
+        }, args, this._obdRepo);
 
     public Task<Result> ProcessSignalPayload(ProcessPayloadArgs args)
-        => Save(broker =>
+        => this.Save(broker =>
         {
             broker.Imei = args.Imei;
             broker.CreatedOn = DateTime.Now;
             return Result.CreateSucceed(broker);
-        }, args, _signalRepo);
+        }, args, this._signalRepo);
 
     public Task<Result> ProcessTemperaturePayload(ProcessPayloadArgs args)
-        => Save(broker =>
+        => this.Save(broker =>
         {
             broker.Imei = args.Imei;
             broker.CreatedOn = DateTime.Now;
             return Result.CreateSucceed(broker);
-        }, args, _tempRepo);
+        }, args, this._tempRepo);
 
     public Task<Result> ProcessTpmsPayload(ProcessPayloadArgs args)
-        => Save(broker =>
+        => this.Save(broker =>
         {
             broker.Imei = args.Imei;
             broker.CreatedOn = DateTime.Now;
             return Result.CreateSucceed(broker);
-        }, args, _tpmsRepo);
+        }, args, this._tpmsRepo);
 
     public Task<Result> ProcessVoltagePayload(ProcessPayloadArgs args)
-        => Save(broker =>
+        => this.Save(broker =>
         {
             broker.Imei = args.Imei;
             broker.CreatedOn = DateTime.Now;
             return Result.CreateSucceed(broker);
-        }, args, _voltageRepo);
+        }, args, this._voltageRepo);
 
     private async Task<Result> InnerSave<TDbBroker>(Func<string, Task<Result<IEnumerable<TDbBroker>>>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
     {
-        var logMessage = string.Empty;
-        var status = SaveStatus.SaveSuccess;
+        var (status, logMessage) = (SaveStatus.SaveSuccess, string.Empty);
         try
         {
             var payloadMessage = Encoding.UTF8.GetString(args.Payload);
@@ -232,35 +231,26 @@ public sealed class GsTechMqttService(
                     var result = await repo.Insert(broker, false);
                     if (!result.IsSucceed)
                     {
-                        status = SaveStatus.SaveFailure;
-                        logMessage = result.Message ?? "Payload not saved";
+                        (status, logMessage) = (SaveStatus.SaveFailure, result.Message ?? "Payload not saved");
                         return result;
                     }
                 }
                 var saveResult = await repo.SaveChanges();
-                if (saveResult.IsSucceed)
-                {
-                    status = SaveStatus.SaveSuccess;
-                    logMessage = saveResult.Message ?? "Payload saved successfully.";
-                }
-                else
-                {
-                    status = SaveStatus.SaveFailure;
-                    logMessage = saveResult.Message ?? "Payload cannot be saved.";
-                }
-                return Result.Succeed;
+
+                (status, logMessage) = saveResult.Process(onSucceed: r => (SaveStatus.SaveSuccess, r.Message ?? "Payload is saved successfully.")
+                                                        , onFailure: r => (SaveStatus.SaveFailure, r.Message ?? "Payload cannot be saved."));
+
+                return saveResult;
             }
             else
             {
-                status = SaveStatus.InvalidRequest;
-                logMessage = initBrokers.Message ?? "Invalid payload or no payload received.";
+                (status, logMessage) = (SaveStatus.InvalidRequest, initBrokers.Message ?? "Invalid payload format.");
                 return initBrokers!;
             }
         }
         catch (Exception ex)
         {
-            status = SaveStatus.SaveFailure;
-            logMessage = ex.GetBaseException().Message;
+            (status, logMessage) = (SaveStatus.SaveFailure, ex.GetBaseException().Message);
             return Result.Failed;
         }
         finally
@@ -270,7 +260,7 @@ public sealed class GsTechMqttService(
     }
 
     private async Task<Result> InnerSave<TDbBroker>(Func<TDbBroker, string, Task<Result<TDbBroker>>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
-        => await InnerSave(async payloadMessage =>
+        => await this.InnerSave(async payloadMessage =>
         {
             if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null)
             {
@@ -281,14 +271,14 @@ public sealed class GsTechMqttService(
         }, args, repo);
 
     private Task<Result> Save<TDbBroker>(Func<TDbBroker, Result<TDbBroker>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
-        => InnerSave((broker, _) =>
+        => this.InnerSave((broker, _) =>
         {
             var result = initialize(broker);
             return Task.FromResult(result);
         }, args, repo);
 
     private Task<Result> Save<TDbBroker>(Func<TDbBroker, string, Result<TDbBroker>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
-        => InnerSave((broker, payloadMessage) =>
+        => this.InnerSave((broker, payloadMessage) =>
         {
             var result = initialize(broker, payloadMessage);
             return Task.FromResult(result);

@@ -1,8 +1,9 @@
-﻿using Moshaveran.Mqtt.API.Middlewares;
+﻿using Moshaveran.GsTech.Mqtt.API;
+using Moshaveran.GsTech.Mqtt.API.Middlewares;
 
 using Prometheus;
 
-namespace Moshaveran.Mqtt.API;
+namespace Moshaveran.GsTech.Mqtt.API;
 
 public class Startup(IConfiguration configuration)
 {
@@ -38,7 +39,10 @@ public class Startup(IConfiguration configuration)
                 .AddProblemDetails();
 
         // // Add Prometheus metrics service
-        _ = services.AddMetricServer(options => options.Port = 5678);
+        if (configuration.GetValue<bool?>("Prometheus:metrics:is_enabled") is true)
+        {
+            _ = services.AddMetricServer(options => options.Port = configuration.GetValue<ushort>("Prometheus:metrics:port"));
+        }
 
         // Add project services
         _ = services.AddInfrastructureService()

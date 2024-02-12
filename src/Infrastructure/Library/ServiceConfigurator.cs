@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Moshaveran.Library.Mapping;
 
-using Moshaveran.Infrastructure.Mapping;
-
-namespace Moshaveran.Infrastructure;
+namespace Moshaveran.Library;
 
 public static class ServiceConfigurator
 {

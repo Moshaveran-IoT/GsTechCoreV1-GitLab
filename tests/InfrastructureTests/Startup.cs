@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-using Moshaveran.Infrastructure;
-using Moshaveran.Infrastructure.Mapping;
+using Moshaveran.Library;
+using Moshaveran.Library.Mapping;
 
 using System;
 using System.Collections.Generic;

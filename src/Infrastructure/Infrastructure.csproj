@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>Moshaveran.$(MSBuildProjectName)</AssemblyName>
-    <RootNamespace>Moshaveran.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <RootNamespace>Moshaveran</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

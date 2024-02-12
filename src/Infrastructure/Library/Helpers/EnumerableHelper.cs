@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Moshaveran.Infrastructure.Helpers;
+namespace Moshaveran.Library.Helpers;
 
 [DebuggerStepThrough]
 [StackTraceHidden]

@@ -1,7 +1,11 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
+using Moshaveran.Library;
 
-namespace Moshaveran.Infrastructure.Helpers;
+namespace Moshaveran.Library.Helpers;
 
+[DebuggerStepThrough]
+[StackTraceHidden]
 public static class ObjectHelper
 {
     public static string Pretty(object? o, char separator = ',')

@@ -1,6 +1,8 @@
-﻿namespace InfrastructureTests;
+﻿using Moshaveran.Library.Helpers;
 
-[Trait("Category", nameof(Moshaveran.Infrastructure.Helpers))]
+namespace InfrastructureTests;
+
+[Trait("Category", nameof(Moshaveran.Library.Helpers))]
 [Trait("Category", nameof(EnumerableHelper))]
 public sealed class EnumerableHelperTests
 {

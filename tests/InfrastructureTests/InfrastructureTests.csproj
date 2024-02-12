@@ -33,7 +33,7 @@
 
   <ItemGroup>
     <Using Include="FluentAssertions" />
-    <Using Include="Moshaveran.Infrastructure.Helpers" />
+    <Using Include="Moshaveran.Library.Helpers" />
   </ItemGroup>
 
 </Project>

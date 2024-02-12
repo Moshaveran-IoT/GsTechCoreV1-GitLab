@@ -2,12 +2,12 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Moshaveran.GsTech.Mqtt.DataAccess.Repositories;
+using Moshaveran.Library.Data;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbContexts;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
-using Moshaveran.Mqtt.DataAccess.Repositories;
-using Moshaveran.Mqtt.DataAccess.Repositories.Bases;
 
-namespace Moshaveran.Mqtt.DataAccess;
+namespace Moshaveran.GsTech.Mqtt.DataAccess;
 
 public static class DataAccessConfigurator
 {

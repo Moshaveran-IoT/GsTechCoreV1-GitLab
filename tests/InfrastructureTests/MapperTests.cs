@@ -1,8 +1,8 @@
-using Moshaveran.Infrastructure.Mapping;
+using Moshaveran.Library.Mapping;
 
 namespace InfrastructureTests;
 
-[Trait("Category", nameof(Moshaveran.Infrastructure.Mapping))]
+[Trait("Category", nameof(Moshaveran.Library.Mapping))]
 public class MapperTests(IMapper mapper)
 {
     private readonly IMapper _mapper = mapper;

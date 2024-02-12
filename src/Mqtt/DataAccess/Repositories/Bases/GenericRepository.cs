@@ -1,14 +1,12 @@
-﻿using Moshaveran.Mqtt.DataAccess.DataSources.DbContexts;
+﻿using Moshaveran.Library.Data;
+using Moshaveran.Mqtt.DataAccess.DataSources.DbContexts;
 
-namespace Moshaveran.Mqtt.DataAccess.Repositories.Bases;
+namespace Moshaveran.GsTech.Mqtt.DataAccess.Repositories.Bases;
 
-internal class GenericRepository<TModel> : IRepository<TModel>
+internal class GenericRepository<TModel>(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext) : IRepository<TModel>
 {
-    public GenericRepository(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext)
-        => (this.WriteDbContext, this.ReadDbContext) = (writeDbContext, readDbContext);
-
-    protected MqttReadDbContext ReadDbContext { get; }
-    protected MqttWriteDbContext WriteDbContext { get; }
+    protected MqttReadDbContext ReadDbContext { get; } = readDbContext;
+    protected MqttWriteDbContext WriteDbContext { get; } = writeDbContext;
 
     public Task<Result> Delete(TModel model, bool persist = true, CancellationToken token = default)
         => this.ManipulateModel(model, this.OnDeleting, persist, token);
@@ -16,8 +14,17 @@ internal class GenericRepository<TModel> : IRepository<TModel>
     public Task<Result> Insert(TModel model, bool persist = true, CancellationToken token = default)
         => this.ManipulateModel(model, this.OnInserting, persist, token);
 
-    public Task<Result> SaveChanges(CancellationToken token = default)
-        => this.OnSavingChanges(token);
+    public async Task<Result> SaveChanges(CancellationToken token = default)
+    {
+        try
+        {
+            return await this.OnSavingChanges(token);
+        }
+        catch (Exception ex)
+        {
+            return Result.CreateFailure(ex);
+        }
+    }
 
     public Task<Result> Update(TModel model, bool persist = true, CancellationToken token = default)
         => this.ManipulateModel(model, this.OnUpdating, persist, token);
@@ -26,7 +33,7 @@ internal class GenericRepository<TModel> : IRepository<TModel>
     {
         try
         {
-            var vr = OnValidating(model, token);
+            var vr = this.OnValidating(model, token);
             if (vr?.IsSucceed != true)
             {
                 return vr ?? Result.Failed;
@@ -40,7 +47,7 @@ internal class GenericRepository<TModel> : IRepository<TModel>
 
             if (persist)
             {
-                return await SaveChanges(token);
+                return await this.SaveChanges(token);
             };
             return Result.Succeed;
         }
@@ -52,25 +59,25 @@ internal class GenericRepository<TModel> : IRepository<TModel>
 
     protected virtual Task<Result> OnDeleting(TModel model, CancellationToken token)
     {
-        _ = WriteDbContext.Remove(model!);
+        _ = this.WriteDbContext.Remove(model!);
         return Task.FromResult(Result.Succeed);
     }
 
     protected virtual async Task<Result> OnInserting(TModel model, CancellationToken token = default)
     {
-        _ = await WriteDbContext.AddAsync(model!, token);
+        _ = await this.WriteDbContext.AddAsync(model!, token);
         return Result.Succeed;
     }
 
     protected virtual async Task<Result> OnSavingChanges(CancellationToken token)
     {
-        var result = await WriteDbContext.SaveChangesAsync(token);
+        var result = await this.WriteDbContext.SaveChangesAsync(token);
         return Result.Create(result > 0);
     }
 
     protected virtual Task<Result> OnUpdating(TModel model, CancellationToken token = default)
     {
-        _ = WriteDbContext.Update(model!);
+        _ = this.WriteDbContext.Update(model!);
         return Task.FromResult(Result.Succeed);
     }
 

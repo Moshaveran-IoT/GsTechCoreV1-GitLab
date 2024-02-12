@@ -1,8 +1,9 @@
-﻿using static Moshaveran.Infrastructure.Helpers.ObjectHelper;
+﻿using Moshaveran.Library.Helpers;
+using static Moshaveran.Library.Helpers.ObjectHelper;
 
 namespace InfrastructureTests;
 
-[Trait("Category", nameof(Moshaveran.Infrastructure.Helpers))]
+[Trait("Category", nameof(Moshaveran.Library.Helpers))]
 [Trait("Category", nameof(ObjectHelper))]
 public sealed class ObjectHelperTests
 {

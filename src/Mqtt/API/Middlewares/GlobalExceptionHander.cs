@@ -4,7 +4,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Moshaveran.Mqtt.API.Middlewares;
+namespace Moshaveran.GsTech.Mqtt.API.Middlewares;
 
 public sealed class GlobalExceptionHander(ILogger<GlobalExceptionHander> logger) : IExceptionHandler
 {

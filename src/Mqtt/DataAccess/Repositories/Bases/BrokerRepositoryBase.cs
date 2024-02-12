@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-using Moshaveran.Infrastructure.Helpers;
+using Moshaveran.Library.Helpers;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbContexts;
 
-namespace Moshaveran.Mqtt.DataAccess.Repositories.Bases;
+namespace Moshaveran.GsTech.Mqtt.DataAccess.Repositories.Bases;
 
 internal abstract class BrokerRepositoryBase<TBroker>(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext) : GenericRepository<TBroker>(readDbContext, writeDbContext)
     where TBroker : class
@@ -12,9 +12,9 @@ internal abstract class BrokerRepositoryBase<TBroker>(MqttReadDbContext readDbCo
     {
         try
         {
-            await WriteDbContext.ChangeTracker
+            await this.WriteDbContext.ChangeTracker
                 .Entries<TBroker>()
-                .Enumerate(SaveBrokerAsync, token);
+                .Enumerate(this.SaveBrokerAsync, token);
             return Result.Succeed;
         }
         catch (Exception ex)

@@ -14,6 +14,7 @@
 		<PlatformTarget>x64</PlatformTarget>
 		<InvariantGlobalization>false</InvariantGlobalization>
 		<AssemblyName>Moshaveran.IoT.$(MSBuildProjectName)</AssemblyName>
+		<RootNamespace>Moshaveran.GsTech.Mqtt.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -65,12 +66,12 @@
 	  </Protobuf>
 	</ItemGroup>
 	<ItemGroup>
-		<Using Include="Moshaveran.Infrastructure" />
-		<Using Include="Moshaveran.Infrastructure.Coding" />
-		<Using Include="Moshaveran.Infrastructure.Coding.CodeHelper">
-			<Static>True</Static>
+		<Using Include="Moshaveran.Library.Results" />
+		<Using Include="Moshaveran.Library" />
+		<Using Include="Moshaveran.Library.Coding" />
+		<Using Include="Moshaveran.Library.Coding.CodeHelper">
+		  <Static>True</Static>
 		</Using>
-		<Using Include="Moshaveran.Infrastructure.Results" />
 	</ItemGroup>
 
 

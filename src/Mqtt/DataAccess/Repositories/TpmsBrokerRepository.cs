@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 
+using Moshaveran.GsTech.Mqtt.DataAccess.Repositories.Bases;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbContexts;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
-using Moshaveran.Mqtt.DataAccess.Repositories.Bases;
 
-namespace Moshaveran.Mqtt.DataAccess.Repositories;
+namespace Moshaveran.GsTech.Mqtt.DataAccess.Repositories;
 
 internal sealed class TpmsBrokerRepository(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext) : BrokerRepositoryBase<TpmsBroker>(readDbContext, writeDbContext)
 {

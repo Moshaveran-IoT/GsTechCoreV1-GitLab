@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Moshaveran.Library.Mapping;
 
-namespace Moshaveran.Infrastructure.Mapping;
+namespace Moshaveran.Library.Mapping;
 
 public interface IMapper
 {

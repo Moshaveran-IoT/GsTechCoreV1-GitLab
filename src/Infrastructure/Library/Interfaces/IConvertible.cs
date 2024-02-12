@@ -1,4 +1,4 @@
-﻿namespace Moshaveran.Infrastructure.Interfaces;
+﻿namespace Moshaveran.Library.Interfaces;
 
 public interface IConvertible<out T>
 {

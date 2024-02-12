@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics.Contracts;
 
 using Moshaveran.API.Mqtt.GrpcServices.Protos;
-using Moshaveran.Infrastructure.ApplicationServices;
+using Moshaveran.Library.ApplicationServices;
 
-namespace Application.Interfaces;
+namespace Moshaveran.GsTech.Mqtt.Application.Interfaces;
 
 public interface IListenerService : IBusinessService
 {

@@ -1,5 +1,5 @@
-﻿using Moshaveran.Infrastructure.ApplicationServices;
-using Moshaveran.Infrastructure.Results;
+﻿using Moshaveran.Library.ApplicationServices;
+using Moshaveran.Library.Results;
 
 namespace Moshaveran.Mqtt.Domain.Services;
 

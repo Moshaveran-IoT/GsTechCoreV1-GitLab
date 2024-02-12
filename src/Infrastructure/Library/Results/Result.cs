@@ -1,4 +1,4 @@
-﻿namespace Moshaveran.Infrastructure.Results;
+﻿namespace Moshaveran.Library.Results;
 
 public sealed class Result(bool isSucceed, string? message = null, Exception? exception = null) : ResultBase(isSucceed, message, exception)
 {
@@ -58,21 +58,21 @@ public sealed class Result<TValue>(TValue value, bool isSucceed, string? message
         => result.Value;
 
     public Result<TValue> WithValue(TValue value)
-        => new(value, this.IsSucceed, this.Message, this.Exception);
+        => new(value, IsSucceed, Message, Exception);
 
     public Result<TValue1> WithValue<TValue1>(TValue1 value)
-        => new(value, this.IsSucceed, this.Message, this.Exception);
+        => new(value, IsSucceed, Message, Exception);
 }
 
 public abstract class ResultBase(bool isSucceed, string? message = null, Exception? exception = null)
 {
     public Exception? Exception { get; } = exception;
 
-    public bool IsFailure => !this.IsSucceed;
+    public bool IsFailure => !IsSucceed;
 
     public bool IsSucceed { get; } = isSucceed;
 
     public string? Message { get; } = message;
 
-    public object? State => (object?)this.Exception ?? this.Message;
+    public object? State => (object?)Exception ?? Message;
 }
