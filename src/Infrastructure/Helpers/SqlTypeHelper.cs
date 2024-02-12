@@ -1,5 +1,9 @@
-﻿namespace Moshaveran.Infrastructure.Helpers;
+﻿using System.Diagnostics;
 
+namespace Moshaveran.Infrastructure.Helpers;
+
+[DebuggerStepThrough]
+[StackTraceHidden]
 public static class SqlTypeHelper
 {
     public static string ToSqlFormat(this DateTime date, bool isForInterpolation = true)

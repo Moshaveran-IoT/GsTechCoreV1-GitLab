@@ -1,11 +1,15 @@
-﻿using Prometheus;
+﻿using Moshaveran.Mqtt.API.Middlewares;
+
+using Prometheus;
 
 namespace Moshaveran.Mqtt.API;
 
 public class Startup(IConfiguration configuration)
 {
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IConfiguration configuration)
     {
+        app.UseExceptionHandler();
+
         // Add Prometheus metrics service
         _ = app.UseHttpMetrics();
         //app.MapMetrics();
@@ -25,11 +29,14 @@ public class Startup(IConfiguration configuration)
             _ = endpoints.MapGet("Hi", () => "Hello from Mohammad");
         });
 
-        _ = app.ConfigureMqtt(1545);
+        _ = app.ConfigureMqtt(int.Parse(configuration["AppPort"]!));
     }
 
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddExceptionHandler<GlobalExceptionHander>()
+                .AddProblemDetails();
+
         // // Add Prometheus metrics service
         _ = services.AddMetricServer(options => options.Port = 5678);
 

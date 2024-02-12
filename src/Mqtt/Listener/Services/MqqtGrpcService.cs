@@ -4,7 +4,7 @@ using Grpc.Core;
 
 using Moshaveran.API.Mqtt.GrpcServices.Protos;
 
-namespace Moshaveran.Mqtt.Listener.Services;
+namespace Moshaveran.Mqtt.Monitor.Services;
 
 public sealed class MqqtGrpcService(ILogger<MqqtGrpcService> logger) : MqqtReceiveService.MqqtReceiveServiceBase
 {

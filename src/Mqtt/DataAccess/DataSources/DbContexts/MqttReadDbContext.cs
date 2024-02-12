@@ -1,10 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
-
 namespace Moshaveran.Mqtt.DataAccess.DataSources.DbContexts;
 
-public sealed class MqttReadDbContext : MqttDbContext
+internal sealed class MqttReadDbContext : MqttDbContext
 {
     public MqttReadDbContext()
     {
@@ -13,4 +11,7 @@ public sealed class MqttReadDbContext : MqttDbContext
     public MqttReadDbContext(DbContextOptions<MqttDbContext> options) : base(options)
     {
     }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => base.OnConfiguring(optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 }

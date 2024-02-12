@@ -20,13 +20,14 @@ public static class DataAccessConfigurator
     public static IServiceCollection AddMqttDataAccessServices(this IServiceCollection services, IConfiguration configuration)
     {
         // Add DbContexts
-        var connectionString = configuration.GetConnectionString("ApplicationConnection");
+        var writeConnectionString = configuration.GetConnectionString("WriteDb");
+        var readConnectionString = configuration.GetConnectionString("ReadDb");
         _ = services
-            .AddDbContext<MqttWriteDbContext>(options => options.UseSqlServer(connectionString, b => b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName)), ServiceLifetime.Transient)
+            .AddDbContext<MqttWriteDbContext>(options => options.UseSqlServer(writeConnectionString, b => b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName)), ServiceLifetime.Transient)
             .AddDbContext<MqttReadDbContext>(
                 options =>
                 {
-                    _ = options.UseSqlServer(connectionString, b => b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName));
+                    _ = options.UseSqlServer(readConnectionString, b => b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName));
                     _ = options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 }, ServiceLifetime.Transient)
             ;

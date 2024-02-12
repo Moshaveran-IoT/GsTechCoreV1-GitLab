@@ -1,14 +1,16 @@
 ﻿using Application.Services;
 
+using Microsoft.AspNetCore.Http.HttpResults;
+
 using Moshaveran.Mqtt.Domain.Services;
 
 using MQTTnet.AspNetCore.AttributeRouting;
 
-namespace Moshaveran.API.Controllers;
+namespace Moshaveran.Mqtt.API.Controllers;
 
 [MqttController]
 [MqttRoute("Gs")]
-public class MqttGsTechController(ILogger<MqttGsTechController> logger, GsTechMqttService service) : MqttBaseController
+public class MqttGsTechController(GsTechMqttService service) : MqttBaseController
 {
     [MqttRoute("{IMEI}/CAN")]
     public Task CAN(string IMEI, CancellationToken token = default)
