@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace InfrastructureTests;
 public sealed class Startup
 {
-    public void ConfigureServices(IServiceCollection services)
+    public static void ConfigureServices(IServiceCollection services)
     {
         services.AddInfrastructureService();
     }

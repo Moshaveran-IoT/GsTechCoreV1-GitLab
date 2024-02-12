@@ -6,11 +6,9 @@ namespace InfrastructureTests;
 
 [Trait("Category", nameof(Moshaveran.Infrastructure))]
 [Trait("Category", nameof(IMapper))]
-public class MapperTests
+public class MapperTests(IMapper mapper)
 {
-    private readonly IMapper _mapper;
-
-    public MapperTests(IMapper mapper) => this._mapper = mapper;
+    private readonly IMapper _mapper = mapper;
 
     [Fact]
     public void BasicTest1()
@@ -38,7 +36,7 @@ public class MapperTests
         // Assert
         _ = Assert.Throws<NotSupportedException>(dst);
 
-        Animal dst() => this._mapper.Map<Animal>(src);  
+        Animal dst() => this._mapper.Map<Animal>(src);
     }
 
     [Fact]
@@ -103,12 +101,9 @@ internal sealed class Person
     public string? Name { get; set; }
 }
 
-sealed class Animal
+internal sealed class Animal
 {
     private readonly string _name;
 
-    public Animal(string name)
-    {
-        this._name = name;
-    }
+    public Animal(string name) => this._name = name;
 }
