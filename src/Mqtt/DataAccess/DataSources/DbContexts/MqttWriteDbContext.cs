@@ -16,6 +16,38 @@ internal sealed class MqttWriteDbContext : MqttDbContext
     {
     }
 
+    public async Task<Result> AddLastVoltageBrokerAsync(EntityEntry<VoltageBroker> entry, CancellationToken token = default)
+    {
+        //var result = entry.Entity;
+        //FormattableString statement = $@"
+        //        DELETE dbo.Voltage_Daily_Brokers WHERE IMEI={result.Imei}
+        //        INSERT INTO dbo.Voltage_Daily_Brokers(Id,DHT_Board_Status,IMEI,InputVoltage,BatteryVoltage,CreatedBy,CreatedOn,IsDelete,DeleteOn)
+        //        VALUES(NEWID(),0,{result.Imei}, {result.InputVoltage},{result.BatteryVoltage}, NULL,{result.CreatedOn.ToSqlFormat()},0,NULL)";
+        //return await this.ExecuteSql(statement, token);
+        var entity = entry.Entity;
+        var oldEntityQuery = from can in this.VoltageDailyBrokers
+                             where can.Imei == entity.Imei
+                             select can;
+        var oldEntity = await oldEntityQuery.FirstOrDefaultAsync(token);
+        if (oldEntity != null)
+        {
+            _ = this.VoltageDailyBrokers.Remove(oldEntity);
+        }
+        _ = this.VoltageDailyBrokers.Add(new VoltageDailyBroker
+        {
+            Id = Guid.NewGuid(),
+            DhtBoardStatus = false,
+            Imei = entity.Imei,
+            InputVoltage = entity.InputVoltage,
+            BatteryVoltage = entity.BatteryVoltage,
+            CreatedBy = null,
+            CreatedOn = entity.CreatedOn,
+            IsDelete = false,
+            DeleteOn = null,
+        });
+        return Result.Succeed;
+    }
+
     public async Task<int> SaveCanBrokerAsync(EntityEntry<CanBroker> entry, CancellationToken token = default)
     {
         var result = entry.Entity;
@@ -96,17 +128,6 @@ internal sealed class MqttWriteDbContext : MqttDbContext
                 VALUES(NEWID(),{result.Imei}, {result.SensorId},{result.Address},{result.Pressure},{result.Temperature},{result.Voltage}, NULL,{result.CreatedOn.ToSqlFormat()},NULL,NULL,0,null)";
         return await this.ExecuteSql(statement, token);
     }
-
-    public async Task<int> SaveVoltageBrokerAsync(EntityEntry<VoltageBroker> entry, CancellationToken token = default)
-    {
-        var result = entry.Entity;
-        FormattableString statement = $@"
-                DELETE dbo.Voltage_Daily_Brokers WHERE IMEI={result.Imei}
-                INSERT INTO dbo.Voltage_Daily_Brokers(Id,DHT_Board_Status,IMEI,InputVoltage,BatteryVoltage,CreatedBy,CreatedOn,IsDelete,DeleteOn)
-                VALUES(NEWID(),0,{result.Imei}, {result.InputVoltage},{result.BatteryVoltage}, NULL,{result.CreatedOn.ToSqlFormat()},0,NULL)";
-        return await this.ExecuteSql(statement, token);
-    }
-
     private Task<int> ExecuteSql(FormattableString statement, CancellationToken token)
-       => this.Database.ExecuteSqlInterpolatedAsync(statement, token);
+        => this.Database.ExecuteSqlInterpolatedAsync(statement, token);
 }

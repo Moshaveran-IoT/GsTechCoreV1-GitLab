@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+
 using Moshaveran.Library.Results;
 using Moshaveran.Library.Validations;
 
@@ -9,6 +10,9 @@ namespace Moshaveran.Library.Helpers;
 [StackTraceHidden]
 public static class ResultHelper
 {
+    public static void Deconstruct<TValue>(this Result<TValue?> r, out Result result, out TValue? value)
+        => (result, value) = (r, r.Value);
+
     [return: NotNullIfNotNull(nameof(result))]
     public static TResult OnFailure<TResult>(this TResult result, Action<TResult> action)
         where TResult : ResultBase

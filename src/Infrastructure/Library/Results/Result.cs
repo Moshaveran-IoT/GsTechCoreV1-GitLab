@@ -39,6 +39,9 @@ public sealed class Result(bool isSucceed, string? message = null, Exception? ex
 
     public static Result<TValue> CreateSucceed<TValue>(TValue value)
         => new(value, true);
+
+    public Result<TValue> WithValue<TValue>(TValue value)
+        => new Result<TValue>(value, this.IsSucceed, this.Message, this.Exception)!;
 }
 
 public sealed class Result<TValue>(TValue value, bool isSucceed, string? message = null, Exception? exception = null) : ResultBase(isSucceed, message, exception)
@@ -51,6 +54,9 @@ public sealed class Result<TValue>(TValue value, bool isSucceed, string? message
 
     public TValue Value { get; } = value;
 
+    public static implicit operator (Result Result, TValue? Value)(Result<TValue?> result)
+        => (result, result.Value);
+
     public static implicit operator Result(Result<TValue?> result)
         => new(result.IsSucceed, result.Message, result.Exception);
 
@@ -58,21 +64,21 @@ public sealed class Result<TValue>(TValue value, bool isSucceed, string? message
         => result.Value;
 
     public Result<TValue> WithValue(TValue value)
-        => new(value, IsSucceed, Message, Exception);
+        => new(value, this.IsSucceed, this.Message, this.Exception);
 
     public Result<TValue1> WithValue<TValue1>(TValue1 value)
-        => new(value, IsSucceed, Message, Exception);
+        => new(value, this.IsSucceed, this.Message, this.Exception);
 }
 
 public abstract class ResultBase(bool isSucceed, string? message = null, Exception? exception = null)
 {
     public Exception? Exception { get; } = exception;
 
-    public bool IsFailure => !IsSucceed;
+    public bool IsFailure => !this.IsSucceed;
 
     public bool IsSucceed { get; } = isSucceed;
 
     public string? Message { get; } = message;
 
-    public object? State => (object?)Exception ?? Message;
+    public object? State => (object?)this.Exception ?? this.Message;
 }
