@@ -2,14 +2,14 @@
 
 namespace Moshaveran.Library.Results.Internals;
 
-public abstract class ResultBase(bool isSucceed, string? message = null, params IGsTechException[] exceptions)
+public abstract class ResultBase(bool isSucceed, string? message = null, params Exception[] exceptions)
 {
-    protected ResultBase(bool isSucceed, string? message = null, IEnumerable<IGsTechException>? exceptions = null)
+    protected ResultBase(bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null)
         : this(isSucceed, message, exceptions?.ToArray() ?? [])
     {
     }
 
-    public IEnumerable<IGsTechException> Exceptions { get; } = exceptions.Length != 0 ? exceptions : [];
+    public IEnumerable<Exception> Exceptions { get; } = exceptions.Length != 0 ? exceptions : [];
 
     public bool IsFailure => !this.IsSucceed;
 

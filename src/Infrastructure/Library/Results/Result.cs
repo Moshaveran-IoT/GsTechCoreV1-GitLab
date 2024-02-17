@@ -1,5 +1,4 @@
-﻿using Moshaveran.Library.Exceptions;
-using Moshaveran.Library.Results.Internals;
+﻿using Moshaveran.Library.Results.Internals;
 
 namespace Moshaveran.Library.Results;
 
@@ -9,11 +8,11 @@ public sealed class Result : ResultBase, IResult
 
     private static Result? _succeed;
 
-    public Result(bool isSucceed, string? message = null, params IGsTechException[] exceptions) : base(isSucceed, message, exceptions)
+    public Result(bool isSucceed, string? message = null, params Exception[] exceptions) : base(isSucceed, message, exceptions)
     {
     }
 
-    public Result(bool isSucceed, string? message = null, IEnumerable<IGsTechException>? exceptions = null) : base(isSucceed, message, exceptions)
+    public Result(bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null) : base(isSucceed, message, exceptions)
     {
     }
 
@@ -27,7 +26,7 @@ public sealed class Result : ResultBase, IResult
     public static Result Create(bool isSucceed, string? message)
         => new(isSucceed, message);
 
-    public static Result Create(IGsTechException exception)
+    public static Result Create(Exception exception)
         => new(false, exceptions: exception);
 
     public static Result<TValue> Create<TValue>(TValue value, bool isSucceed)
@@ -39,7 +38,7 @@ public sealed class Result : ResultBase, IResult
     public static Result<TValue> CreateFailure<TValue>(TValue value)
         => new(value, false);
 
-    public static Result CreateFailure(IGsTechException exception)
+    public static Result CreateFailure(Exception exception)
         => new(false, exceptions: exception);
 
     public static Result<TValue> CreateFailure<TValue>(TValue value, string message)

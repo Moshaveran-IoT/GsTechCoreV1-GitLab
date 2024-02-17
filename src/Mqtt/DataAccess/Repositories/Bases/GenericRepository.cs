@@ -1,4 +1,5 @@
 ﻿using Moshaveran.Library.Data;
+using Moshaveran.Library.Exceptions;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbContexts;
 
 namespace Moshaveran.GsTech.Mqtt.DataAccess.Repositories.Bases;

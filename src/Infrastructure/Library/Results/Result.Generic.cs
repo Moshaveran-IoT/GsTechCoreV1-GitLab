@@ -8,10 +8,10 @@ public sealed class Result<TValue> : ResultBase, IResult, IResult<TValue>
     private static Result<TValue>? _failed;
     private static Result<TValue>? _succeed;
 
-    public Result(TValue value, bool isSucceed, string? message = null, params IGsTechException[] exceptions) : base(isSucceed, message, exceptions)
+    public Result(TValue value, bool isSucceed, string? message = null, params Exception[] exceptions) : base(isSucceed, message, exceptions)
         => this.Value = value;
 
-    public Result(TValue value, bool isSucceed, string? message = null, IEnumerable<IGsTechException>? exceptions = null) : base(isSucceed, message, exceptions)
+    public Result(TValue value, bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null) : base(isSucceed, message, exceptions)
         => this.Value = value;
 
     public static Result<TValue> Failed => _failed ??= new(default!, false);

@@ -23,9 +23,9 @@ internal abstract class LastBrokerRepositoryBase<TBroker>(MqttReadDbContext read
             await entries.Enumerate(this.SaveBrokerAsync, token);
             return Result.Succeed;
         }
-        catch (Exception ex) when (ex is IGsTechException x)
+        catch (Exception ex)
         {
-            return Result.Create(x);
+            return Result.Create(ex);
         }
     }
 
