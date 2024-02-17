@@ -1,10 +1,20 @@
-﻿namespace Moshaveran.Library.Results;
+﻿using Moshaveran.Library.Results.Internals;
 
-public sealed class Result(bool isSucceed, string? message = null, Exception? exception = null) : ResultBase(isSucceed, message, exception)
+namespace Moshaveran.Library.Results;
+
+public sealed class Result : ResultBase
 {
     private static Result? _failed;
 
     private static Result? _succeed;
+
+    public Result(bool isSucceed, string? message = null, params Exception[] exceptions) : base(isSucceed, message, exceptions)
+    {
+    }
+
+    public Result(bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null) : base(isSucceed, message, exceptions)
+    {
+    }
 
     public static Result Failed => _failed ??= new(true);
 
@@ -16,14 +26,11 @@ public sealed class Result(bool isSucceed, string? message = null, Exception? ex
     public static Result Create(bool isSucceed, string? message)
         => new(isSucceed, message);
 
-    public static Result Create(Exception? exception)
-        => new(false, exception: exception);
+    public static Result Create(Exception exception)
+        => new(false, exceptions: exception);
 
     public static Result<TValue> Create<TValue>(TValue value, bool isSucceed)
         => new(value, isSucceed);
-
-    public static Result<TValue> Create<TValue>(TValue value, bool isSucceed, Exception? exception)
-        => new(value, isSucceed, exception: exception);
 
     public static Result<TValue> Create<TValue>(TValue value, bool isSucceed, string? message)
         => new(value, isSucceed, message);
@@ -32,7 +39,7 @@ public sealed class Result(bool isSucceed, string? message = null, Exception? ex
         => new(value, false);
 
     public static Result CreateFailure(Exception exception)
-        => new(false, exception: exception);
+        => new(false, exceptions: exception);
 
     public static Result<TValue> CreateFailure<TValue>(TValue value, string message)
         => new(value, false, message);
@@ -41,44 +48,37 @@ public sealed class Result(bool isSucceed, string? message = null, Exception? ex
         => new(value, true);
 
     public Result<TValue> WithValue<TValue>(TValue value)
-        => new Result<TValue>(value, this.IsSucceed, this.Message, this.Exception)!;
+        => new Result<TValue>(value, this.IsSucceed, this.Message, this.Exceptions)!;
 }
 
-public sealed class Result<TValue>(TValue value, bool isSucceed, string? message = null, Exception? exception = null) : ResultBase(isSucceed, message, exception)
+public sealed class Result<TValue> : ResultBase
 {
     private static Result<TValue>? _failed;
     private static Result<TValue>? _succeed;
 
+    public Result(TValue value, bool isSucceed, string? message = null, params Exception[] exceptions) : base(isSucceed, message, exceptions)
+        => this.Value = value;
+
+    public Result(TValue value, bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null) : base(isSucceed, message, exceptions)
+        => this.Value = value;
+
     public static Result<TValue> Failed => _failed ??= new(default!, false);
     public static Result<TValue> Succeed => _succeed ??= new(default!, true);
 
-    public TValue Value { get; } = value;
+    public TValue Value { get; }
 
     public static implicit operator (Result Result, TValue? Value)(Result<TValue?> result)
         => (result, result.Value);
 
     public static implicit operator Result(Result<TValue?> result)
-        => new(result.IsSucceed, result.Message, result.Exception);
+        => new(result.IsSucceed, result.Message, result.Exceptions);
 
     public static implicit operator TValue?(Result<TValue?> result)
         => result.Value;
 
     public Result<TValue> WithValue(TValue value)
-        => new(value, this.IsSucceed, this.Message, this.Exception);
+        => new(value, this.IsSucceed, this.Message, this.Exceptions);
 
     public Result<TValue1> WithValue<TValue1>(TValue1 value)
-        => new(value, this.IsSucceed, this.Message, this.Exception);
-}
-
-public abstract class ResultBase(bool isSucceed, string? message = null, Exception? exception = null)
-{
-    public Exception? Exception { get; } = exception;
-
-    public bool IsFailure => !this.IsSucceed;
-
-    public bool IsSucceed { get; } = isSucceed;
-
-    public string? Message { get; } = message;
-
-    public object? State => (object?)this.Exception ?? this.Message;
+        => new(value, this.IsSucceed, this.Message, this.Exceptions);
 }

@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 
 using Moshaveran.Library.Results;
+using Moshaveran.Library.Results.Internals;
 using Moshaveran.Library.Validations;
 
 namespace Moshaveran.Library.Helpers;

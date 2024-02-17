@@ -12,6 +12,9 @@ public static class EnumerableHelper
     public static IEnumerable<T>? Build<T>(this IEnumerable<T>? values)
         => values?.ToImmutableArray().AsEnumerable();
 
+    public static IEnumerable<T> Combine<T>(this IEnumerable<IEnumerable<T>> items)
+        => items.SelectMany(x => x);
+
     /// <summary>
     /// Returns an IEnumerable of non-null elements from the given IEnumerable of nullable elements.
     /// </summary>
