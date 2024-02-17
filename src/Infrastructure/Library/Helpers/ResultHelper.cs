@@ -16,7 +16,7 @@ public static class ResultHelper
 
     [return: NotNullIfNotNull(nameof(result))]
     public static TResult OnFailure<TResult>(this TResult result, Action<TResult> action)
-        where TResult : ResultBase
+        where TResult : IResult
     {
         if (result?.IsSucceed != true)
         {
@@ -27,7 +27,7 @@ public static class ResultHelper
     }
 
     public static async Task<TFuncResult> OnFailure<TResult, TFuncResult>(this Task<TResult> resultAsync, Func<TResult, TFuncResult> action, TFuncResult defaultFuncResult = default!)
-        where TResult : ResultBase
+        where TResult : IResult
     {
         var result = await resultAsync;
         return result?.IsSucceed != true
@@ -37,7 +37,7 @@ public static class ResultHelper
 
     [return: NotNullIfNotNull(nameof(result))]
     public static TResult OnSucceed<TResult>(this TResult result, Action<TResult> action)
-        where TResult : ResultBase
+        where TResult : IResult
     {
         if (result?.IsSucceed == true)
         {
@@ -48,7 +48,7 @@ public static class ResultHelper
     }
 
     public static async Task<TResult> OnSucceed<TResult>(this Task<TResult> resultAsync, Action<TResult> action)
-        where TResult : ResultBase
+        where TResult : IResult
     {
         var result = await resultAsync;
         if (result?.IsSucceed == true)
@@ -60,7 +60,7 @@ public static class ResultHelper
     }
 
     public static async Task<TFuncResult> OnSucceed<TResult, TFuncResult>(this Task<TResult> resultAsync, Func<TResult, TFuncResult> action, TFuncResult defaultFuncResult = default!)
-        where TResult : ResultBase
+        where TResult : IResult
     {
         var result = await resultAsync;
         return result?.IsSucceed == true
@@ -69,7 +69,7 @@ public static class ResultHelper
     }
 
     public static async Task<TFuncResult> Process<TResult, TFuncResult>(this Task<TResult> resultAsync, Func<TResult, TFuncResult> onSucceed, Func<TResult, TFuncResult> onFailure)
-        where TResult : ResultBase
+        where TResult : IResult
     {
         var result = await resultAsync;
         return result?.IsSucceed == true
@@ -78,7 +78,7 @@ public static class ResultHelper
     }
 
     public static TFuncResult Process<TResult, TFuncResult>(this TResult result, Func<TResult, TFuncResult> onSucceed, Func<TResult, TFuncResult> onFailure)
-        where TResult : ResultBase
+        where TResult : IResult
         => result?.IsSucceed == true
             ? onSucceed.ArgumentNotNull()(result!)
             : onFailure.ArgumentNotNull()(result!);

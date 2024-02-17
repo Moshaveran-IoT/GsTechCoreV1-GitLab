@@ -1,6 +1,6 @@
 ﻿namespace Moshaveran.Library.Exceptions;
 
-public sealed class GsTechException : GsTechExceptionBase
+public sealed class GsTechException : GsTechExceptionBase, IGsTechException
 {
     public GsTechException()
     {
