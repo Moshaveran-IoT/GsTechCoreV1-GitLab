@@ -1,15 +1,15 @@
-﻿using Moshaveran.Infrastructure.ApplicationServices;
-using Moshaveran.Infrastructure.Results;
+﻿using Moshaveran.Library;
+using Moshaveran.Library.ApplicationServices;
 
 namespace Moshaveran.Mqtt.Domain.Services;
 
 public interface IGeocodingService : IBusinessService
 {
-    Task<Result<GeoCode?>> Forward(string address);
+    Task<IResult<GeoCode?>> Forward(string address);
 
-    Task<Result<string?>> Reverse(double latitude, double longitude);
+    Task<IResult<string?>> Reverse(double latitude, double longitude);
 
-    Task<Result<string?>> Reverse(GeoCode code)
+    Task<IResult<string?>> Reverse(GeoCode code)
         => Reverse(code.Latitude, code.Longitude);
 }
 

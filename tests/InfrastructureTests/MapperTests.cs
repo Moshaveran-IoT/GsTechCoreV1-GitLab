@@ -1,11 +1,8 @@
-using FluentAssertions;
-
-using Moshaveran.Infrastructure.Mapping;
+using Moshaveran.Library.Mapping;
 
 namespace InfrastructureTests;
 
-[Trait("Category", nameof(Moshaveran.Infrastructure))]
-[Trait("Category", nameof(IMapper))]
+[Trait("Category", nameof(Moshaveran.Library.Mapping))]
 public class MapperTests(IMapper mapper)
 {
     private readonly IMapper _mapper = mapper;
@@ -85,20 +82,17 @@ public class MapperTests(IMapper mapper)
     }
 }
 
-internal sealed class Person
+internal sealed class Person()
 {
-    public Person()
-    {
-    }
-
-    public Person(string? name, int age)
+    public Person(string name, int age)
+        : this()
     {
         this.Name = name;
         this.Age = age;
     }
 
     public int Age { get; set; }
-    public string? Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 }
 
 internal sealed class Animal

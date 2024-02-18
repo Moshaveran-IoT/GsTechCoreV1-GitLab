@@ -1,4 +1,4 @@
-﻿namespace Moshaveran.Infrastructure.Mapping;
+﻿namespace Moshaveran.Library.Mapping;
 
 public interface IMappable<in TSource, out TDestination>
 {

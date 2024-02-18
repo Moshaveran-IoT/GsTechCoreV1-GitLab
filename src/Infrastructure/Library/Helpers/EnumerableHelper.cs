@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Moshaveran.Infrastructure.Helpers;
+namespace Moshaveran.Library.Helpers;
 
 [DebuggerStepThrough]
 [StackTraceHidden]
@@ -12,13 +12,16 @@ public static class EnumerableHelper
     public static IEnumerable<T>? Build<T>(this IEnumerable<T>? values)
         => values?.ToImmutableArray().AsEnumerable();
 
+    public static IEnumerable<T> Combine<T>(this IEnumerable<IEnumerable<T>> items)
+        => items.SelectMany(x => x);
+
     /// <summary>
     /// Returns an IEnumerable of non-null elements from the given IEnumerable of nullable elements.
     /// </summary>
     [return: NotNull]
     public static IEnumerable<TSource> Compact<TSource>(this IEnumerable<TSource?>? items) where TSource : class =>
         items?
-             .Where([DebuggerStepThrough] (x) => x is not null)
+             .Where([DebuggerStepThrough] (x) => x != null)
              .Select([DebuggerStepThrough] (x) => x!)
         ?? [];
 

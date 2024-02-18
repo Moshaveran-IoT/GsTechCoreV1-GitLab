@@ -1,29 +1,29 @@
-﻿using Moshaveran.Infrastructure.ApplicationServices;
-using Moshaveran.Infrastructure.Results;
+﻿using Moshaveran.Library;
+using Moshaveran.Library.ApplicationServices;
 
 namespace Moshaveran.Mqtt.Domain.Services;
 
 public interface IGsTechMqttService : IBusinessService
 {
-    Task<Result> ProcessCameraPayload(ProcessPayloadArgs args);
+    Task<IResult> ProcessCameraPayload(ProcessPayloadArgs args);
 
-    Task<Result> ProcessCanPayload(ProcessPayloadArgs args);
+    Task<IResult> ProcessCanPayload(ProcessPayloadArgs args);
 
-    Task<Result> ProcessGeneralPayload(ProcessPayloadArgs args);
+    Task<IResult> ProcessGeneralPayload(ProcessPayloadArgs args);
 
-    Task<Result> ProcessGeneralPlusPayload(ProcessPayloadArgs args);
+    Task<IResult> ProcessGeneralPlusPayload(ProcessPayloadArgs args);
 
-    Task<Result> ProcessGpsPayload(ProcessPayloadArgs args);
+    Task<IResult> ProcessGpsPayload(ProcessPayloadArgs args);
 
-    Task<Result> ProcessObdPayload(ProcessPayloadArgs args);
+    Task<IResult> ProcessObdPayload(ProcessPayloadArgs args);
 
-    Task<Result> ProcessSignalPayload(ProcessPayloadArgs args);
+    Task<IResult> ProcessSignalPayload(ProcessPayloadArgs args);
 
-    Task<Result> ProcessTemperaturePayload(ProcessPayloadArgs args);
+    Task<IResult> ProcessTemperaturePayload(ProcessPayloadArgs args);
 
-    Task<Result> ProcessTpmsPayload(ProcessPayloadArgs args);
+    Task<IResult> ProcessTpmsPayload(ProcessPayloadArgs args);
 
-    Task<Result> ProcessVoltagePayload(ProcessPayloadArgs args);
+    Task<IResult> ProcessVoltagePayload(ProcessPayloadArgs args);
 }
 
 public readonly record struct ProcessPayloadArgs(byte[] Payload, string ClientId, string Imei, CancellationToken Token = default);

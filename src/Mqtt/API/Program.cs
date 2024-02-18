@@ -1,6 +1,6 @@
 using MQTTnet.AspNetCore.Extensions;
 
-namespace Moshaveran.Mqtt.API;
+namespace Moshaveran.GsTech.Mqtt.API;
 
 internal static class Program
 {

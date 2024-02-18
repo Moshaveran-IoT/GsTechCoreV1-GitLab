@@ -5,7 +5,7 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AssemblyName>Moshaveran.IoT.$(MSBuildProjectName)</AssemblyName>
-		<RootNamespace>Moshaveran.Mqtt.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+		<RootNamespace>Moshaveran.GsTech.Mqtt.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 		<Title>Moshaveran GS-Tech Worker Service</Title>
 		<Authors>Mirmostafa</Authors>
 		<Company>Moshaveran</Company>
@@ -52,20 +52,15 @@
 
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="Models\" />
-	</ItemGroup>
-	<ItemGroup>
 	  <ProjectReference Include="..\..\Infrastructure\Infrastructure.csproj" />
 	  <ProjectReference Include="..\Application\Application.csproj" />
 	  <ProjectReference Include="..\Domain\Domain.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Using Include="Moshaveran.Infrastructure" />
-	  <Using Include="Moshaveran.Infrastructure.Coding" />
-	  <Using Include="Moshaveran.Infrastructure.Coding.CodeHelper">
+	  <Using Include="Moshaveran.Library" />
+	  <Using Include="Moshaveran.Library.CodeHelper">
 	    <Static>True</Static>
 	  </Using>
-	  <Using Include="Moshaveran.Infrastructure.Results" />
 	</ItemGroup>
 
 </Project>

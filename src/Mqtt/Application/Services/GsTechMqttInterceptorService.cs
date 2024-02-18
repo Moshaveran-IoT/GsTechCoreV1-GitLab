@@ -3,10 +3,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-using Application.Interfaces;
-
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
+using Moshaveran.GsTech.Mqtt.Application.Interfaces;
 
 using MQTTnet;
 using MQTTnet.Protocol;

@@ -31,4 +31,9 @@
     <ProjectReference Include="..\..\src\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="FluentAssertions" />
+    <Using Include="Moshaveran.Library.Helpers" />
+  </ItemGroup>
+
 </Project>

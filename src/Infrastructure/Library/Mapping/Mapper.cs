@@ -1,9 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using Moshaveran.Library.Helpers;
 
-using Moshaveran.Infrastructure.Helpers;
-
-namespace Moshaveran.Infrastructure.Mapping;
+namespace Moshaveran.Library.Mapping;
 
 //[DebuggerStepThrough]
 //[StackTraceHidden]
@@ -66,7 +65,7 @@ public sealed class Mapper : IMapper
     private static void Copy<TDestination>(object source, TDestination destination, PropertyInfo dstProp)
     {
         var mapping = dstProp.GetCustomAttribute<PropertyMappingAttribute>()?.MapFrom;
-        var name = (mapping is { } info) && (info.SourceClassName is null || info.SourceClassName == typeof(TDestination).Name)
+        var name = mapping is { } info && (info.SourceClassName is null || info.SourceClassName == typeof(TDestination).Name)
                 ? info.SourcePropertyName ?? dstProp.Name
                 : dstProp.Name;
         if (source!.GetType().GetProperty(name) is not { } srcProp)
