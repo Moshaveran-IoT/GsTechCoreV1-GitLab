@@ -4,29 +4,44 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
+using Moshaveran.Library.Validations;
+
 namespace Moshaveran.Library;
 
-[DebuggerStepThrough]
-[StackTraceHidden]
+//[DebuggerStepThrough]
+//[StackTraceHidden]
 public static partial class StringHelper
 {
     public static StringBuilder AppendAll(this StringBuilder sb, in IEnumerable<string?> lines)
     {
-        foreach (var line in lines)
+        Check.MustBeArgumentNotNull(sb);
+
+        if (lines?.Any() == true)
         {
-            _ = sb.Append(line);
+            foreach (var line in lines)
+            {
+                _ = sb.Append(line);
+            }
         }
+
         return sb;
     }
 
     public static StringBuilder AppendAllLine(this StringBuilder sb, in IEnumerable<string?> lines)
     {
-        foreach (var line in lines)
+        Check.MustBeArgumentNotNull(sb);
+
+        if (lines?.Any() == true)
         {
-            _ = sb.AppendLine(line);
+            foreach (var line in lines)
+            {
+                _ = sb.AppendLine(line);
+            }
         }
+
         return sb;
     }
+
     public static string HexToUnicode(in string hex)
     {
         var bytes = hexToUnicodeRegex().Matches(hex).OfType<Match>().Select(m => Convert.ToByte(m.Groups["hex"].Value, 16)).ToArray();
@@ -34,7 +49,7 @@ public static partial class StringHelper
         return string.Join("", chars);
     }
 
-    public static bool IsNullOrEmpty([NotNullWhen(false)] this string s)
+    public static bool IsNullOrEmpty([NotNullWhen(false)] this string? s)
         => string.IsNullOrEmpty(s);
 
     public static bool TryParseJson<T>(string @this, out T? result)
@@ -50,6 +65,7 @@ public static partial class StringHelper
             return false;
         }
     }
+
     [GeneratedRegex(@"(?<hex>[0-9A-F]{2})", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
     private static partial Regex hexToUnicodeRegex();
 }
