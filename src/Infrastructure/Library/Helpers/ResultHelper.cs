@@ -16,7 +16,7 @@ public static class ResultHelper
         => (await result).Value;
 
     [return: NotNullIfNotNull(nameof(result))]
-    public static TResult OnFailure<TResult>(this TResult result, Action<TResult> action)
+    public static TResult? OnFailure<TResult>(this TResult? result, Action<TResult> action)
         where TResult : IResult
     {
         if (result?.IsSucceed != true)
@@ -27,9 +27,11 @@ public static class ResultHelper
         return result!;
     }
 
-    public static async Task<TFuncResult> OnFailure<TResult, TFuncResult>(this Task<TResult> resultAsync, Func<TResult, TFuncResult> action, TFuncResult defaultFuncResult = default!)
+    public static async Task<TFuncResult?> OnFailure<TResult, TFuncResult>(this Task<TResult?> resultAsync, Func<TResult, TFuncResult> action, TFuncResult defaultFuncResult = default!)
         where TResult : IResult
     {
+        Check.MustBeArgumentNotNull(resultAsync);
+
         var result = await resultAsync;
         return result?.IsSucceed != true
             ? action.ArgumentNotNull()(result!)
@@ -51,6 +53,8 @@ public static class ResultHelper
     public static async Task<TResult> OnSucceed<TResult>(this Task<TResult> resultAsync, Action<TResult> action)
         where TResult : IResult
     {
+        Check.MustBeArgumentNotNull(resultAsync);
+
         var result = await resultAsync;
         if (result?.IsSucceed == true)
         {

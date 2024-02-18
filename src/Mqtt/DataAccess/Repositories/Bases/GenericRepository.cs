@@ -12,12 +12,8 @@ internal class GenericRepository<TModel>(MqttReadDbContext readDbContext, MqttWr
     public Task<IResult> Delete(TModel model, bool persist = true, CancellationToken token = default)
         => this.ManipulateModel(model, this.OnDeleting, persist, token);
 
-    Task<Result> IRepository<TModel>.Delete(TModel model, bool persist, CancellationToken token) => throw new NotImplementedException();
-
     public Task<IResult> Insert(TModel model, bool persist = true, CancellationToken token = default)
             => this.ManipulateModel(model, this.OnInserting, persist, token);
-
-    Task<Result> IRepository<TModel>.Insert(TModel model, bool persist, CancellationToken token) => throw new NotImplementedException();
 
     public async Task<IResult> SaveChanges(CancellationToken token = default)
     {
@@ -31,12 +27,8 @@ internal class GenericRepository<TModel>(MqttReadDbContext readDbContext, MqttWr
         }
     }
 
-    Task<Result> IRepository<TModel>.SaveChanges(CancellationToken token) => throw new NotImplementedException();
-
     public Task<IResult> Update(TModel model, bool persist = true, CancellationToken token = default)
             => this.ManipulateModel(model, this.OnUpdating, persist, token);
-
-    Task<Result> IRepository<TModel>.Update(TModel model, bool persist, CancellationToken token) => throw new NotImplementedException();
 
     protected virtual async Task<IResult> ManipulateModel(TModel model, Func<TModel, CancellationToken, Task<IResult>> action, bool persist = true, CancellationToken token = default)
     {
