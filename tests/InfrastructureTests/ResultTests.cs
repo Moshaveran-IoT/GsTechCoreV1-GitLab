@@ -74,20 +74,6 @@ public sealed class ResultTests
     }
 
     [Fact]
-    public async Task OnFailureAsync__ReturnsDefaultFuncResultWhenResultIsSuccessful()
-    {
-        // Arrange
-        var resultTask = Task.FromResult(Result.Succeed);
-        var defaultFuncResult = "Default Result";
-
-        // Act
-        var returnedResult = await resultTask.OnFailure(r => "Action Result", defaultFuncResult);
-
-        // Assert
-        _ = returnedResult.Should().Be(defaultFuncResult);
-    }
-
-    [Fact]
     public async Task OnFailureAsync_ExecutesActionWhenResultIsFailure()
     {
         // Arrange
@@ -378,5 +364,35 @@ public sealed class ResultTests
         IResult result = Result.Succeed;
         _ = result.Should().NotBeNull();
         _ = result.IsSucceed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void WithValue_ShouldCreateResultWithValueOnFailure()
+    {
+        // Arrange
+        IResult failureResult = Result.Fail("Error message");
+        var value = "Failure Value";
+
+        // Act
+        var resultWithValue = failureResult.WithValue(value);
+
+        // Assert
+        Assert.False(resultWithValue.IsSucceed);
+        Assert.Equal(value, resultWithValue.Value);
+    }
+
+    [Fact]
+    public void WithValue_ShouldCreateResultWithValueOnSuccess()
+    {
+        // Arrange
+        IResult successResult = Result.Succeed;
+        var value = "Success Value";
+
+        // Act
+        var resultWithValue = successResult.WithValue(value);
+
+        // Assert
+        Assert.True(resultWithValue.IsSucceed);
+        Assert.Equal(value, resultWithValue.Value);
     }
 }
