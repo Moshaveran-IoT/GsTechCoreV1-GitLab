@@ -2,7 +2,6 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-
 using Moshaveran.Library.Exceptions;
 using Moshaveran.Library.Helpers;
 using Moshaveran.Library.Validations;
@@ -13,7 +12,7 @@ namespace Moshaveran.GsTech.Mqtt.DataAccess.Repositories.Bases;
 internal abstract class LastBrokerRepositoryBase<TBroker>(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext) : GenericRepository<TBroker>(readDbContext, writeDbContext)
     where TBroker : class
 {
-    protected override async Task<Result> OnSavingChanges(CancellationToken token)
+    protected override async Task<IResult> OnSavingChanges(CancellationToken token)
     {
         try
         {

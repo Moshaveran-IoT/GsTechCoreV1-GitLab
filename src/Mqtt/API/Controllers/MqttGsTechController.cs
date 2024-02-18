@@ -1,9 +1,9 @@
-﻿using Application.Services;
-
-using Moshaveran.Library.Results;
+﻿using Moshaveran.GsTech.Mqtt.Application.Services;
 using Moshaveran.Mqtt.Domain.Services;
 
 using MQTTnet.AspNetCore.AttributeRouting;
+
+using IResult = Moshaveran.Library.IResult;
 
 namespace Moshaveran.GsTech.Mqtt.API.Controllers;
 
@@ -51,7 +51,7 @@ public class MqttGsTechController(GsTechMqttService service) : MqttBaseControlle
     public Task Voltage(string IMEI, CancellationToken token = default)
         => this.ProcessServiceMethod(service.ProcessVoltagePayload, "Voltage", IMEI, token);
 
-    private async Task ProcessServiceMethod(Func<ProcessPayloadArgs, Task<Result>> method, string _, string imei, CancellationToken token = default)
+    private async Task ProcessServiceMethod(Func<ProcessPayloadArgs, Task<IResult>> method, string _, string imei, CancellationToken token = default)
     {
         var result = await method(new(this.Message.Payload, this.MqttContext.ClientId, imei, token));
         if (result.IsSucceed)

@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-
 using Moshaveran.Library.Helpers;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
 
@@ -16,7 +15,7 @@ internal sealed class MqttWriteDbContext : MqttDbContext
     {
     }
 
-    public async Task<Result> AddLastVoltageBrokerAsync(EntityEntry<VoltageBroker> entry, CancellationToken token = default)
+    public async Task<IResult> AddLastVoltageBrokerAsync(EntityEntry<VoltageBroker> entry, CancellationToken token = default)
     {
         //var result = entry.Entity;
         //FormattableString statement = $@"

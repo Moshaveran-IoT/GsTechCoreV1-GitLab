@@ -1,6 +1,4 @@
-﻿using Moshaveran.Library.Exceptions;
-
-namespace Moshaveran.Library.Results;
+﻿namespace Moshaveran.Library;
 
 public interface IResult
 {

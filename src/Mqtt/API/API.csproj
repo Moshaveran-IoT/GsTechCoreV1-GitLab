@@ -58,11 +58,9 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Using Include="Moshaveran.Library" />
-	  <Using Include="Moshaveran.Library.Coding" />
-	  <Using Include="Moshaveran.Library.Coding.CodeHelper">
+	  <Using Include="Moshaveran.Library.CodeHelper">
 	    <Static>True</Static>
 	  </Using>
-	  <Using Include="Moshaveran.Library.Results" />
 	</ItemGroup>
 
 </Project>

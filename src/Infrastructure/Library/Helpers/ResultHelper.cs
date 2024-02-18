@@ -1,8 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-
 using Moshaveran.Library.Results;
-using Moshaveran.Library.Results.Internals;
 using Moshaveran.Library.Validations;
 
 namespace Moshaveran.Library.Helpers;
@@ -13,6 +11,9 @@ public static class ResultHelper
 {
     public static void Deconstruct<TValue>(this Result<TValue?> r, out Result result, out TValue? value)
         => (result, value) = (r, r.Value);
+
+    public static async Task<TValue> GetValueAsync<TValue>(this Task<IResult<TValue>> result)
+        => (await result).Value;
 
     [return: NotNullIfNotNull(nameof(result))]
     public static TResult OnFailure<TResult>(this TResult result, Action<TResult> action)
@@ -68,21 +69,27 @@ public static class ResultHelper
             : defaultFuncResult;
     }
 
-    public static async Task<TFuncResult> Process<TResult, TFuncResult>(this Task<TResult> resultAsync, Func<TResult, TFuncResult> onSucceed, Func<TResult, TFuncResult> onFailure)
+    public static async Task<TFuncResult> Process<TResult, TFuncResult>(this Task<TResult?> resultAsync, Func<TResult, TFuncResult> onSucceed, Func<TResult?, TFuncResult> onFailure)
         where TResult : IResult
     {
         var result = await resultAsync;
         return result?.IsSucceed == true
-            ? onSucceed.ArgumentNotNull()(result!)
-            : onFailure.ArgumentNotNull()(result!);
+            ? onSucceed.ArgumentNotNull()(result)
+            : onFailure.ArgumentNotNull()(result);
     }
 
-    public static TFuncResult Process<TResult, TFuncResult>(this TResult result, Func<TResult, TFuncResult> onSucceed, Func<TResult, TFuncResult> onFailure)
+    public static TFuncResult Process<TResult, TFuncResult>(this TResult? result, Func<TResult, TFuncResult> onSucceed, Func<TResult?, TFuncResult> onFailure)
         where TResult : IResult
         => result?.IsSucceed == true
-            ? onSucceed.ArgumentNotNull()(result!)
-            : onFailure.ArgumentNotNull()(result!);
+            ? onSucceed.ArgumentNotNull()(result)
+            : onFailure.ArgumentNotNull()(result);
 
-    public static Task<TResult> ToAsync<TResult>(this TResult result)
+    public static Task<IResult> ToAsync(this IResult result)
         => Task.FromResult(result);
+
+    public static Task<IResult<TValue>> ToAsync<TValue>(this IResult<TValue> result)
+        => Task.FromResult(result);
+
+    public static IResult<TValue> WithValue<TValue>(this IResult result, TValue value)
+        => new Result<TValue>(value, result.IsSucceed, result.Message, result.Exceptions)!;
 }

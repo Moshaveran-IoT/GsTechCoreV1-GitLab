@@ -1,11 +1,14 @@
-﻿using Moshaveran.Library.Results;
+﻿using Moshaveran.Library.Helpers;
+using Moshaveran.Library.Results;
 using Moshaveran.Mqtt.Domain.Services;
 
 namespace Moshaveran.GsTech.Mqtt.Application.Services;
 
 public sealed class GeocodingService : IGeocodingService
 {
-    public Task<Result<GeoCode?>> Forward(string address) => Task.FromResult(Result.Create<GeoCode?>(new GeoCode(0, 0), true));
+    public Task<IResult<GeoCode?>> Forward(string address)
+        => Result.Create<GeoCode?>(new GeoCode(0, 0), true).ToAsync();
 
-    public Task<Result<string?>> Reverse(double latitude, double longitude) => Task.FromResult(Result.Create<string?>(string.Empty, true));
+    public Task<IResult<string?>> Reverse(double latitude, double longitude)
+        => Result.Create<string?>(string.Empty, true).ToAsync();
 }

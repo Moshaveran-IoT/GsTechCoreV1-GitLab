@@ -8,15 +8,15 @@ public sealed class Result : ResultBase, IResult
 
     private static Result? _succeed;
 
-    public Result(bool isSucceed, string? message = null, params Exception[] exceptions) : base(isSucceed, message, exceptions)
+    internal Result(bool isSucceed, string? message = null, params Exception[] exceptions) : base(isSucceed, message, exceptions)
     {
     }
 
-    public Result(bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null) : base(isSucceed, message, exceptions)
+    internal Result(bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null) : base(isSucceed, message, exceptions)
     {
     }
 
-    public static Result Failed => _failed ??= new(true);
+    public static Result Failed => _failed ??= new(false);
 
     public static Result Succeed => _succeed ??= new(true);
 
@@ -35,18 +35,15 @@ public sealed class Result : ResultBase, IResult
     public static Result<TValue> Create<TValue>(TValue value, bool isSucceed, string? message)
         => new(value, isSucceed, message);
 
-    public static Result<TValue> CreateFailure<TValue>(TValue value)
+    public static Result<TValue> Fail<TValue>(TValue value)
         => new(value, false);
 
-    public static Result CreateFailure(Exception exception)
+    public static Result Fail(Exception exception)
         => new(false, exceptions: exception);
 
-    public static Result<TValue> CreateFailure<TValue>(TValue value, string message)
+    public static Result<TValue> Fail<TValue>(TValue value, string message)
         => new(value, false, message);
 
-    public static Result<TValue> CreateSucceed<TValue>(TValue value)
+    public static Result<TValue> Success<TValue>(TValue value)
         => new(value, true);
-
-    public Result<TValue> WithValue<TValue>(TValue value)
-        => new Result<TValue>(value, this.IsSucceed, this.Message, this.Exceptions)!;
 }

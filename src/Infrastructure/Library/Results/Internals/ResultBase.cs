@@ -1,15 +1,8 @@
-﻿using Moshaveran.Library.Exceptions;
+﻿namespace Moshaveran.Library.Results.Internals;
 
-namespace Moshaveran.Library.Results.Internals;
-
-public abstract class ResultBase(bool isSucceed, string? message = null, params Exception[] exceptions)
+public abstract class ResultBase(bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null)
 {
-    protected ResultBase(bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null)
-        : this(isSucceed, message, exceptions?.ToArray() ?? [])
-    {
-    }
-
-    public IEnumerable<Exception> Exceptions { get; } = exceptions.Length != 0 ? exceptions : [];
+    public IEnumerable<Exception> Exceptions { get; } = exceptions?.Count() > 0 ? exceptions : [];
 
     public bool IsFailure => !this.IsSucceed;
 

@@ -54,7 +54,7 @@ public sealed class ObjectHelperTests
     public void TrimsTrailingSeparator()
     {
         // Arrange
-        var input = new TestObject { Name = "John Doe", Age = 30 };
+        var input = new TestObject { Name = "John Snow", Age = 30 };
 
         // Act
         var result = Pretty(input);
