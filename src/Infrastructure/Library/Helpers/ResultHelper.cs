@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+
 using Moshaveran.Library.Results;
 using Moshaveran.Library.Validations;
 
@@ -9,8 +10,21 @@ namespace Moshaveran.Library.Helpers;
 [StackTraceHidden]
 public static class ResultHelper
 {
-    public static void Deconstruct<TValue>(this Result<TValue?> r, out Result result, out TValue? value)
+    public static void Deconstruct<TValue>(this IResult<TValue?> r, out IResult result, out TValue? value)
         => (result, value) = (r, r.Value);
+
+    public static async Task<(IResult Result, TValue? Value)> Deconstruct<TValue>(this Task<Result<TValue?>> r)
+    {
+        var result = await r;
+        return (result, result.Value);
+    }
+
+    public static async Task<(IResult Result, TValue? Value)> Deconstruct<TValue>(this Task<IResult<TValue?>> r)
+    {
+        Check.MustBeArgumentNotNull(r);
+        var result = await r;
+        return (result, result.Value);
+    }
 
     public static async Task<TValue> GetValueAsync<TValue>(this Task<IResult<TValue>> result)
         => (await result.ArgumentNotNull()).Value;
@@ -65,12 +79,9 @@ public static class ResultHelper
     }
 
     public static TFuncResult OnSucceed<TResult, TFuncResult>(this TResult result, Func<TResult, TFuncResult> action, TFuncResult defaultFuncResult = default!)
-        where TResult : IResult
-    {
-        return result?.IsSucceed == true
+        where TResult : IResult => result?.IsSucceed == true
             ? action.ArgumentNotNull()(result)
             : defaultFuncResult;
-    }
 
     public static async Task<TFuncResult> OnSucceedAsync<TResult, TFuncResult>(this Task<TResult> resultAsync, Func<TResult, TFuncResult> action, TFuncResult defaultFuncResult = default!)
         where TResult : IResult

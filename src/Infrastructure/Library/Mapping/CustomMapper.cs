@@ -1,7 +1,10 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 
 namespace Moshaveran.Library.Mapping;
 
+[DebuggerStepThrough]
+[StackTraceHidden]
 public sealed class CustomMapper
     : IEquatable<CustomMapper>
     , IEquatable<(Type SourceType, Type DestinationType)>

@@ -7,6 +7,46 @@ namespace InfrastructureTests;
 public sealed class ResultTests
 {
     [Fact]
+    public async Task Deconstruct_ShouldReturnResultAndNullValueOnNullResult()
+    {
+        // Arrange
+        var nullResultTask = Task.FromResult<IResult<string?>>(null!);
+
+        // Act
+        _ = await Assert.ThrowsAsync<NullReferenceException>(() => nullResultTask.Deconstruct());
+    }
+
+    [Fact]
+    public async Task Deconstruct_ShouldReturnResultAndValueOnFailure()
+    {
+        // Arrange
+        var failureResult = Result.Fail<string?>(null);
+        var taskResult = Task.FromResult(failureResult);
+
+        // Act
+        var (result, value) = await taskResult.Deconstruct();
+
+        // Assert
+        Assert.False(result.IsSucceed);
+        Assert.Null(value);
+    }
+
+    [Fact]
+    public async Task Deconstruct_ShouldReturnResultAndValueOnSuccess()
+    {
+        // Arrange
+        var successResult = Result.Success<string?>("Success Value");
+        var taskResult = Task.FromResult(successResult);
+
+        // Act
+        var (result, value) = await taskResult.Deconstruct();
+
+        // Assert
+        Assert.True(result.IsSucceed);
+        Assert.Equal("Success Value", value);
+    }
+
+    [Fact]
     public void Failed_FailedHealthTest()
     {
         IResult result = Result.Failed;
@@ -78,10 +118,10 @@ public sealed class ResultTests
     {
         // Arrange
         var resultTask = Task.FromResult(Result.Failed);
-        var defaultFuncResult = "Default Result";
+        const string defaultFuncResult = "Default Result";
 
         // Act
-        var returnedResult = await resultTask.OnFailure(r => "Action Result", defaultFuncResult);
+        var returnedResult = await resultTask.OnFailure(_ => "Action Result", defaultFuncResult);
 
         // Assert
         _ = returnedResult.Should().Be("Action Result");
@@ -113,11 +153,12 @@ public sealed class ResultTests
 
         void Action(Result r) => actionExecuted = true;
 
-        // Act
-        var returnedResult = result.OnSucceed(Action);
 
         // Assert
         _ = actionExecuted.Should().BeFalse();
+
+        // Act
+        var returnedResult = result.OnSucceed<Result>(Action);
         _ = returnedResult.Should().BeNull();
     }
 
@@ -143,8 +184,8 @@ public sealed class ResultTests
     {
         // Arrange
         var successResult = Result.Succeed;
-        var action = new Func<IResult, int>(result => 42);
-        var defaultFuncResult = 0;
+        var action = new Func<IResult, int>(_ => 42);
+        const int defaultFuncResult = 0;
 
         // Act
         var result = successResult.OnSucceed(action, defaultFuncResult);
@@ -158,8 +199,8 @@ public sealed class ResultTests
     {
         // Arrange
         var failureResult = Result.Fail("Error message");
-        var action = new Func<IResult, int>(result => 42);
-        var defaultFuncResult = 0;
+        var action = new Func<IResult, int>(_ => 42);
+        const int defaultFuncResult = 0;
 
         // Act
         var result = failureResult.OnSucceed(action, defaultFuncResult);
@@ -207,8 +248,8 @@ public sealed class ResultTests
     {
         // Arrange
         var failureResult = Result.Fail("Error message").ToAsync();
-        var action = new Func<IResult, int>(result => 42);
-        var defaultFuncResult = 0;
+        var action = new Func<IResult, int>(_ => 42);
+        const int defaultFuncResult = 0;
 
         // Act
         var result = await failureResult.OnSucceedAsync(action, defaultFuncResult);
@@ -222,8 +263,8 @@ public sealed class ResultTests
     {
         // Arrange
         Task<IResult>? nullResultTask = null;
-        var action = new Func<IResult, int>(result => 42);
-        var defaultFuncResult = 0;
+        var action = new Func<IResult, int>(_ => 42);
+        const int defaultFuncResult = 0;
 
         // Act & Assert
         _ = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
@@ -235,8 +276,8 @@ public sealed class ResultTests
     {
         // Arrange
         var successResult = Result.Succeed.ToAsync();
-        var action = new Func<IResult, int>(result => 42);
-        var defaultFuncResult = 0;
+        var action = new Func<IResult, int>(_ => 42);
+        const int defaultFuncResult = 0;
 
         // Act
         var result = await successResult.OnSucceedAsync(action, defaultFuncResult);
@@ -265,8 +306,8 @@ public sealed class ResultTests
     {
         // Arrange
         IResult failureResult = Result.Fail("Error message");
-        var onSucceed = new Func<IResult, int>(result => 42);
-        var onFailure = new Func<IResult?, int>(result => 0);
+        var onSucceed = new Func<IResult, int>(_ => 42);
+        var onFailure = new Func<IResult?, int>(_ => 0);
 
         // Act
         var result = failureResult.Process(onSucceed, onFailure);
@@ -280,8 +321,8 @@ public sealed class ResultTests
     {
         // Arrange
         IResult? nullResult = null;
-        var onSucceed = new Func<IResult, int>(result => 42);
-        var onFailure = new Func<IResult?, int>(result => 0);
+        var onSucceed = new Func<IResult, int>(_ => 42);
+        var onFailure = new Func<IResult?, int>(_ => 0);
 
         // Act
         var result = nullResult.Process(onSucceed, onFailure);
@@ -295,8 +336,8 @@ public sealed class ResultTests
     {
         // Arrange
         IResult successResult = Result.Succeed;
-        var onSucceed = new Func<IResult, int>(result => 42);
-        var onFailure = new Func<IResult?, int>(result => 0);
+        var onSucceed = new Func<IResult, int>(_ => 42);
+        var onFailure = new Func<IResult?, int>(_ => 0);
 
         // Act
         var result = successResult.Process(onSucceed, onFailure);
@@ -306,27 +347,12 @@ public sealed class ResultTests
     }
 
     [Fact]
-    public async Task ProcessAsync_Should_ExecuteOnFailureOnNullResult()
-    {
-        // Arrange
-        var nullResultTask = Task.FromResult<IResult?>(null);
-        var onSucceed = new Func<IResult, int>(result => 42);
-        var onFailure = new Func<IResult?, int>(result => 0);
-
-        // Act
-        var result = await nullResultTask.Process(onSucceed, onFailure);
-
-        // Assert
-        Assert.Equal(0, result);
-    }
-
-    [Fact]
     public async Task ProcessAsync_ShouldExecuteOnFailureOnFailure()
     {
         // Arrange
         var failureResult = Result.Fail("Error message").ToAsync();
-        var onSucceed = new Func<IResult, int>(result => 42);
-        var onFailure = new Func<IResult?, int>(result => 0);
+        var onSucceed = new Func<IResult, int>(_ => 42);
+        var onFailure = new Func<IResult?, int>(_ => 0);
 
         // Act
         var result = await failureResult.Process(onSucceed, onFailure);
@@ -336,12 +362,26 @@ public sealed class ResultTests
     }
 
     [Fact]
+    public async Task ProcessAsync_ShouldExecuteOnFailureOnNullResult()
+    {
+        // Arrange
+        var nullResultTask = Task.FromResult<IResult?>(null);
+        var onSucceed = new Func<IResult, int>(_ => 42);
+        var onFailure = new Func<IResult?, int>(_ => 0);
+
+        // Act
+        var result = await nullResultTask.Process(onSucceed, onFailure);
+
+        // Assert
+        Assert.Equal(0, result);
+    }
+    [Fact]
     public async Task ProcessAsync_ShouldExecuteOnSucceedOnSuccess()
     {
         // Arrange
         var successResult = Result.Succeed.ToAsync();
-        var onSucceed = new Func<IResult, int>(result => 42);
-        var onFailure = new Func<IResult?, int>(result => 0);
+        var onSucceed = new Func<IResult, int>(_ => 42);
+        var onFailure = new Func<IResult?, int>(_ => 0);
 
         // Act
         var result = await successResult.Process(onSucceed, onFailure);
@@ -371,7 +411,7 @@ public sealed class ResultTests
     {
         // Arrange
         IResult failureResult = Result.Fail("Error message");
-        var value = "Failure Value";
+        const string value = "Failure Value";
 
         // Act
         var resultWithValue = failureResult.WithValue(value);
@@ -386,7 +426,7 @@ public sealed class ResultTests
     {
         // Arrange
         IResult successResult = Result.Succeed;
-        var value = "Success Value";
+        const string value = "Success Value";
 
         // Act
         var resultWithValue = successResult.WithValue(value);

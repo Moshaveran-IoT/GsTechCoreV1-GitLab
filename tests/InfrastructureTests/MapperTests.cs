@@ -27,13 +27,12 @@ public class MapperTests(IMapper mapper)
     {
         // Assign
         var src = new Animal("Cat");
+        Animal dst() => this._mapper.Map<Animal>(src);
 
         // Act
 
         // Assert
         _ = Assert.Throws<NotSupportedException>(dst);
-
-        Animal dst() => this._mapper.Map<Animal>(src);
     }
 
     [Fact]
@@ -95,9 +94,4 @@ internal sealed class Person()
     public string Name { get; set; } = string.Empty;
 }
 
-internal sealed class Animal
-{
-    private readonly string _name;
-
-    public Animal(string name) => this._name = name;
-}
+file sealed record Animal(string Name);
