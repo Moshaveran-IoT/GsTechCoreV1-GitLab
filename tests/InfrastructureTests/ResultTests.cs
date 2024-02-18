@@ -7,6 +7,46 @@ namespace InfrastructureTests;
 public sealed class ResultTests
 {
     [Fact]
+    public async Task Deconstruct_ShouldReturnResultAndNullValueOnNullResult()
+    {
+        // Arrange
+        var nullResultTask = Task.FromResult<IResult<string?>>(null!);
+
+        // Act
+        _ = await Assert.ThrowsAsync<NullReferenceException>(() => nullResultTask.Deconstruct());
+    }
+
+    [Fact]
+    public async Task Deconstruct_ShouldReturnResultAndValueOnFailure()
+    {
+        // Arrange
+        var failureResult = Result.Fail<string?>(null);
+        var taskResult = Task.FromResult(failureResult);
+
+        // Act
+        var (result, value) = await taskResult.Deconstruct();
+
+        // Assert
+        Assert.False(result.IsSucceed);
+        Assert.Null(value);
+    }
+
+    [Fact]
+    public async Task Deconstruct_ShouldReturnResultAndValueOnSuccess()
+    {
+        // Arrange
+        var successResult = Result.Success<string?>("Success Value");
+        var taskResult = Task.FromResult(successResult);
+
+        // Act
+        var (result, value) = await taskResult.Deconstruct();
+
+        // Assert
+        Assert.True(result.IsSucceed);
+        Assert.Equal("Success Value", value);
+    }
+
+    [Fact]
     public void Failed_FailedHealthTest()
     {
         IResult result = Result.Failed;
@@ -306,21 +346,6 @@ public sealed class ResultTests
     }
 
     [Fact]
-    public async Task ProcessAsync_Should_ExecuteOnFailureOnNullResult()
-    {
-        // Arrange
-        var nullResultTask = Task.FromResult<IResult?>(null);
-        var onSucceed = new Func<IResult, int>(result => 42);
-        var onFailure = new Func<IResult?, int>(result => 0);
-
-        // Act
-        var result = await nullResultTask.Process(onSucceed, onFailure);
-
-        // Assert
-        Assert.Equal(0, result);
-    }
-
-    [Fact]
     public async Task ProcessAsync_ShouldExecuteOnFailureOnFailure()
     {
         // Arrange
@@ -335,6 +360,20 @@ public sealed class ResultTests
         Assert.Equal(0, result);
     }
 
+    [Fact]
+    public async Task ProcessAsync_ShouldExecuteOnFailureOnNullResult()
+    {
+        // Arrange
+        var nullResultTask = Task.FromResult<IResult?>(null);
+        var onSucceed = new Func<IResult, int>(result => 42);
+        var onFailure = new Func<IResult?, int>(result => 0);
+
+        // Act
+        var result = await nullResultTask.Process(onSucceed, onFailure);
+
+        // Assert
+        Assert.Equal(0, result);
+    }
     [Fact]
     public async Task ProcessAsync_ShouldExecuteOnSucceedOnSuccess()
     {

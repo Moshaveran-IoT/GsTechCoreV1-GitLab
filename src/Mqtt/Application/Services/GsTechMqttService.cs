@@ -222,8 +222,7 @@ public sealed class GsTechMqttService(
         var (status, logMessage) = (SaveStatus.SaveSuccess, string.Empty);
         try
         {
-            var result = await save(initialize, args, repo);
-            (status, logMessage) = result.Value;
+            (var result, (status, logMessage)) = await save(initialize, args, repo).Deconstruct();
             return result;
         }
         catch (Exception ex)

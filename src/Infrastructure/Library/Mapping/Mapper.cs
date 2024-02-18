@@ -1,11 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Moshaveran.Library.Helpers;
 
 namespace Moshaveran.Library.Mapping;
 
-//[DebuggerStepThrough]
-//[StackTraceHidden]
+[DebuggerStepThrough]
+[StackTraceHidden]
 public sealed class Mapper : IMapper
 {
     private static readonly HashSet<CustomMapper> _customMappers = [];

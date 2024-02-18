@@ -8,8 +8,8 @@ using Moshaveran.Library.Validations;
 
 namespace Moshaveran.Library;
 
-//[DebuggerStepThrough]
-//[StackTraceHidden]
+[DebuggerStepThrough]
+[StackTraceHidden]
 public static partial class StringHelper
 {
     public static StringBuilder AppendAll(this StringBuilder sb, in IEnumerable<string?> lines)
