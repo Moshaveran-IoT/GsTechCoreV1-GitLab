@@ -1,14 +1,16 @@
-﻿using Moshaveran.Library.Results;
-
-namespace Moshaveran.Library.Data;
+﻿namespace Moshaveran.Library.Data;
 
 public interface IRepository<TModel>
 {
-    Task<IResult> Delete(TModel model, bool persist = true, CancellationToken token = default);
+    ValueTask<IResult> Delete(TModel model, bool persist = true, CancellationToken cancellationToken = default);
 
-    Task<IResult> Insert(TModel model, bool persist = true, CancellationToken token = default);
+    ValueTask<IList<TModel>> GetAllAsync(CancellationToken cancellationToken = default);
 
-    Task<IResult> SaveChanges(CancellationToken token = default);
+    ValueTask<TModel?> GetByIdAsync(int id, CancellationToken token = default);
 
-    Task<IResult> Update(TModel model, bool persist = true, CancellationToken token = default);
+    ValueTask<IResult> Insert(TModel model, bool persist = true, CancellationToken cancellationToken = default);
+
+    ValueTask<IResult> SaveChanges(CancellationToken cancellationToken = default);
+
+    ValueTask<IResult> Update(TModel model, bool persist = true, CancellationToken cancellationToken = default);
 }

@@ -108,11 +108,11 @@ public static class ResultHelper
             ? onSucceed.ArgumentNotNull()(result)
             : onFailure.ArgumentNotNull()(result);
 
-    public static Task<IResult> ToAsync(this IResult result)
-        => Task.FromResult(result);
+    public static ValueTask<IResult> ToAsync(this IResult result)
+        => ValueTask.FromResult(result);
 
-    public static Task<IResult<TValue>> ToAsync<TValue>(this IResult<TValue> result)
-        => Task.FromResult(result);
+    public static ValueTask<IResult<TValue>> ToAsync<TValue>(this IResult<TValue> result)
+        => ValueTask.FromResult(result);
 
     public static IResult<TValue> WithValue<TValue>(this IResult result, TValue value)
         => new Result<TValue>(value, result.IsSucceed, result.Message, result.Exceptions)!;
