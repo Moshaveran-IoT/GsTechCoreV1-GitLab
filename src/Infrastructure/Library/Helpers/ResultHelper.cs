@@ -1,13 +1,12 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-
-using Moshaveran.Library.Results;
+﻿using Moshaveran.Library.Results;
 using Moshaveran.Library.Validations;
+
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Moshaveran.Library.Helpers;
 
-[DebuggerStepThrough]
-[StackTraceHidden]
+[DebuggerStepThrough, StackTraceHidden]
 public static class ResultHelper
 {
     public static void Deconstruct<TValue>(this IResult<TValue?> r, out IResult result, out TValue? value)

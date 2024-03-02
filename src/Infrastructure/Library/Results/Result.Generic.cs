@@ -4,8 +4,7 @@ using Moshaveran.Library.Results.Internals;
 
 namespace Moshaveran.Library.Results;
 
-[DebuggerStepThrough]
-[StackTraceHidden]
+[DebuggerStepThrough, StackTraceHidden]
 public sealed class Result<TValue> : ResultBase, IResult<TValue>
 {
     private static Result<TValue?>? _failed;
