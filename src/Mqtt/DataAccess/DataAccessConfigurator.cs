@@ -23,13 +23,20 @@ public static class DataAccessConfigurator
         var writeConnectionString = configuration.GetConnectionString("WriteDb");
         var readConnectionString = configuration.GetConnectionString("ReadDb");
         _ = services
-            .AddDbContext<MqttWriteDbContext>(options => options.UseSqlServer(writeConnectionString, b => b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName)), ServiceLifetime.Transient)
-            .AddDbContext<MqttReadDbContext>(
-                options =>
+            .AddDbContext<MqttWriteDbContext>(options => options.UseSqlServer(writeConnectionString, b =>
+            {
+                _ = b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName);
+                _ = b.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
+            }), ServiceLifetime.Transient)
+            .AddDbContext<MqttReadDbContext>(options =>
+            {
+                _ = options.UseSqlServer(readConnectionString, b =>
                 {
-                    _ = options.UseSqlServer(readConnectionString, b => b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName));
-                    _ = options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-                }, ServiceLifetime.Transient)
+                    _ = b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName);
+                    _ = b.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
+                });
+                _ = options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            }, ServiceLifetime.Transient)
             ;
 
         // Add repositories

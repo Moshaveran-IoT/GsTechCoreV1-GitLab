@@ -1,4 +1,4 @@
-﻿using Moshaveran.Library;
+﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Moshaveran.Library.Results;
 
 namespace InfrastructureTests;
@@ -7,432 +7,646 @@ namespace InfrastructureTests;
 public sealed class ResultTests
 {
     [Fact]
-    public async Task Deconstruct_ShouldReturnResultAndNullValueOnNullResult()
+    public void CreateFail_ReturnsFailResult()
     {
         // Arrange
-        var nullResultTask = Task.FromResult<IResult<string?>>(null!);
+        const bool succeed = false;
 
         // Act
-        _ = await Assert.ThrowsAsync<NullReferenceException>(() => nullResultTask.Deconstruct());
-    }
-
-    [Fact]
-    public async Task Deconstruct_ShouldReturnResultAndValueOnFailure()
-    {
-        // Arrange
-        var failureResult = Result.Fail<string?>(null);
-        var taskResult = Task.FromResult(failureResult);
-
-        // Act
-        var (result, value) = await taskResult.Deconstruct();
+        var result = IResult.Create(succeed);
 
         // Assert
         Assert.False(result.IsSucceed);
-        Assert.Null(value);
+        Assert.True(result.IsFailure);
+        Assert.Null(result.Message);
+        Assert.Empty(result.Exceptions);
     }
 
     [Fact]
-    public async Task Deconstruct_ShouldReturnResultAndValueOnSuccess()
+    public void CreateSucceed_ReturnsSucceedResult()
     {
         // Arrange
-        var successResult = Result.Success<string?>("Success Value");
-        var taskResult = Task.FromResult(successResult);
+        const bool succeed = true;
 
         // Act
-        var (result, value) = await taskResult.Deconstruct();
+        var result = IResult.Create(succeed);
 
         // Assert
         Assert.True(result.IsSucceed);
-        Assert.Equal("Success Value", value);
+        Assert.False(result.IsFailure);
+        Assert.Null(result.Message);
+        Assert.Empty(result.Exceptions);
     }
 
     [Fact]
-    public void Failed_FailedHealthTest()
-    {
-        IResult result = Result.Failed;
-        _ = result.Should().NotBeNull();
-        _ = result.IsFailure.Should().BeTrue();
-    }
-
-    [Fact]
-    public void Failed_Generic_FailedHealthTest()
-    {
-        IResult result = Result<int>.Failed;
-        _ = result.Should().NotBeNull();
-        _ = result.IsFailure.Should().BeTrue();
-    }
-
-    [Fact]
-    public void OnFailure_DoesNotExecuteActionWhenResultIsNull()
+    public void Fail_WithCustomClassValue_ReturnsFailResultWithCustomClassValue()
     {
         // Arrange
-        Result? result = null;
-        var actionExecuted = false;
-
-        void Action(Result r) => actionExecuted = true;
+        var value = new CustomClass { Property = "Test" }; // مثالی از یک کلاس سفارشی
 
         // Act
-        var returnedResult = result.OnFailure(Action);
+        var result = IResult.Fail(value);
 
         // Assert
-        _ = actionExecuted.Should().BeTrue();
-        _ = returnedResult.Should().BeNull();
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
+        Assert.Null(result.Message);
+        Assert.Empty(result.Exceptions);
+        Assert.Equal(value, result.Value);
     }
 
     [Fact]
-    public void OnFailure_DoesNotExecuteActionWhenResultIsSuccessful()
+    public void Fail_WithEmptyValue_ReturnsFailResultWithEmptyValue()
     {
         // Arrange
-        var result = Result.Succeed;
-        var actionExecuted = false;
-
-        void Action(Result r) => actionExecuted = true;
+        var value = string.Empty; // مثالی از یک مقدار خالی
 
         // Act
-        var returnedResult = result.OnFailure(Action);
+        var result = IResult.Fail(value: value);
 
         // Assert
-        _ = actionExecuted.Should().BeFalse();
-        _ = returnedResult.Should().Be(Result.Succeed);
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
+        Assert.Null(result.Message);
+        Assert.Empty(result.Exceptions);
+        Assert.Equal(value, result.Value);
     }
 
     [Fact]
-    public void OnFailure_ExecutesActionWhenResultIsFailure()
+    public void Fail_WithException_ReturnsFailResultWithException()
     {
         // Arrange
-        var result = Result.Failed;
-        var actionExecuted = false;
-
-        void Action(Result r) => actionExecuted = true;
+        var exception = new Exception("Test exception");
 
         // Act
-        var returnedResult = result.OnFailure(Action);
+        var result = IResult.Fail(exception);
 
         // Assert
-        _ = actionExecuted.Should().BeTrue();
-        _ = returnedResult.Should().Be(Result.Failed);
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
+        Assert.Null(result.Message);
+        _ = Assert.Single(result.Exceptions);
+        Assert.Contains(exception, result.Exceptions);
     }
 
     [Fact]
-    public async Task OnFailureAsync_ExecutesActionWhenResultIsFailure()
+    public void Fail_WithMessage_HasEmptyExceptions()
     {
         // Arrange
-        var resultTask = Task.FromResult(Result.Failed);
-        const string defaultFuncResult = "Default Result";
+        const string message = "Test failure message";
 
         // Act
-        var returnedResult = await resultTask.OnFailure(_ => "Action Result", defaultFuncResult);
+        var result = IResult.Fail(message);
 
         // Assert
-        _ = returnedResult.Should().Be("Action Result");
+        Assert.Empty(result.Exceptions);
     }
 
     [Fact]
-    public void OnSucceed_DoesNotExecuteActionWhenResultIsFailure()
+    public void Fail_WithMessage_ReturnsFailResultWithMessage()
     {
         // Arrange
-        var result = Result.Failed;
-        var actionExecuted = false;
-
-        void Action(Result r) => actionExecuted = true;
+        const string message = "Test failure message";
 
         // Act
-        var returnedResult = result.OnSucceed(Action);
+        var result = IResult.Fail(message);
 
         // Assert
-        _ = actionExecuted.Should().BeFalse();
-        _ = returnedResult.Should().Be(Result.Failed);
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
+        Assert.Equal(message, result.Message);
     }
 
     [Fact]
-    public void OnSucceed_DoesNotExecuteActionWhenResultIsNull()
+    public void Fail_WithMessageAndNullValue_HasEmptyExceptions()
     {
         // Arrange
-        Result? result = null;
-        var actionExecuted = false;
-
-        void Action(Result r) => actionExecuted = true;
-
-
-        // Assert
-        _ = actionExecuted.Should().BeFalse();
+        const string message = "Test failure message";
 
         // Act
-        var returnedResult = result.OnSucceed<Result>(Action);
-        _ = returnedResult.Should().BeNull();
-    }
-
-    [Fact]
-    public void OnSucceed_ExecutesActionWhenResultIsSuccessful()
-    {
-        // Arrange
-        var result = Result.Succeed;
-        var actionExecuted = false;
-
-        void Action(Result r) => actionExecuted = true;
-
-        // Act
-        var returnedResult = result.OnSucceed(Action);
+        var result = IResult.Fail<int?>(message);
 
         // Assert
-        _ = actionExecuted.Should().BeTrue();
-        _ = returnedResult.Should().Be(Result.Succeed);
+        Assert.Empty(result.Exceptions);
     }
 
     [Fact]
-    public void OnSucceed_ShouldExecuteActionOnSuccess()
+    public void Fail_WithMessageAndNullValue_ReturnsFailResultWithMessage()
     {
         // Arrange
-        var successResult = Result.Succeed;
-        var action = new Func<IResult, int>(_ => 42);
-        const int defaultFuncResult = 0;
+        const string message = "Test failure message";
 
         // Act
-        var result = successResult.OnSucceed(action, defaultFuncResult);
+        var result = IResult.Fail<int?>(message);
 
         // Assert
-        Assert.Equal(42, result);
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
+        Assert.Equal(message, result.Message);
     }
 
     [Fact]
-    public void OnSucceed_ShouldReturnDefaultOnFailure()
+    public void Fail_WithMessageAndNullValue_ReturnsFailResultWithNullValue()
     {
         // Arrange
-        var failureResult = Result.Fail("Error message");
-        var action = new Func<IResult, int>(_ => 42);
-        const int defaultFuncResult = 0;
+        const string message = "Test failure message";
 
         // Act
-        var result = failureResult.OnSucceed(action, defaultFuncResult);
+        var result = IResult.Fail<int?>(message);
 
         // Assert
-        Assert.Equal(defaultFuncResult, result);
+        Assert.Null(result.Value);
     }
 
     [Fact]
-    public async Task OnSucceedAsync_DoesNotExecuteActionWhenResultIsFailure()
+    public void Fail_WithNullableCustomClass_ReturnsFailResultWithNullValue()
     {
-        // Arrange
-        var resultTask = Task.FromResult(Result.Failed);
-        var actionExecuted = false;
-
-        void Action(Result r) => actionExecuted = true;
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش مقدار خالی را برمی‌گرداند
 
         // Act
-        var returnedResult = await resultTask.OnSucceed(Action);
+        var result = IResult.Fail<CustomClass?>();
 
         // Assert
-        _ = actionExecuted.Should().BeFalse();
-        _ = returnedResult.Should().Be(Result.Failed);
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
+        Assert.Null(result.Message);
+        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Value);
     }
 
     [Fact]
-    public async Task OnSucceedAsync_ExecutesActionWhenResultIsSuccessful()
+    public void Fail_WithNullableValueType_ReturnsFailResultWithNullValue()
     {
-        // Arrange
-        var resultTask = Task.FromResult(Result.Succeed);
-        var actionExecuted = false;
-
-        void Action(Result r) => actionExecuted = true;
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش مقدار خالی را برمی‌گرداند
 
         // Act
-        var returnedResult = await resultTask.OnSucceed(Action);
+        var result = IResult.Fail<int?>();
 
         // Assert
-        _ = actionExecuted.Should().BeTrue();
-        _ = returnedResult.Should().Be(Result.Succeed);
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
+        Assert.Null(result.Message);
+        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Value);
     }
 
     [Fact]
-    public async Task OnSucceedAsync_Should_Return_Default_On_Failure()
+    public void Fail_WithNullValue_ReturnsFailResultWithNullValue()
     {
         // Arrange
-        var failureResult = Result.Fail("Error message").ToAsync();
-        var action = new Func<IResult, int>(_ => 42);
-        const int defaultFuncResult = 0;
+        const string? value = null; // مثالی از یک مقدار null
 
         // Act
-        var result = await failureResult.OnSucceedAsync(action, defaultFuncResult);
+        var result = IResult.Fail<string>(value!);
 
         // Assert
-        Assert.Equal(defaultFuncResult, result);
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
+        Assert.Null(result.Message);
+        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Value);
     }
 
     [Fact]
-    public async Task OnSucceedAsync_Should_Throw_On_Null_Result()
+    public void Fail_WithoutValue_HasEmptyExceptions()
     {
-        // Arrange
-        Task<IResult>? nullResultTask = null;
-        var action = new Func<IResult, int>(_ => 42);
-        const int defaultFuncResult = 0;
-
-        // Act & Assert
-        _ = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await nullResultTask!.OnSucceedAsync(action, defaultFuncResult));
-    }
-
-    [Fact]
-    public async Task OnSucceedAsync_ShouldExecute_ActionOnSuccess()
-    {
-        // Arrange
-        var successResult = Result.Succeed.ToAsync();
-        var action = new Func<IResult, int>(_ => 42);
-        const int defaultFuncResult = 0;
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه ناموفق بدون مقدار نهایی را برمی‌گرداند
 
         // Act
-        var result = await successResult.OnSucceedAsync(action, defaultFuncResult);
+        var result = IResult.Fail();
 
         // Assert
-        Assert.Equal(42, result);
+        Assert.Empty(result.Exceptions);
     }
 
     [Fact]
-    public async Task OnSucceedAsync_ThrowsArgumentNullExceptionWhenResultAsyncIsNull()
+    public void Fail_WithoutValue_HasNullMessage()
     {
-        // Arrange
-        Task<Result>? resultTask = null;
-
-        static void Action(Result r)
-        {
-            // This action should not be executed.
-        }
-
-        // Act & Assert
-        _ = await Assert.ThrowsAsync<ArgumentNullException>(() => resultTask!.OnSucceed(Action));
-    }
-
-    [Fact]
-    public void Process_ShouldExecuteOnFailureOnFailure()
-    {
-        // Arrange
-        IResult failureResult = Result.Fail("Error message");
-        var onSucceed = new Func<IResult, int>(_ => 42);
-        var onFailure = new Func<IResult?, int>(_ => 0);
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه ناموفق بدون مقدار نهایی را برمی‌گرداند
 
         // Act
-        var result = failureResult.Process(onSucceed, onFailure);
+        var result = IResult.Fail();
 
         // Assert
-        Assert.Equal(0, result);
+        Assert.Null(result.Message);
     }
 
     [Fact]
-    public void Process_ShouldExecuteOnFailureOnNullResult()
+    public void Fail_WithoutValue_ReturnsFailResultWithoutValue()
     {
-        // Arrange
-        IResult? nullResult = null;
-        var onSucceed = new Func<IResult, int>(_ => 42);
-        var onFailure = new Func<IResult?, int>(_ => 0);
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه ناموفق بدون مقدار نهایی را برمی‌گرداند
 
         // Act
-        var result = nullResult.Process(onSucceed, onFailure);
+        var result = IResult.Fail();
 
         // Assert
-        Assert.Equal(0, result);
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
     }
 
     [Fact]
-    public void Process_ShouldExecuteOnSucceedOnSuccess()
+    public void Fail_WithValidValue_ReturnsFailResultWithValidValue()
     {
         // Arrange
-        IResult successResult = Result.Succeed;
-        var onSucceed = new Func<IResult, int>(_ => 42);
-        var onFailure = new Func<IResult?, int>(_ => 0);
+        const int value = 42; // مثالی از یک مقدار معتبر
 
         // Act
-        var result = successResult.Process(onSucceed, onFailure);
+        var result = IResult.Fail(value);
 
         // Assert
-        Assert.Equal(42, result);
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
+        Assert.Null(result.Message);
+        Assert.Empty(result.Exceptions);
+        Assert.Equal(value, result.Value);
     }
 
     [Fact]
-    public async Task ProcessAsync_ShouldExecuteOnFailureOnFailure()
+    public void Fail_WithValue_ReturnsFailResultWithValue()
     {
         // Arrange
-        var failureResult = Result.Fail("Error message").ToAsync();
-        var onSucceed = new Func<IResult, int>(_ => 42);
-        var onFailure = new Func<IResult?, int>(_ => 0);
+        const string value = "Test value";
 
         // Act
-        var result = await failureResult.Process(onSucceed, onFailure);
+        var result = IResult.Fail(value: value);
 
         // Assert
-        Assert.Equal(0, result);
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
+        Assert.Null(result.Message);
+        Assert.Empty(result.Exceptions);
+        Assert.Equal(value, result.Value);
     }
 
     [Fact]
-    public async Task ProcessAsync_ShouldExecuteOnFailureOnNullResult()
+    public void Fail_WithValueAndException_HasNullMessage()
     {
         // Arrange
-        var nullResultTask = Task.FromResult<IResult?>(null);
-        var onSucceed = new Func<IResult, int>(_ => 42);
-        var onFailure = new Func<IResult?, int>(_ => 0);
+        const string value = "Test value";
+        var exception = new Exception("Test exception");
 
         // Act
-        var result = await nullResultTask.Process(onSucceed, onFailure);
+        var result = IResult.Fail(value, exception);
 
         // Assert
-        Assert.Equal(0, result);
+        Assert.Null(result.Message);
     }
+
     [Fact]
-    public async Task ProcessAsync_ShouldExecuteOnSucceedOnSuccess()
+    public void Fail_WithValueAndException_ReturnsFailResultWithException()
     {
         // Arrange
-        var successResult = Result.Succeed.ToAsync();
-        var onSucceed = new Func<IResult, int>(_ => 42);
-        var onFailure = new Func<IResult?, int>(_ => 0);
+        const string value = "Test value";
+        var exception = new Exception("Test exception");
 
         // Act
-        var result = await successResult.Process(onSucceed, onFailure);
+        var result = IResult.Fail(value, exception);
 
         // Assert
-        Assert.Equal(42, result);
+        Assert.Equal(exception, result.Exceptions.First());
     }
 
     [Fact]
-    public void Succeed_Generic_SucceedHealthTest()
-    {
-        IResult result = Result<int>.Succeed;
-        _ = result.Should().NotBeNull();
-        _ = result.IsSucceed.Should().BeTrue();
-    }
-
-    [Fact]
-    public void Succeed_SucceedHealthTest()
-    {
-        IResult result = Result.Succeed;
-        _ = result.Should().NotBeNull();
-        _ = result.IsSucceed.Should().BeTrue();
-    }
-
-    [Fact]
-    public void WithValue_ShouldCreateResultWithValueOnFailure()
+    public void Fail_WithValueAndException_ReturnsFailResultWithValue()
     {
         // Arrange
-        IResult failureResult = Result.Fail("Error message");
-        const string value = "Failure Value";
+        const string value = "Test value";
+        var exception = new Exception("Test exception");
 
         // Act
-        var resultWithValue = failureResult.WithValue(value);
+        var result = IResult.Fail(value, exception);
 
         // Assert
-        Assert.False(resultWithValue.IsSucceed);
-        Assert.Equal(value, resultWithValue.Value);
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
+        Assert.Equal(value, result.Value);
     }
 
     [Fact]
-    public void WithValue_ShouldCreateResultWithValueOnSuccess()
+    public void Fail_WithValueAndMessage_HasEmptyExceptions()
     {
         // Arrange
-        IResult successResult = Result.Succeed;
-        const string value = "Success Value";
+        const string value = "Test value";
+        const string message = "Test failure message";
 
         // Act
-        var resultWithValue = successResult.WithValue(value);
+        var result = IResult.Fail(value, message);
 
         // Assert
-        Assert.True(resultWithValue.IsSucceed);
-        Assert.Equal(value, resultWithValue.Value);
+        Assert.Empty(result.Exceptions);
+    }
+
+    [Fact]
+    public void Fail_WithValueAndMessage_ReturnsFailResultWithMessage()
+    {
+        // Arrange
+        const string value = "Test value";
+        const string message = "Test failure message";
+
+        // Act
+        var result = IResult.Fail(value, message);
+
+        // Assert
+        Assert.Equal(message, result.Message);
+    }
+
+    [Fact]
+    public void Fail_WithValueAndMessage_ReturnsFailResultWithValue()
+    {
+        // Arrange
+        const string value = "Test value";
+        const string message = "Test failure message";
+
+        // Act
+        var result = IResult.Fail(value, message);
+
+        // Assert
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
+        Assert.Equal(value, result.Value);
+    }
+
+    [Fact]
+    public void Fail_WithValueAndMessage_ReturnsFailResultWithValueAndMessage()
+    {
+        // Arrange
+        const string value = "Test value";
+        const string message = "Test failure message";
+
+        // Act
+        var result = IResult.Fail(value, message);
+
+        // Assert
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
+        Assert.Equal(message, result.Message);
+        Assert.Empty(result.Exceptions);
+        Assert.Equal(value, result.Value);
+    }
+
+    [Fact]
+    public void FailedProperty_HasEmptyExceptions()
+    {
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه ناموفق بدون مقدار نهایی را برمی‌گرداند
+
+        // Act
+        var result = IResult<int?>.Failed;
+
+        // Assert
+        Assert.Empty(result.Exceptions);
+    }
+
+    [Fact]
+    public void FailedProperty_HasNullMessage()
+    {
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه ناموفق بدون مقدار نهایی را برمی‌گرداند
+
+        // Act
+        var result = IResult<int?>.Failed;
+
+        // Assert
+        Assert.Null(result.Message);
+    }
+
+    [Fact]
+    public void FailedProperty_HasNullValue()
+    {
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه ناموفق بدون مقدار نهایی را برمی‌گرداند
+
+        // Act
+        var result = IResult<int?>.Failed;
+
+        // Assert
+        Assert.Null(result.Value);
+    }
+
+    [Fact]
+    public void FailedProperty_ReturnsFailedResultWithNullValue()
+    {
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه ناموفق بدون مقدار نهایی را برمی‌گرداند
+
+        // Act
+        var result = IResult<int?>.Failed;
+
+        // Assert
+        Assert.False(result.IsSucceed);
+        Assert.True(result.IsFailure);
+    }
+
+    [Fact]
+    public void SucceedProperty_HasEmptyExceptions()
+    {
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه موفقیت آمیز بدون مقدار نهایی
+        // را برمی‌گرداند
+
+        // Act
+        var result = IResult<int?>.Succeed;
+
+        // Assert
+        Assert.Empty(result.Exceptions);
+    }
+
+    [Fact]
+    public void SucceedProperty_HasNullMessage()
+    {
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه موفقیت آمیز بدون مقدار نهایی
+        // را برمی‌گرداند
+
+        // Act
+        var result = IResult<int?>.Succeed;
+
+        // Assert
+        Assert.Null(result.Message);
+    }
+
+    [Fact]
+    public void SucceedProperty_HasNullValue()
+    {
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه موفقیت آمیز بدون مقدار نهایی
+        // را برمی‌گرداند
+
+        // Act
+        var result = IResult<int?>.Succeed;
+
+        // Assert
+        Assert.Null(result.Value);
+    }
+
+    [Fact]
+    public void SucceedProperty_ReturnsSuccessResultWithNullValue()
+    {
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه موفقیت آمیز بدون مقدار نهایی
+        // را برمی‌گرداند
+
+        // Act
+        var result = IResult<int?>.Succeed;
+
+        // Assert
+        Assert.True(result.IsSucceed);
+        Assert.False(result.IsFailure);
+    }
+
+    [Fact]
+    public void Success_WithMessage_ReturnsSuccessResultWithMessage()
+    {
+        // Arrange
+        const string message = "Test success message";
+
+        // Act
+        var result = IResult.Success(message);
+
+        // Assert
+        Assert.True(result.IsSucceed);
+        Assert.False(result.IsFailure);
+        Assert.Equal(message, result.Message);
+        Assert.Empty(result.Exceptions);
+    }
+
+    [Fact]
+    public void Success_WithoutValue_HasEmptyExceptions()
+    {
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه موفقیت آمیز بدون مقدار نهایی
+        // را برمی‌گرداند
+
+        // Act
+        var result = IResult.Success();
+
+        // Assert
+        Assert.Empty(result.Exceptions);
+    }
+
+    [Fact]
+    public void Success_WithoutValue_HasNullMessage()
+    {
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه موفقیت آمیز بدون مقدار نهایی
+        // را برمی‌گرداند
+
+        // Act
+        var result = IResult.Success();
+
+        // Assert
+        Assert.Null(result.Message);
+    }
+
+    [Fact]
+    public void Success_WithoutValue_ReturnsSuccessResultWithoutValue()
+    {
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه موفقیت آمیز بدون مقدار نهایی
+        // را برمی‌گرداند
+
+        // Act
+        var result = IResult.Success();
+
+        // Assert
+        Assert.True(result.IsSucceed);
+        Assert.False(result.IsFailure);
+    }
+
+    [Fact]
+    public void Success_WithValue_HasEmptyExceptions()
+    {
+        // Arrange
+        const string value = "Test value";
+
+        // Act
+        var result = IResult.Success<string>(value);
+
+        // Assert
+        Assert.Empty(result.Exceptions);
+    }
+
+    [Fact]
+    public void Success_WithValue_HasNullMessage()
+    {
+        // Arrange
+        const string value = "Test value";
+
+        // Act
+        var result = IResult.Success<string>(value);
+
+        // Assert
+        Assert.Null(result.Message);
+    }
+
+    [Fact]
+    public void Success_WithValue_ReturnsSuccessResultWithValue()
+    {
+        // Arrange
+        const string value = "Test value";
+
+        // Act
+        var result = IResult.Success<string>(value);
+
+        // Assert
+        Assert.True(result.IsSucceed);
+        Assert.False(result.IsFailure);
+        Assert.Equal(value, result.Value);
+    }
+
+    [Fact]
+    public void Success_WithValueAndMessage_HasEmptyExceptions()
+    {
+        // Arrange
+        const string value = "Test value";
+        const string message = "Test success message";
+
+        // Act
+        var result = IResult.Success(value, message);
+
+        // Assert
+        Assert.Empty(result.Exceptions);
+    }
+
+    [Fact]
+    public void Success_WithValueAndMessage_ReturnsSuccessResultWithMessage()
+    {
+        // Arrange
+        const string value = "Test value";
+        const string message = "Test success message";
+
+        // Act
+        var result = IResult.Success(value, message);
+
+        // Assert
+        Assert.Equal(message, result.Message);
+    }
+
+    [Fact]
+    public void Success_WithValueAndMessage_ReturnsSuccessResultWithValue()
+    {
+        // Arrange
+        const string value = "Test value";
+        const string message = "Test success message";
+
+        // Act
+        var result = IResult.Success(value, message);
+
+        // Assert
+        Assert.True(result.IsSucceed);
+        Assert.False(result.IsFailure);
+        Assert.Equal(value, result.Value);
+    }
+
+    [Fact]
+    public void Success_WithValueAndMessage_ReturnsSuccessResultWithValueAndMessage()
+    {
+        // Arrange
+        const string value = "Test value";
+        const string message = "Test success message";
+
+        // Act
+        var result = IResult.Success(value, message);
+
+        // Assert
+        Assert.True(result.IsSucceed);
+        Assert.False(result.IsFailure);
+        Assert.Equal(message, result.Message);
+        Assert.Empty(result.Exceptions);
+        Assert.Equal(value, result.Value);
+    }
+
+    public class CustomClass
+    {
+        public required string Property { get; set; }
     }
 }

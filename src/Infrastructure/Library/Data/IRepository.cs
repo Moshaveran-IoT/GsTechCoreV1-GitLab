@@ -1,4 +1,6 @@
-﻿namespace Moshaveran.Library.Data;
+﻿using Moshaveran.Library.Results;
+
+namespace Moshaveran.Library.Data;
 
 public interface IRepository<TModel>
 {
