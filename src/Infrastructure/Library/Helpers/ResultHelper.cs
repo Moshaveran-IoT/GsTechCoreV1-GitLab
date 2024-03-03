@@ -24,11 +24,14 @@ public static class ResultHelper
     public static async Task<TValue?> GetValueAsync<TValue>(this Task<IResult<TValue?>> result)
         => (await result.ArgumentNotNull()).Value;
 
+    public static bool IsSucceed([NotNullWhen(true)] this IResult? result)
+        => result?.IsSucceed ?? false;
+
     [return: NotNullIfNotNull(nameof(result))]
     public static TResult? OnFailure<TResult>(this TResult? result, Action<TResult> action)
         where TResult : IResult
     {
-        if (result?.IsSucceed != true)
+        if (result.IsSucceed())
         {
             action.ArgumentNotNull()(result!);
         }
@@ -42,7 +45,7 @@ public static class ResultHelper
         Check.MustBeArgumentNotNull(resultAsync);
 
         var result = await resultAsync;
-        return result?.IsSucceed != true
+        return result.IsSucceed()
             ? action.ArgumentNotNull()(result!)
             : defaultFuncResult;
     }
@@ -51,7 +54,7 @@ public static class ResultHelper
     public static TResult OnSucceed<TResult>(this TResult result, Action<TResult> action)
         where TResult : IResult
     {
-        if (result?.IsSucceed == true)
+        if (result.IsSucceed())
         {
             action.ArgumentNotNull()(result);
         }
@@ -65,7 +68,7 @@ public static class ResultHelper
         Check.MustBeArgumentNotNull(resultAsync);
 
         var result = await resultAsync;
-        if (result?.IsSucceed == true)
+        if (result.IsSucceed())
         {
             action.ArgumentNotNull()(result);
         }
@@ -74,7 +77,7 @@ public static class ResultHelper
     }
 
     public static TFuncResult OnSucceed<TResult, TFuncResult>(this TResult result, Func<TResult, TFuncResult> action, TFuncResult defaultFuncResult = default!)
-        where TResult : IResult => result?.IsSucceed == true
+        where TResult : IResult => result.IsSucceed()
             ? action.ArgumentNotNull()(result)
             : defaultFuncResult;
 
@@ -84,7 +87,7 @@ public static class ResultHelper
         Check.MustBeArgumentNotNull(resultAsync);
 
         var result = await resultAsync;
-        return result?.IsSucceed == true
+        return result.IsSucceed()
             ? action.ArgumentNotNull()(result)
             : defaultFuncResult;
     }
@@ -95,7 +98,7 @@ public static class ResultHelper
         Check.MustBeArgumentNotNull(resultAsync);
 
         var result = await resultAsync;
-        return result?.IsSucceed == true
+        return result.IsSucceed()
             ? action.ArgumentNotNull()(result)
             : defaultFuncResult;
     }
@@ -106,14 +109,14 @@ public static class ResultHelper
         Check.MustBeArgumentNotNull(resultAsync);
 
         var result = await resultAsync;
-        return result?.IsSucceed == true
+        return result.IsSucceed()
             ? onSucceed.ArgumentNotNull()(result)
             : onFailure.ArgumentNotNull()(result);
     }
 
     public static TFuncResult Process<TResult, TFuncResult>(this TResult? result, Func<TResult, TFuncResult> onSucceed, Func<TResult?, TFuncResult> onFailure)
         where TResult : IResult
-        => result?.IsSucceed == true
+        => result.IsSucceed()
             ? onSucceed.ArgumentNotNull()(result)
             : onFailure.ArgumentNotNull()(result);
 
@@ -123,12 +126,19 @@ public static class ResultHelper
     public static Task<IResult<TValue>> ToAsync<TValue>(this IResult<TValue> result)
         => Task.FromResult(result);
 
+    [return: NotNullIfNotNull(nameof(result))]
+    public static IResult? ToResult(this IResult? result)
+        => result;
+
     public static ValueTask<IResult> ToValueTask(this IResult result)
-        => ValueTask.FromResult(result);
+            => ValueTask.FromResult(result);
 
     public static ValueTask<IResult<TValue>> ToValueTask<TValue>(this IResult<TValue> result)
         => ValueTask.FromResult(result);
 
+    public static bool TryParse<TResult>(this TResult r, out TResult result) where TResult : IResult
+        => (result = r).IsSucceed();
+
     public static IResult<TValue> WithValue<TValue>(this IResult result, TValue value)
-        => new Result<TValue>(value, result.IsSucceed, result.Message, result.Exceptions)!;
+        => new Result<TValue>(value, result.IsSucceed(), result.Message, result.Exceptions)!;
 }

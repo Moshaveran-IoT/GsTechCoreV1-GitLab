@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Moshaveran.API.Mqtt.GrpcServices.Protos;
 using Moshaveran.GsTech.Mqtt.Application.Interfaces;
 
-namespace Application.Services;
+namespace Moshaveran.GsTech.Mqtt.Application.Services;
 
 public sealed class ListenerService : IListenerService
 {
@@ -31,44 +31,38 @@ public sealed class ListenerService : IListenerService
         }
     }
 
-    public Task LogClientConnectedAsync(string clientId, CancellationToken token = default)
+    public async Task LogClientConnectedAsync(string clientId, CancellationToken token = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(clientId);
-        return Task.Run(() =>
+        try
         {
-            try
+            _ = await this._grpcClient.ClientConnectedAsync(new()
             {
-                _ = this._grpcClient.ClientConnectedAsync(new()
-                {
-                    ClientId = clientId,
-                    Time = Now()
-                }, cancellationToken: token);
-            }
-            catch
-            {
-                this._logger.LogInformation("Client connected: {ClientId}", clientId);
-            }
-        }, token);
+                ClientId = clientId,
+                Time = Now()
+            }, cancellationToken: token);
+        }
+        catch
+        {
+            this._logger.LogInformation("Client connected: {ClientId}", clientId);
+        }
     }
 
-    public Task LogClientDisconnectedAsync(string clientId, CancellationToken token = default)
+    public async Task LogClientDisconnectedAsync(string clientId, CancellationToken token = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(clientId);
-        return Task.Run(() =>
+        try
         {
-            try
+            _ = await this._grpcClient.ClientDisconnectedAsync(new()
             {
-                _ = this._grpcClient.ClientDisconnectedAsync(new()
-                {
-                    ClientId = clientId,
-                    Time = Now()
-                }, cancellationToken: token);
-            }
-            catch
-            {
-                this._logger.LogInformation("Client disconnected: {ClientId}", clientId);
-            }
-        }, token);
+                ClientId = clientId,
+                Time = Now()
+            }, cancellationToken: token);
+        }
+        catch
+        {
+            this._logger.LogInformation("Client disconnected: {ClientId}", clientId);
+        }
     }
 
     public async Task LogPayloadReceivedAsync<TBroker>(LogPayloadReceivedArgs<TBroker> args, CancellationToken token = default)

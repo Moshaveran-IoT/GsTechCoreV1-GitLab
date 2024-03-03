@@ -6,9 +6,9 @@ public interface IRepository<TModel>
 {
     ValueTask<IResult> Delete(TModel model, bool persist = true, CancellationToken cancellationToken = default);
 
-    ValueTask<IList<TModel>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<List<TModel>> GetAll(CancellationToken cancellationToken = default);
 
-    ValueTask<TModel?> GetByIdAsync(int id, CancellationToken token = default);
+    Task<TModel?> GetById(int id, CancellationToken token = default);
 
     ValueTask<IResult> Insert(TModel model, bool persist = true, CancellationToken cancellationToken = default);
 

@@ -1,6 +1,10 @@
-﻿using System.Collections.Immutable;
+﻿using Microsoft.EntityFrameworkCore;
+
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Moshaveran.Library.Helpers;
 
@@ -43,5 +47,23 @@ public static class EnumerableHelper
     public static IEnumerable<T> ToEnumerable<T>(T item)
     {
         yield return item;
+    }
+
+    public static async IAsyncEnumerable<TSource> ToEnumerableAsync<TSource>(this IQueryable<TSource> source, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        await foreach (var element in source.AsAsyncEnumerable().WithCancellation(cancellationToken))
+        {
+            yield return element;
+        }
+    }
+
+    public static async Task<IList<TSource>> ToListAsync<TSource>(this IAsyncEnumerable<TSource> source, CancellationToken cancellationToken = default)
+    {
+        var list = new List<TSource>();
+        await foreach (var item in source.WithCancellation(cancellationToken))
+        {
+            list.Add(item);
+        }
+        return list;
     }
 }

@@ -281,8 +281,14 @@ public sealed class GsTechMqttService(
         }, args, repo);
 
     private Task<IResult> Save<TDbBroker>(Func<TDbBroker, IResult<TDbBroker>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
-        => this.Save((broker, _) => initialize(broker), args, repo);
+        => this.InnerSave(payloadMessage =>
+        {
+            if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null)
+            {
+                return IResult.Fail<IEnumerable<TDbBroker>>([], "Invalid JSON format.").ToAsync();
+            }
 
-    private Task<IResult> Save<TDbBroker>(Func<TDbBroker, string, IResult<TDbBroker>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
-        => this.Save((broker, payloadMessage) => initialize(broker, payloadMessage), args, repo);
+            var initResult = initialize(broker);
+            return initResult.WithValue(EnumerableHelper.ToEnumerable(initResult.Value!)).ToAsync();
+        }, args, repo);
 }

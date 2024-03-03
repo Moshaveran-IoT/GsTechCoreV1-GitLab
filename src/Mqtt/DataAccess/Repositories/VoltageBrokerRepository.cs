@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Logging;
 
 using Moshaveran.GsTech.Mqtt.DataAccess.Repositories.Bases;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbContexts;
@@ -6,7 +7,8 @@ using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
 
 namespace Moshaveran.GsTech.Mqtt.DataAccess.Repositories;
 
-internal sealed class VoltageBrokerRepository(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext) : LastBrokerRepositoryBase<VoltageBroker>(readDbContext, writeDbContext)
+internal sealed class VoltageBrokerRepository(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext, ILogger<VoltageBrokerRepository> logger)
+    : LastBrokerRepositoryBase<VoltageBroker>(readDbContext, writeDbContext, logger)
 {
     protected override async Task SaveBrokerAsync(EntityEntry<VoltageBroker> broker, CancellationToken token = default)
     {

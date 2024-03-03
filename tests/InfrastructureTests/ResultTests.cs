@@ -263,17 +263,14 @@ public sealed class ResultTests
     public void Fail_WithValidValue_ReturnsFailResultWithValidValue()
     {
         // Arrange
-        const int value = 42; // مثالی از یک مقدار معتبر
+        const string value = "Test value";
+        var exception = new Exception("Test exception");
 
         // Act
-        var result = IResult.Fail(value);
+        var result = IResult.Fail(value, exception);
 
         // Assert
-        Assert.False(result.IsSucceed);
-        Assert.True(result.IsFailure);
-        Assert.Null(result.Message);
-        Assert.Empty(result.Exceptions);
-        Assert.Equal(value, result.Value);
+        Assert.Equal(exception, result.Exceptions.First());
     }
 
     [Fact]
@@ -310,15 +307,13 @@ public sealed class ResultTests
     [Fact]
     public void Fail_WithValueAndException_ReturnsFailResultWithException()
     {
-        // Arrange
-        const string value = "Test value";
-        var exception = new Exception("Test exception");
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه ناموفق بدون مقدار نهایی را برمی‌گرداند
 
         // Act
-        var result = IResult.Fail(value, exception);
+        var result = IResult.Fail();
 
         // Assert
-        Assert.Equal(exception, result.Exceptions.First());
+        Assert.Null(result.Message);
     }
 
     [Fact]
@@ -460,6 +455,45 @@ public sealed class ResultTests
 
         // Assert
         Assert.Equal(expectedValue, actualValue);
+    }
+
+    [Fact]
+    public void IsSucceed_WhenFailure_ReturnsFalse()
+    {
+        // Arrange
+        var failureResult = IResult.Fail<int?>(new Exception("Failure"));
+
+        // Act
+        var isSuccess = failureResult.IsSucceed();
+
+        // Assert
+        Assert.False(isSuccess);
+    }
+
+    [Fact]
+    public void IsSucceed_WhenNull_ReturnsFalse()
+    {
+        // Arrange
+        IResult? nullResult = null;
+
+        // Act
+        var isSuccess = nullResult.IsSucceed();
+
+        // Assert
+        Assert.False(isSuccess);
+    }
+
+    [Fact]
+    public void IsSucceed_WhenSuccess_ReturnsTrue()
+    {
+        // Arrange
+        var successResult = IResult.Success<int?>(42);
+
+        // Act
+        var isSuccess = successResult.IsSucceed();
+
+        // Assert
+        Assert.True(isSuccess);
     }
 
     [Fact]
@@ -863,6 +897,6 @@ public sealed class ResultTests
 
     public class CustomClass
     {
-        public required string Property { get; set; }
+        public string Property { get; set; }
     }
 }

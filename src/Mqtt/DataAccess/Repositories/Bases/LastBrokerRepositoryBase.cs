@@ -1,16 +1,19 @@
-﻿using System.Collections.Immutable;
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Logging;
+
+using Moshaveran.Library.Data;
 using Moshaveran.Library.Exceptions;
 using Moshaveran.Library.Helpers;
 using Moshaveran.Library.Validations;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbContexts;
 
+using System.Collections.Immutable;
+
 namespace Moshaveran.GsTech.Mqtt.DataAccess.Repositories.Bases;
 
-internal abstract class LastBrokerRepositoryBase<TBroker>(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext) : GenericRepository<TBroker>(readDbContext, writeDbContext)
-    where TBroker : class
+internal abstract class LastBrokerRepositoryBase<TBroker>(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext, ILogger logger)
+    : RepositoryBase<TBroker, MqttReadDbContext, MqttWriteDbContext>(readDbContext, writeDbContext, logger) where TBroker : class
 {
     protected override async ValueTask<IResult> OnSavingChanges(CancellationToken token)
     {

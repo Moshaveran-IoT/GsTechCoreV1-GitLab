@@ -41,17 +41,17 @@ public static class DataAccessConfigurator
 
         // Add repositories
         _ = services
-            .AddScoped<IRepository<CanBroker>>(x => new CanBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
-            .AddScoped<IRepository<GeneralBroker>>(x => new GeneralBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
+            //.AddScoped<IRepository<CanBroker>>(x => new CanBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
+            .AddScoped<IRepository<CanBroker>, CanBrokerRepository>()
+            .AddScoped<IRepository<GeneralBroker>, GeneralBrokerRepository>()
             //todo: GeneralPlusBroker strategy pattern must be re-written.
-            //x .AddScoped<IRepository<GeneralPlusBroker>>(x => new GeneralPlusBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
-            .AddScoped<IRepository<SignalBroker>>(x => new SignalBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
-            .AddScoped<IRepository<VoltageBroker>>(x => new VoltageBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
-            .AddScoped<IRepository<GpsBroker>>(x => new GpsBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
-            .AddScoped<IRepository<ObdBroker>>(x => new ObdBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
-            .AddScoped<IRepository<TemperatureBroker>>(x => new TemperatureBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
-            .AddScoped<IRepository<TpmsBroker>>(x => new TpmsBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()))
-            .AddScoped<IRepository<CameraBroker>>(x => new CameraBrokerRepository(x.GetRequiredService<MqttReadDbContext>(), x.GetRequiredService<MqttWriteDbContext>()));
+            .AddScoped<IRepository<SignalBroker>, SignalBrokerRepository>()
+            .AddScoped<IRepository<VoltageBroker>, VoltageBrokerRepository>()
+            .AddScoped<IRepository<GpsBroker>, GpsBrokerRepository>()
+            .AddScoped<IRepository<ObdBroker>, ObdBrokerRepository>()
+            .AddScoped<IRepository<TemperatureBroker>, TemperatureBrokerRepository>()
+            .AddScoped<IRepository<TpmsBroker>, TpmsBrokerRepository>()
+            .AddScoped<IRepository<CameraBroker>, CameraBrokerRepository>();
 
         return services;
     }
