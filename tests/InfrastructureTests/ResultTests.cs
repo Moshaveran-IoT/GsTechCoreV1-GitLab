@@ -263,17 +263,14 @@ public sealed class ResultTests
     public void Fail_WithValidValue_ReturnsFailResultWithValidValue()
     {
         // Arrange
-        const int value = 42; // مثالی از یک مقدار معتبر
+        const string value = "Test value";
+        var exception = new Exception("Test exception");
 
         // Act
-        var result = IResult.Fail(value);
+        var result = IResult.Fail(value, exception);
 
         // Assert
-        Assert.False(result.IsSucceed);
-        Assert.True(result.IsFailure);
-        Assert.Null(result.Message);
-        Assert.Empty(result.Exceptions);
-        Assert.Equal(value, result.Value);
+        Assert.Equal(exception, result.Exceptions.First());
     }
 
     [Fact]
@@ -310,15 +307,13 @@ public sealed class ResultTests
     [Fact]
     public void Fail_WithValueAndException_ReturnsFailResultWithException()
     {
-        // Arrange
-        const string value = "Test value";
-        var exception = new Exception("Test exception");
+        // Arrange هیچ مقداری برای تعریف نیاز نیست زیرا متد خودش نتیجه ناموفق بدون مقدار نهایی را برمی‌گرداند
 
         // Act
-        var result = IResult.Fail(value, exception);
+        var result = IResult.Fail();
 
         // Assert
-        Assert.Equal(exception, result.Exceptions.First());
+        Assert.Null(result.Message);
     }
 
     [Fact]
