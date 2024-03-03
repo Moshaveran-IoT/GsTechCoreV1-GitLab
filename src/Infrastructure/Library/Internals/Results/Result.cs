@@ -1,20 +1,15 @@
-﻿using Moshaveran.Library.Results.Internals;
-
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Moshaveran.Library.Results;
 
-namespace Moshaveran.Library.Results;
+namespace Moshaveran.Library.Internals.Results;
 
 [DebuggerStepThrough, StackTraceHidden]
-public sealed class Result : ResultBase, IResult
+internal sealed class Result(bool isSucceed, string? message = null, params Exception[] exceptions) : ResultBase(isSucceed, message, exceptions), IResult
 {
     private static IResult? _failed;
 
     private static IResult? _succeed;
-
-    internal Result(bool isSucceed, string? message = null, params Exception[] exceptions) : base(isSucceed, message, exceptions)
-    {
-    }
 
     internal Result(bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null)
         : this(isSucceed, message, exceptions?.ToArray() ?? [])
@@ -28,24 +23,16 @@ public sealed class Result : ResultBase, IResult
     public static IResult Succeed => _succeed ??= Success();
 
     [return: NotNull]
-    public static IResult Create(bool isSucceed)
-        => new Result(isSucceed);
-
-    [return: NotNull]
-    public static IResult Create(bool isSucceed, string? message)
-        => new Result(isSucceed, message);
-
-    [return: NotNull]
-    public static IResult Create(Exception exception)
+    public static IResult Fail(Exception exception)
         => new Result(false, exceptions: exception);
 
     [return: NotNull]
-    public static IResult<TValue> Create<TValue>(TValue value, bool isSucceed)
-        => new Result<TValue>(value, isSucceed);
+    public static IResult<TValue> Fail<TValue>(TValue value, Exception exception)
+        => new Result<TValue>(value, false, exceptions: exception);
 
     [return: NotNull]
-    public static IResult<TValue> Create<TValue>(TValue value, bool isSucceed, string? message)
-        => new Result<TValue>(value, isSucceed, message);
+    public static IResult<TValue?> Fail<TValue>(Exception exception)
+        => new Result<TValue?>(default, false, exceptions: exception);
 
     [return: NotNull]
     public static IResult<TValue> Fail<TValue>(TValue value)
@@ -64,8 +51,8 @@ public sealed class Result : ResultBase, IResult
         => new Result(false, message: message);
 
     [return: NotNull]
-    public static IResult Fail(Exception exception)
-        => new Result(false, exceptions: exception);
+    public static IResult<TValue?> Fail<TValue>(string message)
+        => new Result<TValue?>(default, false, message);
 
     [return: NotNull]
     public static IResult<TValue> Fail<TValue>(TValue value, string message)
@@ -86,4 +73,8 @@ public sealed class Result : ResultBase, IResult
     [return: NotNull]
     public static IResult<TValue> Success<TValue>(TValue value)
         => new Result<TValue>(value, true);
+
+    [return: NotNull]
+    internal static IResult Create(bool succeed)
+        => new Result(succeed);
 }

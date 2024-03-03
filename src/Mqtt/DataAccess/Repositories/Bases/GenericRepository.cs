@@ -38,7 +38,7 @@ internal class GenericRepository<TModel>(MqttReadDbContext readDbContext, MqttWr
         }
         catch (Exception ex)
         {
-            return Result.Fail(ex);
+            return IResult.Fail(ex);
         }
     }
 
@@ -54,52 +54,52 @@ internal class GenericRepository<TModel>(MqttReadDbContext readDbContext, MqttWr
                 var vr = this.OnValidating(model, cancellationToken);
                 if (vr?.IsSucceed != true)
                 {
-                    return vr ?? Result.Failed;
+                    return vr ?? IResult.Failed;
                 }
             }
 
             var ar = await action(model, cancellationToken);
             if (ar?.IsSucceed != true)
             {
-                return ar ?? Result.Failed;
+                return ar ?? IResult.Failed;
             }
 
             if (persist)
             {
                 return await this.SaveChanges(cancellationToken);
             };
-            return Result.Succeed;
+            return IResult.Succeed;
         }
         catch (Exception ex)
         {
-            return Result.Fail(ex);
+            return IResult.Fail(ex);
         }
     }
 
     protected virtual ValueTask<IResult> OnDeleting(TModel model, CancellationToken cancellationToken)
     {
         _ = this.WriteDbContext.Remove(model!);
-        return Result.Succeed.ToAsync();
+        return IResult.Succeed.ToValueTask();
     }
 
     protected virtual async ValueTask<IResult> OnInserting(TModel model, CancellationToken cancellationToken = default)
     {
         _ = await this.WriteDbContext.AddAsync(model!, cancellationToken);
-        return Result.Succeed;
+        return IResult.Succeed;
     }
 
     protected virtual async ValueTask<IResult> OnSavingChanges(CancellationToken cancellationToken)
     {
         var result = await this.WriteDbContext.SaveChangesAsync(cancellationToken);
-        return Result.Create(result > 0);
+        return IResult.Create(result > 0);
     }
 
     protected virtual ValueTask<IResult> OnUpdating(TModel model, CancellationToken cancellationToken = default)
     {
         _ = this.WriteDbContext.Update(model!);
-        return Result.Succeed.ToAsync();
+        return IResult.Succeed.ToValueTask();
     }
 
     protected virtual IResult OnValidating(TModel? model, CancellationToken cancellationToken = default)
-        => Result.Succeed;
+        => IResult.Succeed;
 }

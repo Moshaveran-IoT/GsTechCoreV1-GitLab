@@ -1,12 +1,12 @@
-﻿using System.Text;
-
-using Moshaveran.API.Mqtt.GrpcServices.Protos;
+﻿using Moshaveran.API.Mqtt.GrpcServices.Protos;
 using Moshaveran.GsTech.Mqtt.Application.Interfaces;
 using Moshaveran.Library.Data;
 using Moshaveran.Library.Helpers;
 using Moshaveran.Library.Results;
 using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
 using Moshaveran.Mqtt.Domain.Services;
+
+using System.Text;
 
 namespace Moshaveran.GsTech.Mqtt.Application.Services;
 
@@ -41,7 +41,7 @@ public sealed class GsTechMqttService(
             broker.Imei = args.Imei;
             broker.CreatedOn = DateTime.Now;
             broker.Value = $"data:image/png;base64,{payloadMessage}";
-            return Result.Success(broker).ToAsync();
+            return IResult.Success(broker).ToAsync();
         }, args, this._cameraRepo);
 
     public Task<IResult> ProcessCanPayload(ProcessPayloadArgs args)
@@ -50,13 +50,13 @@ public sealed class GsTechMqttService(
             IResult<IEnumerable<CanBroker>> result;
             if (!JsonDocumentHelpers.TryParse(payloadMessage, out var dto) || dto == null)
             {
-                result = Result.Fail<IEnumerable<CanBroker>>([]);
+                result = IResult.Fail<IEnumerable<CanBroker>>([]);
             }
             else
             {
                 using (dto)
                 {
-                    result = Result.Create(processDto(args.Imei, dto).Build(), true);
+                    result = IResult.Success(processDto(args.Imei, dto).Build());
                 }
             }
 
@@ -103,7 +103,7 @@ public sealed class GsTechMqttService(
         {
             if (string.IsNullOrEmpty(broker.InternetTotalVolume))
             {
-                return Result<GeneralBroker>.Failed!;
+                return IResult<GeneralBroker>.Failed!;
             }
             broker.Imei = args.Imei;
             broker.CreatedOn = DateTime.Now;
@@ -122,7 +122,7 @@ public sealed class GsTechMqttService(
                 broker.InternetRemainingVolume = ussd.Split(":")[1].Trim().Split("،")[0].Trim();
                 broker.InternetRemainingTime = ussd.Split(":")[1].Trim().Split("،")[1].Trim().Replace(".", "").Replace("تا", "");
             }
-            return Result.Success(broker);
+            return IResult.Success(broker);
         }, args, this._genRepo);
 
     public Task<IResult> ProcessGeneralPlusPayload(ProcessPayloadArgs args)
@@ -154,7 +154,7 @@ public sealed class GsTechMqttService(
                     broker.SimCardNumber = splitSimCard[1].Substring(2, 11);
                 }
             }
-            return Result.Success(broker);
+            return IResult.Success(broker);
         }, args, this._genRepo);
 
     public Task<IResult> ProcessGpsPayload(ProcessPayloadArgs args)
@@ -165,11 +165,11 @@ public sealed class GsTechMqttService(
                 broker.Imei = args.Imei;
                 broker.CreatedOn = DateTime.Now;
                 broker.Address = await this._geocoding.Reverse(broker.Latitude, broker.Longitude).GetValueAsync();
-                return Result.Success(broker);
+                return IResult.Success(broker);
             }
             else
             {
-                return Result.Fail(broker);
+                return IResult.Fail(broker);
             }
         }, args, this._gpsRepo);
 
@@ -182,7 +182,7 @@ public sealed class GsTechMqttService(
                 CreatedOn = DateTime.Now,
                 Value = payloadMessage
             };
-            return Result.Success(broker).ToAsync();
+            return IResult.Success(broker).ToAsync();
         }, args, this._obdRepo);
 
     public Task<IResult> ProcessSignalPayload(ProcessPayloadArgs args)
@@ -190,7 +190,7 @@ public sealed class GsTechMqttService(
         {
             broker.Imei = args.Imei;
             broker.CreatedOn = DateTime.Now;
-            return Result.Success(broker);
+            return IResult.Success(broker);
         }, args, this._signalRepo);
 
     public Task<IResult> ProcessTemperaturePayload(ProcessPayloadArgs args)
@@ -198,7 +198,7 @@ public sealed class GsTechMqttService(
         {
             broker.Imei = args.Imei;
             broker.CreatedOn = DateTime.Now;
-            return Result.Success(broker);
+            return IResult.Success(broker);
         }, args, this._tempRepo);
 
     public Task<IResult> ProcessTpmsPayload(ProcessPayloadArgs args)
@@ -206,7 +206,7 @@ public sealed class GsTechMqttService(
         {
             broker.Imei = args.Imei;
             broker.CreatedOn = DateTime.Now;
-            return Result.Success(broker);
+            return IResult.Success(broker);
         }, args, this._tpmsRepo);
 
     public Task<IResult> ProcessVoltagePayload(ProcessPayloadArgs args)
@@ -214,7 +214,7 @@ public sealed class GsTechMqttService(
         {
             broker.Imei = args.Imei;
             broker.CreatedOn = DateTime.Now;
-            return Result.Success(broker);
+            return IResult.Success(broker);
         }, args, this._voltageRepo);
 
     private async Task<IResult> InnerSave<TDbBroker>(Func<string, Task<IResult<IEnumerable<TDbBroker>>>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
@@ -222,13 +222,13 @@ public sealed class GsTechMqttService(
         var (status, logMessage) = (SaveStatus.SaveSuccess, string.Empty);
         try
         {
-            (var result, (status, logMessage)) = await save(initialize, args, repo).Deconstruct();
+            (var result, (status, logMessage)) = await save(initialize, args, repo);
             return result;
         }
         catch (Exception ex)
         {
             (status, logMessage) = (SaveStatus.SaveFailure, ex.GetBaseException().Message);
-            return Result.Failed;
+            return IResult.Failed;
         }
         finally
         {
@@ -274,7 +274,7 @@ public sealed class GsTechMqttService(
         {
             if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null)
             {
-                return Result.Fail<IEnumerable<TDbBroker>>([], "Invalid JSON format.");
+                return IResult.Fail<IEnumerable<TDbBroker>>([], "Invalid JSON format.");
             }
             var initResult = await initialize(broker, payloadMessage);
             return initResult.WithValue(EnumerableHelper.ToEnumerable(initResult.Value!));

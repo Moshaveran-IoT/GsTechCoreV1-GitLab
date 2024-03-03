@@ -3,7 +3,7 @@ using Moshaveran.Mqtt.Domain.Services;
 
 using MQTTnet.AspNetCore.AttributeRouting;
 
-using IResult = Moshaveran.Library.IResult;
+using IResult = Moshaveran.Library.Results.IResult;
 
 namespace Moshaveran.GsTech.Mqtt.API.Controllers;
 

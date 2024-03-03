@@ -7,8 +7,8 @@ namespace Moshaveran.GsTech.Mqtt.Application.Services;
 public sealed class GeocodingService : IGeocodingService
 {
     public Task<IResult<GeoCode?>> Forward(string address)
-        => Result.Create<GeoCode?>(new GeoCode(0, 0), true).ToAsync();
+        => IResult.Success<GeoCode?>(new GeoCode(0, 0)).ToAsync();
 
     public Task<IResult<string?>> Reverse(double latitude, double longitude)
-        => Result.Create<string?>(string.Empty, true).ToAsync();
+        => IResult.Success<string?>(string.Empty).ToAsync();
 }

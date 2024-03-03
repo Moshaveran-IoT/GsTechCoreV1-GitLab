@@ -12,7 +12,7 @@ namespace Moshaveran.GsTech.Mqtt.DataAccess.Repositories.Bases;
 internal abstract class LastBrokerRepositoryBase<TBroker>(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext) : GenericRepository<TBroker>(readDbContext, writeDbContext)
     where TBroker : class
 {
-    protected override async Task<IResult> OnSavingChanges(CancellationToken token)
+    protected override async ValueTask<IResult> OnSavingChanges(CancellationToken token)
     {
         try
         {
@@ -20,11 +20,11 @@ internal abstract class LastBrokerRepositoryBase<TBroker>(MqttReadDbContext read
 
             var entries = this.WriteDbContext.ChangeTracker.Entries<TBroker>().ToImmutableArray();
             await entries.Enumerate(this.SaveBrokerAsync, token);
-            return Result.Succeed;
+            return IResult.Succeed;
         }
         catch (Exception ex)
         {
-            return Result.Create(ex);
+            return IResult.Fail(ex);
         }
     }
 

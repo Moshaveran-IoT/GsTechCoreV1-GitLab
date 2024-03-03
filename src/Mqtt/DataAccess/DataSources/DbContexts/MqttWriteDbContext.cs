@@ -44,7 +44,7 @@ internal sealed class MqttWriteDbContext : MqttDbContext
             IsDelete = false,
             DeleteOn = null,
         });
-        return Result.Succeed;
+        return IResult.Succeed;
     }
 
     public async Task<int> SaveCanBrokerAsync(EntityEntry<CanBroker> entry, CancellationToken token = default)
