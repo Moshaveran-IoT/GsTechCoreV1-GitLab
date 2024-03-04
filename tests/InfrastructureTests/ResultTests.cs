@@ -897,6 +897,6 @@ public sealed class ResultTests
 
     public class CustomClass
     {
-        public string Property { get; set; }
+        public required string Property { get; set; }
     }
 }

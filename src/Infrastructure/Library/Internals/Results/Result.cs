@@ -1,18 +1,20 @@
-﻿using System.Diagnostics;
+﻿using Moshaveran.Library.Results;
+
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Moshaveran.Library.Results;
 
 namespace Moshaveran.Library.Internals.Results;
 
 [DebuggerStepThrough, StackTraceHidden]
-internal sealed class Result(bool isSucceed, string? message = null, params Exception[] exceptions) : ResultBase(isSucceed, message, exceptions), IResult
+internal sealed class Result(bool isSucceed, string? message = null, IResult? innerResult = null, params Exception[] exceptions)
+    : ResultBase(isSucceed, message, exceptions, innerResult), IResult
 {
     private static IResult? _failed;
 
     private static IResult? _succeed;
 
-    internal Result(bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null)
-        : this(isSucceed, message, exceptions?.ToArray() ?? [])
+    internal Result(bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null, IResult? innerResult = null)
+        : this(isSucceed, message, innerResult, exceptions?.ToArray() ?? [])
     {
     }
 

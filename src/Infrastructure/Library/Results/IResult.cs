@@ -15,6 +15,8 @@ public interface IResult
     [NotNull]
     IEnumerable<Exception> Exceptions { get; }
 
+    IResult? InnerResult { get; }
+
     bool IsFailure { get; }
     bool IsSucceed { get; }
     string? Message { get; }
