@@ -18,6 +18,10 @@ internal sealed class Result(bool isSucceed, string? message = null, IResult? in
     {
     }
 
+    internal Result(IResult result)
+        : this(result.IsSucceed, result.Message, result.Exceptions, result.InnerResult)
+    { }
+
     [NotNull]
     public static IResult Failed => _failed ??= Fail();
 

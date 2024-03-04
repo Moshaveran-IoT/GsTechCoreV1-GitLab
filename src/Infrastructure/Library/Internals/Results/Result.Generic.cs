@@ -11,8 +11,18 @@ internal sealed class Result<TValue>(TValue value, bool isSucceed, string? messa
     private static Result<TValue?>? _failed;
     private static Result<TValue?>? _succeed;
 
-    public Result(TValue value, bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null, IResult? innerResult = null)
+    internal Result(TValue value, bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null, IResult? innerResult = null)
         : this(value, isSucceed, message, innerResult, exceptions?.ToArray() ?? [])
+    {
+    }
+
+    internal Result(IResult<TValue> result)
+        : this(result.Value, result.IsSucceed, result.Message, result.Exceptions, result.InnerResult)
+    {
+    }
+
+    internal Result(in TValue value, in IResult result)
+        : this(value, result.IsSucceed, result.Message, result.Exceptions, result.InnerResult)
     {
     }
 

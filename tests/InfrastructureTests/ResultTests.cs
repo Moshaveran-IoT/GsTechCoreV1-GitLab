@@ -458,6 +458,28 @@ public sealed class ResultTests
     }
 
     [Fact]
+    public void InnerResult_BasicTest()
+    {
+        // Arrange
+        var mainResult = IResult.Success("main");
+        var immutatedResult = IResult.Success("layer1");
+        var layer2Result = IResult.Success("layer2");
+
+        // Act
+        var layer1Result = immutatedResult.WithInnerResult(layer2Result);
+        var actual = mainResult.WithInnerResult(layer1Result);
+
+        // Assert
+        Assert.NotNull(actual.InnerResult);
+        Assert.Equal("layer1", actual.InnerResult.Message);
+
+        Assert.NotNull(actual.InnerResult.InnerResult);
+        Assert.Equal("layer2", actual.InnerResult.InnerResult.Message);
+
+        Assert.Null(immutatedResult.InnerResult);
+    }
+
+    [Fact]
     public void IsSucceed_WhenFailure_ReturnsFalse()
     {
         // Arrange

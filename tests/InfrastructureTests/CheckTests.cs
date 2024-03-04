@@ -11,7 +11,7 @@ public sealed class CheckTests
     public void ArgumentNotNull_ShouldReturnArgumentOnNonNullArgument()
     {
         // Arrange
-        var nonNullArg = "Non-null value";
+        const string nonNullArg = "Non-null value";
 
         // Act
         var result = nonNullArg.ArgumentNotNull();
@@ -24,7 +24,7 @@ public sealed class CheckTests
     public void ArgumentNotNull_ShouldThrowOnNullArgument()
     {
         // Arrange
-        string? nullArg = null;
+        const string? nullArg = null;
 
         // Act & Assert
         var ex = Assert.Throws<ArgumentNullException>(() => nullArg.ArgumentNotNull());
@@ -32,10 +32,68 @@ public sealed class CheckTests
     }
 
     [Fact]
+    public void If_Returns_Fail_With_False_Value_When_Ok_Is_False()
+    {
+        // Arrange
+        const bool ok = false;
+        const int trueValue = 1;
+        const int falseValue = 0;
+
+        // Act
+        var result = Check.If(ok, () => trueValue, () => falseValue);
+
+        // Assert
+        Assert.False(result.IsSucceed);
+        Assert.Equal(falseValue, result.Value);
+    }
+
+    [Fact]
+    public void If_Returns_Failed_When_Ok_Is_False()
+    {
+        // Arrange
+        const bool ok = false;
+
+        // Act
+        var result = Check.If(ok);
+
+        // Assert
+        Assert.False(result.IsSucceed);
+    }
+
+    [Fact]
+    public void If_Returns_Succeed_When_Ok_Is_True()
+    {
+        // Arrange
+        const bool ok = true;
+
+        // Act
+        var result = Check.If(ok);
+
+        // Assert
+        Assert.True(result.IsSucceed);
+    }
+
+    [Fact]
+    public void If_Returns_Success_With_True_Value_When_Ok_Is_True()
+    {
+        // Arrange
+        const bool ok = true;
+        const int trueValue = 1;
+        const int falseValue = 0;
+
+        // Act
+        var result = Check.If(ok, () => trueValue, () => falseValue);
+
+        // Assert
+        Assert.True(result.IsSucceed);
+        Assert.Equal(trueValue, result.Value);
+    }
+
+    [Fact]
     public void MustBe_Generic_ShouldNotThrowExceptionOnTrueCondition()
     {
         // Arrange
-        var condition = true;
+        const bool condition = true;
 
         // Act & Assert
         Check.MustBe<GsTechException>(condition);
@@ -46,7 +104,7 @@ public sealed class CheckTests
     public void MustBe_Generic_ShouldThrowSpecificExceptionOnFalseCondition()
     {
         // Arrange
-        var condition = false;
+        const bool condition = false;
 
         // Act & Assert
         var ex = Assert.Throws<GsTechException>(() => Check.MustBe<GsTechException>(condition));
@@ -57,7 +115,7 @@ public sealed class CheckTests
     public void MustBe_ShouldNotThrowExceptionOnTrueCondition()
     {
         // Arrange
-        var condition = true;
+        const bool condition = true;
         var exception = new ArgumentException("Invalid argument");
 
         // Act & Assert
@@ -69,7 +127,7 @@ public sealed class CheckTests
     public void MustBe_ShouldThrowSpecificExceptionOnFalseCondition()
     {
         // Arrange
-        var condition = false;
+        const bool condition = false;
         var exception = new ArgumentException("Invalid argument");
 
         // Act & Assert
