@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Moshaveran.Library.Results;
 
-public interface IResult<TValue> : IResult
+public interface IResult<out TValue> : IResult
 {
     [NotNull]
     static new IResult<TValue?> Failed => Result<TValue?>.Failed;

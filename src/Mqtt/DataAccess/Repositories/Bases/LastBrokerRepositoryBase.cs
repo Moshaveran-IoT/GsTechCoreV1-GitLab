@@ -15,7 +15,7 @@ namespace Moshaveran.GsTech.Mqtt.DataAccess.Repositories.Bases;
 internal abstract class LastBrokerRepositoryBase<TBroker>(MqttReadDbContext readDbContext, MqttWriteDbContext writeDbContext, ILogger logger)
     : RepositoryBase<TBroker, MqttReadDbContext, MqttWriteDbContext>(readDbContext, writeDbContext, logger) where TBroker : class
 {
-    protected override async ValueTask<IResult> OnSavingChanges(CancellationToken token)
+    protected override async Task<IResult> OnSavingChanges(CancellationToken token)
     {
         try
         {

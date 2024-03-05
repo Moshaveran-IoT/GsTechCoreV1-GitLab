@@ -145,6 +145,12 @@ public static class ResultHelper
     public static IResult WithInnerResult(this IResult result, IResult innerResult)
         => new Result(result) { InnerResult = innerResult };
 
+    public static IResult<TValue> WithInnerResult<TValue>(this IResult result, TValue value, IResult innerResult)
+        => new Result<TValue>(value, result) { InnerResult = innerResult };
+
+    public static IResult<TValue> WithInnerResult<TValue>(this IResult<TValue> result, IResult innerResult)
+        => new Result<TValue>(result.Value, result) { InnerResult = innerResult };
+
     public static IResult<TValue> WithValue<TValue>(this IResult result, TValue value)
         => new Result<TValue>(value, result);
 }

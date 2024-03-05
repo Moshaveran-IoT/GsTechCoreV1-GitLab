@@ -12,68 +12,71 @@ public interface IResult
     [NotNull]
     static IResult Succeed => Result.Succeed;
 
-    [NotNull]
-    IEnumerable<Exception> Exceptions { get; }
+    IEnumerable<Exception>? Exceptions { get; }
 
     IResult? InnerResult { get; }
 
-    bool IsFailure { get; }
+    bool IsFailure => !this.IsSucceed;
     bool IsSucceed { get; }
     string? Message { get; }
 
     [return: NotNull]
     static IResult Create(bool succeed)
-        => Result.Create(succeed);
+        => new Result(succeed);
 
     [return: NotNull]
     static IResult Fail(Exception exception)
-        => Result.Fail(exception);
+        => new Result(false) { Exceptions = [exception] };
 
     [return: NotNull]
     static IResult<TValue> Fail<TValue>(TValue value, Exception exception)
-        => Result.Fail(value, exception);
+        => new Result<TValue>(value, false) { Exceptions = [exception] };
 
     [return: NotNull]
     static IResult<TValue?> Fail<TValue>(Exception exception)
-        => Result.Fail<TValue>(exception);
+        => new Result<TValue?>(default, false) { Exceptions = [exception] };
 
     [return: NotNull]
     static IResult<TValue> Fail<TValue>(TValue value)
-        => Result.Fail(value);
+        => new Result<TValue>(value, false);
 
     [return: NotNull]
     static IResult<TValue?> Fail<TValue>()
-        => Result.Fail<TValue>();
+        => new Result<TValue?>(default, false);
 
     [return: NotNull]
     static IResult Fail()
-        => Result.Fail();
+        => new Result(false);
 
     [return: NotNull]
     static IResult Fail(string message)
-        => Result.Fail(message);
+        => new Result(false, message);
 
     [return: NotNull]
     static IResult<TValue?> Fail<TValue>(string message)
-        => Result.Fail<TValue>(message);
+        => new Result<TValue?>(default, false, message);
 
     [return: NotNull]
     static IResult<TValue> Fail<TValue>(TValue value, string message)
-        => Result.Fail(value, message);
+        => new Result<TValue>(value, false, message);
 
     [return: NotNull]
     static IResult Success()
-        => Result.Success();
+        => new Result(true);
 
     [return: NotNull]
     static IResult Success(string message)
-        => Result.Success(message);
+        => new Result(true, Message: message);
+
+    [return: NotNull]
+    static IResult<TValue?> Success<TValue>()
+        => new Result<TValue?>(default, true);
 
     [return: NotNull]
     static IResult<TValue> Success<TValue>(TValue value, string message)
-        => Result.Success(value, message);
+        => new Result<TValue>(value, true, Message: message);
 
     [return: NotNull]
     static IResult<TValue> Success<TValue>(TValue value)
-        => Result.Success(value);
+        => new Result<TValue>(value, true);
 }

@@ -5,30 +5,19 @@ using System.Diagnostics;
 namespace Moshaveran.Library.Internals.Results;
 
 [DebuggerStepThrough, StackTraceHidden]
-internal sealed class Result<TValue>(TValue value, bool isSucceed, string? message = null, IResult? innerResult = null, params Exception[] exceptions)
-    : ResultBase(isSucceed, message, exceptions, innerResult), IResult<TValue>
+internal sealed record Result<TValue>(TValue Value, bool IsSucceed, string? Message = null, IEnumerable<Exception>? Exceptions = null, IResult? InnerResult = null)
+    : IResult<TValue>
 {
-    private static Result<TValue?>? _failed;
-    private static Result<TValue?>? _succeed;
-
-    internal Result(TValue value, bool isSucceed, string? message = null, IEnumerable<Exception>? exceptions = null, IResult? innerResult = null)
-        : this(value, isSucceed, message, innerResult, exceptions?.ToArray() ?? [])
+    public Result(TValue Value, IResult result)
+        : this(Value, result.IsSucceed, result.Message, result.Exceptions, result.InnerResult)
     {
+        
     }
 
-    internal Result(IResult<TValue> result)
-        : this(result.Value, result.IsSucceed, result.Message, result.Exceptions, result.InnerResult)
-    {
-    }
+    private static IResult<TValue?>? _failed;
+    private static IResult<TValue?>? _succeed;
 
-    internal Result(in TValue value, in IResult result)
-        : this(value, result.IsSucceed, result.Message, result.Exceptions, result.InnerResult)
-    {
-    }
+    public static IResult<TValue?> Failed => _failed ??= IResult.Fail<TValue?>();
 
-    public static Result<TValue?> Failed => _failed ??= new(default, false);
-
-    public static Result<TValue?> Succeed => _succeed ??= new(default, true);
-
-    public TValue Value { get; } = value;
+    public static IResult<TValue?> Succeed => _succeed ??= IResult.Success<TValue?>();
 }

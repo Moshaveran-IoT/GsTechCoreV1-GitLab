@@ -20,7 +20,7 @@ public sealed class ResultTests
         Assert.False(result.IsSucceed);
         Assert.True(result.IsFailure);
         Assert.Null(result.Message);
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public sealed class ResultTests
         Assert.True(result.IsSucceed);
         Assert.False(result.IsFailure);
         Assert.Null(result.Message);
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public sealed class ResultTests
         Assert.False(result.IsSucceed);
         Assert.True(result.IsFailure);
         Assert.Null(result.Message);
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
         Assert.Equal(value, result.Value);
     }
 
@@ -83,7 +83,7 @@ public sealed class ResultTests
         Assert.False(result.IsSucceed);
         Assert.True(result.IsFailure);
         Assert.Null(result.Message);
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
         Assert.Equal(value, result.Value);
     }
 
@@ -114,7 +114,7 @@ public sealed class ResultTests
         var result = IResult.Fail(message);
 
         // Assert
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
     }
 
     [Fact]
@@ -142,7 +142,7 @@ public sealed class ResultTests
         var result = IResult.Fail<int?>(message);
 
         // Assert
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
     }
 
     [Fact]
@@ -185,7 +185,7 @@ public sealed class ResultTests
         Assert.False(result.IsSucceed);
         Assert.True(result.IsFailure);
         Assert.Null(result.Message);
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
         Assert.Null(result.Value);
     }
 
@@ -201,7 +201,7 @@ public sealed class ResultTests
         Assert.False(result.IsSucceed);
         Assert.True(result.IsFailure);
         Assert.Null(result.Message);
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
         Assert.Null(result.Value);
     }
 
@@ -218,7 +218,7 @@ public sealed class ResultTests
         Assert.False(result.IsSucceed);
         Assert.True(result.IsFailure);
         Assert.Null(result.Message);
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
         Assert.Null(result.Value);
     }
 
@@ -231,7 +231,7 @@ public sealed class ResultTests
         var result = IResult.Fail();
 
         // Assert
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
     }
 
     [Fact]
@@ -286,7 +286,7 @@ public sealed class ResultTests
         Assert.False(result.IsSucceed);
         Assert.True(result.IsFailure);
         Assert.Null(result.Message);
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
         Assert.Equal(value, result.Value);
     }
 
@@ -343,7 +343,7 @@ public sealed class ResultTests
         var result = IResult.Fail(value, message);
 
         // Assert
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
     }
 
     [Fact]
@@ -390,7 +390,7 @@ public sealed class ResultTests
         Assert.False(result.IsSucceed);
         Assert.True(result.IsFailure);
         Assert.Equal(message, result.Message);
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
         Assert.Equal(value, result.Value);
     }
 
@@ -403,7 +403,7 @@ public sealed class ResultTests
         var result = IResult<int?>.Failed;
 
         // Assert
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
     }
 
     [Fact]
@@ -685,7 +685,7 @@ public sealed class ResultTests
         var result = IResult<int?>.Succeed;
 
         // Assert
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
     }
 
     [Fact]
@@ -741,7 +741,7 @@ public sealed class ResultTests
         Assert.True(result.IsSucceed);
         Assert.False(result.IsFailure);
         Assert.Equal(message, result.Message);
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
     }
 
     [Fact]
@@ -754,7 +754,7 @@ public sealed class ResultTests
         var result = IResult.Success();
 
         // Assert
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
     }
 
     [Fact]
@@ -794,7 +794,7 @@ public sealed class ResultTests
         var result = IResult.Success<string>(value);
 
         // Assert
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
     }
 
     [Fact]
@@ -836,7 +836,7 @@ public sealed class ResultTests
         var result = IResult.Success(value, message);
 
         // Assert
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
     }
 
     [Fact]
@@ -883,7 +883,7 @@ public sealed class ResultTests
         Assert.True(result.IsSucceed);
         Assert.False(result.IsFailure);
         Assert.Equal(message, result.Message);
-        Assert.Empty(result.Exceptions);
+        Assert.Null(result.Exceptions);
         Assert.Equal(value, result.Value);
     }
 
