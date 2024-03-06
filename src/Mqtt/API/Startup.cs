@@ -1,5 +1,6 @@
 ﻿using Moshaveran.GsTech.Mqtt.API.Middlewares;
 using Moshaveran.GsTech.Mqtt.Application;
+using Moshaveran.GsTech.Mqtt.Domain;
 
 using Prometheus;
 
@@ -37,6 +38,9 @@ public class Startup(IConfiguration configuration)
     {
         _ = services.AddExceptionHandler<GlobalExceptionHander>()
             .AddProblemDetails();
+
+        _ = services.AddMediatR(options => options.RegisterServicesFromAssemblyContaining(typeof(Startup)));
+        _ = services.AddMediatR(options => options.RegisterServicesFromAssemblyContaining(typeof(DomainModule)));
 
         // // Add Prometheus metrics service
         if (configuration.GetValue<bool?>("Prometheus:metrics:is_enabled") is true)

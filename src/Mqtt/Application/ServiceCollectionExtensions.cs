@@ -9,7 +9,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationLayer(this IServiceCollection services, IConfiguration configuration)
     {
-        //=> services.AddMediatR(Assembly.GetExecutingAssembly());
+        _ = services.AddMediatR(options => options.RegisterServicesFromAssemblyContaining(typeof(ServiceCollectionExtensions)));
         return services;
     }
 }

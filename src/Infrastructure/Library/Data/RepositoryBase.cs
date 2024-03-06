@@ -62,7 +62,6 @@ public abstract class RepositoryBase<TModel, TReadDbContext, TWriteDbContext>(in
         }
     }
 
-
     public Task<IResult> Update(TModel model, bool persist = true, CancellationToken cancellationToken = default)
     {
         this.Logger.LogTrace($"[{nameof(TModel)}] - {nameof(Update)}");

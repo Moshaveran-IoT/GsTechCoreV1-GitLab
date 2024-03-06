@@ -1,4 +1,7 @@
-﻿using Moshaveran.GsTech.Mqtt.Application.Services;
+﻿using MediatR;
+
+using Moshaveran.GsTech.Mqtt.Application.Services;
+using Moshaveran.GsTech.Mqtt.Domain.Commands;
 using Moshaveran.Mqtt.Domain.Services;
 
 using MQTTnet.AspNetCore.AttributeRouting;
@@ -9,7 +12,7 @@ namespace Moshaveran.GsTech.Mqtt.API.Controllers;
 
 [MqttController]
 [MqttRoute("Gs")]
-public class MqttGsTechController(GsTechMqttService service) : MqttBaseController
+public sealed class MqttGsTechController(GsTechMqttService service, IMediator mediator) : MqttBaseController
 {
     [MqttRoute("{IMEI}/CAN")]
     public Task CAN(string IMEI, CancellationToken token = default)
@@ -28,8 +31,9 @@ public class MqttGsTechController(GsTechMqttService service) : MqttBaseControlle
         => this.ProcessServiceMethod(service.ProcessGpsPayload, "GPS", IMEI, token);
 
     [MqttRoute("{IMEI}/Image")]
-    public Task Image(string IMEI, CancellationToken token = default)
-        => this.ProcessServiceMethod(service.ProcessCameraPayload, "Camera", IMEI, token);
+    public Task ProcessCameraPayload(string IMEI, CancellationToken token = default)
+        //=> this.ProcessServiceMethod(service.ProcessCameraPayload, "Camera", IMEI, token);
+        => mediator.Send(new ProcessCameraPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
 
     [MqttRoute("{IMEI}/OBD")]
     public Task OBD(string IMEI, CancellationToken token = default)
