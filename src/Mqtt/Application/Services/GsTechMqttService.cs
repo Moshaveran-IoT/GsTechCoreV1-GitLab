@@ -220,6 +220,7 @@ public sealed class GsTechMqttService(
     private async Task<IResult> InnerSave<TDbBroker>(Func<string, Task<IResult<IEnumerable<TDbBroker>>>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
     {
         var (status, logMessage) = (SaveStatus.SaveSuccess, string.Empty);
+
         try
         {
             (var result, (status, logMessage)) = await save(initialize, args, repo);

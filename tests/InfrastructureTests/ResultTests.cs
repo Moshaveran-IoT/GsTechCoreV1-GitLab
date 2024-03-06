@@ -606,7 +606,7 @@ public sealed class ResultTests
         const string expectedResult = "Success";
 
         // Act
-        var actualResult = await resultTask.OnSucceedAsync(_ => expectedResult, "Failure");
+        var actualResult = await resultTask.OnSucceed(_ => expectedResult, "Failure");
 
         // Assert
         Assert.Equal(expectedResult, actualResult);

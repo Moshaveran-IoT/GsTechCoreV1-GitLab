@@ -14,6 +14,8 @@ public interface IResult
 
     IEnumerable<Exception>? Exceptions { get; }
 
+    Exception? Exception { get; }
+
     IResult? InnerResult { get; }
 
     bool IsFailure => !this.IsSucceed;

@@ -24,21 +24,7 @@ public static class CodeHelper
         }
     }
 
-    public static async ValueTask<IResult<TResult?>> CatchResultAsync<TResult>(Func<Task<TResult?>> action)
-    {
-        Check.MustBeArgumentNotNull(action);
-        try
-        {
-            var result = await action();
-            return IResult.Success(result);
-        }
-        catch (Exception ex)
-        {
-            return IResult.Fail<TResult>(ex);
-        }
-    }
-
-    public static async ValueTask<IResult<TResult>> CatchResult<TResult>(Func<ValueTask<TResult>> action)
+    public static async Task<IResult<TResult>> CatchResult<TResult>(Func<ValueTask<TResult>> action)
     {
         Check.MustBeArgumentNotNull(action);
         try
@@ -66,18 +52,43 @@ public static class CodeHelper
         }
     }
 
-    public static T? New<T>()
+    public static async Task<IResult<TResult?>> CatchResultAsync<TResult>(Func<Task<TResult?>> action)
+    {
+        Check.MustBeArgumentNotNull(action);
+        try
+        {
+            var result = await action();
+            return IResult.Success(result);
+        }
+        catch (Exception ex)
+        {
+            return IResult.Fail<TResult>(ex);
+        }
+    }
+    public static async Task<IResult<TValue?>> CatchResultAsync<TValue>(Func<Task<IResult<TValue>>> action)
+    {
+        Check.MustBeArgumentNotNull(action);
+        try
+        {
+            return await action();
+        }
+        catch (Exception ex)
+        {
+            return IResult.Fail<TValue>(ex);
+        }
+    }
+    public static T New<T>()
         where T : new() => new();
 
     [return: NotNullIfNotNull(nameof(o))]
-    public static T? With<T>(this T? o, in Action<T?> action)
+    public static T With<T>(this T o, in Action<T> action)
     {
         action?.Invoke(o);
         return o;
     }
 
     [return: NotNullIfNotNull(nameof(o))]
-    public static T? With<T>(this T? o, in Func<T?, T?> action)
+    public static T With<T>(this T o, in Func<T, T> action)
     {
         var result = o;
         if (action != null)

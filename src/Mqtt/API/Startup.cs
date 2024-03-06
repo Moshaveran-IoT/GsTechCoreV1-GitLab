@@ -1,5 +1,5 @@
-﻿using Moshaveran.GsTech.Mqtt.API;
-using Moshaveran.GsTech.Mqtt.API.Middlewares;
+﻿using Moshaveran.GsTech.Mqtt.API.Middlewares;
+using Moshaveran.GsTech.Mqtt.Application;
 
 using Prometheus;
 
@@ -9,7 +9,7 @@ public class Startup(IConfiguration configuration)
 {
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IConfiguration configuration)
     {
-        app.UseExceptionHandler();
+        _ = app.UseExceptionHandler();
 
         // Add Prometheus metrics service
         _ = app.UseHttpMetrics();
@@ -35,8 +35,8 @@ public class Startup(IConfiguration configuration)
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddExceptionHandler<GlobalExceptionHander>()
-                .AddProblemDetails();
+        _ = services.AddExceptionHandler<GlobalExceptionHander>()
+            .AddProblemDetails();
 
         // // Add Prometheus metrics service
         if (configuration.GetValue<bool?>("Prometheus:metrics:is_enabled") is true)
@@ -47,6 +47,8 @@ public class Startup(IConfiguration configuration)
         // Add project services
         _ = services.AddInfrastructureService()
             .AddMqttServices(configuration);
+
+        _ = services.AddApplicationLayer(configuration);
 
         // Setup api
         _ = services.AddControllers();

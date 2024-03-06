@@ -84,7 +84,7 @@ public static class ResultHelper
             ? action.ArgumentNotNull()(result)
             : defaultFuncResult;
 
-    public static async ValueTask<TFuncResult> OnSucceedAsync<TResult, TFuncResult>(this ValueTask<TResult> resultAsync, Func<TResult, TFuncResult> action, TFuncResult defaultFuncResult = default!)
+    public static async ValueTask<TFuncResult> OnSucceed<TResult, TFuncResult>(this ValueTask<TResult> resultAsync, Func<TResult, TFuncResult> action, TFuncResult defaultFuncResult = default!)
         where TResult : IResult
     {
         Check.MustBeArgumentNotNull(resultAsync);

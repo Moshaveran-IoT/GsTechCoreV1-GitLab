@@ -22,4 +22,6 @@ internal sealed record Result(bool IsSucceed, string? Message = null, IEnumerabl
 
     [NotNull]
     public static IResult Succeed => _succeed ??= IResult.Success();
+
+    public Exception? Exception => this.Exceptions?.SingleOrDefault();
 }
