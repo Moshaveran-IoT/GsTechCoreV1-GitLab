@@ -15,7 +15,6 @@ internal sealed record Result(bool IsSucceed, string? Message = null, IEnumerabl
     }
 
     private static IResult? _failed;
-
     private static IResult? _succeed;
 
     [NotNull]

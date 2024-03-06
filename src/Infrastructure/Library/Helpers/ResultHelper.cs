@@ -151,6 +151,15 @@ public static class ResultHelper
     public static IResult<TValue> WithInnerResult<TValue>(this IResult<TValue> result, IResult innerResult)
         => new Result<TValue>(result.Value, result) { InnerResult = innerResult };
 
+    public static IResult<TValue1> WithValue<TValue, TValue1>(this IResult<TValue> result, Func<TValue, TValue1> builder)
+        => result.WithValue(builder(result.Value));
+
+    public static async Task<IResult<TValue1>> WithValue<TValue, TValue1>(this Task<IResult<TValue>> resultAsync, Func<TValue, TValue1> builder)
+        => (await resultAsync).WithValue(builder);
+    
     public static IResult<TValue> WithValue<TValue>(this IResult result, TValue value)
         => new Result<TValue>(value, result);
+
+    public static async Task<IResult<TValue>> WithValue<TValue>(this Task<IResult> result, TValue value)
+        => new Result<TValue>(value, await result);
 }

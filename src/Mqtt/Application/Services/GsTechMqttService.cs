@@ -45,7 +45,7 @@ public sealed class GsTechMqttService(
         }, args, this._cameraRepo);
 
     public Task<IResult> ProcessCanPayload(ProcessPayloadArgs args)
-        => this.InnerSave(payloadMessage =>
+        => this.Save(payloadMessage =>
         {
             IResult<IEnumerable<CanBroker>> result;
             if (!JsonDocumentHelpers.TryParse(payloadMessage, out var dto) || dto == null)
@@ -269,26 +269,22 @@ public sealed class GsTechMqttService(
             => this._listenerService.LogPayloadReceivedAsync(new LogPayloadReceivedArgs<TDbBroker>(args.ClientId, args.Imei, logMessage, status));
     }
 
+    private Task<IResult> Save<TDbBroker>(Func<string, Task<IResult<IEnumerable<TDbBroker>>>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
+        => this.InnerSave(initialize, args, repo);
+
     private async Task<IResult> Save<TDbBroker>(Func<TDbBroker, string, Task<IResult<TDbBroker>>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
-        => await this.InnerSave(async payloadMessage =>
+        => await this.InnerSave(payloadMessage =>
         {
-            if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null)
-            {
-                return IResult.Fail<IEnumerable<TDbBroker>>([], "Invalid JSON format.");
-            }
-            var initResult = await initialize(broker, payloadMessage);
-            return initResult.WithValue(EnumerableHelper.ToEnumerable(initResult.Value!));
+            return !StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null
+                ? IResult.Fail<IEnumerable<TDbBroker>>([], "Invalid JSON format.").ToAsync()
+                : initialize(broker, payloadMessage).WithValue(EnumerableHelper.ToEnumerable);
         }, args, repo);
 
     private Task<IResult> Save<TDbBroker>(Func<TDbBroker, IResult<TDbBroker>> initialize, ProcessPayloadArgs args, IRepository<TDbBroker> repo)
         => this.InnerSave(payloadMessage =>
         {
-            if (!StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null)
-            {
-                return IResult.Fail<IEnumerable<TDbBroker>>([], "Invalid JSON format.").ToAsync();
-            }
-
-            var initResult = initialize(broker);
-            return initResult.WithValue(EnumerableHelper.ToEnumerable(initResult.Value!)).ToAsync();
+            return !StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null
+                ? IResult.Fail<IEnumerable<TDbBroker>>([], "Invalid JSON format.").ToAsync()
+                : initialize(broker).WithValue(EnumerableHelper.ToEnumerable).ToAsync();
         }, args, repo);
 }
