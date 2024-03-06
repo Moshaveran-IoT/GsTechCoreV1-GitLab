@@ -21,10 +21,10 @@
 	  <Compile Include="..\..\Solution Items\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Google.Protobuf" Version="3.21.5" />
-		<PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
-		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.49.0" />
-		<PackageReference Include="Grpc.Tools" Version="2.49.0">
+		<PackageReference Include="Google.Protobuf" Version="3.25.0" />
+		<PackageReference Include="Grpc.AspNetCore" Version="2.61.0" />
+		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.61.0" />
+		<PackageReference Include="Grpc.Tools" Version="2.61.0">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
