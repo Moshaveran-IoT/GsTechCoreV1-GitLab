@@ -14,7 +14,9 @@ using MQTTnet.Server;
 
 namespace Application.Services;
 
-public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorService> logger, IServiceScopeFactory scopeFactory, IListenerService listenerService) :
+// Original
+//public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorService> logger, IServiceScopeFactory scopeFactory, IListenerService listenerService) :
+public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorService> logger, IListenerService listenerService) :
     IMqttServerConnectionValidator,
     IMqttServerSubscriptionInterceptor,
     IMqttServerClientConnectedHandler,
@@ -54,7 +56,9 @@ public sealed class GsTechMqttInterceptorService(ILogger<GsTechMqttInterceptorSe
             SubscribeKiss();
         }
 
+#pragma warning disable CA1062 // Validate arguments of public methods
         var clientId = eventArgs.ClientId;
+#pragma warning restore CA1062 // Validate arguments of public methods
         _connectedClientIds.Add(clientId);
         return _listenerService.LogClientConnectedAsync(clientId);
         //logger.LogInformation($"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - MQTT Client Connected:{_newLine} - ClientID = {clientId + _newLine}");
