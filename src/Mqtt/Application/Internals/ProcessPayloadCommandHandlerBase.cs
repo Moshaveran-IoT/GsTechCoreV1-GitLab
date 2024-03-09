@@ -7,15 +7,15 @@ using Moshaveran.Library.Results;
 
 using System.Text;
 
-namespace Moshaveran.GsTech.Mqtt.Application.Commands;
+namespace Moshaveran.GsTech.Mqtt.Application.Internals;
 
 public abstract class ProcessPayloadCommandHandlerBase(IListenerService listenerService)
 {
     protected Task<IResult> Save<TDbBroker>(Func<string, Task<IResult<IEnumerable<TDbBroker>>>> initialize, ProcessPayloadDto args, IRepository<TDbBroker> repo)
-        => this.InnerSave(initialize, args, repo);
+        => InnerSave(initialize, args, repo);
 
     protected Task<IResult> Save<TDbBroker>(Func<TDbBroker, string, Task<IResult<TDbBroker>>> initialize, ProcessPayloadDto args, IRepository<TDbBroker> repo)
-        => this.InnerSave(payloadMessage =>
+        => InnerSave(payloadMessage =>
         {
             return !StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null
                 ? IResult.Fail<IEnumerable<TDbBroker>>([], "Invalid JSON format.").ToAsync()
@@ -23,7 +23,7 @@ public abstract class ProcessPayloadCommandHandlerBase(IListenerService listener
         }, args, repo);
 
     protected Task<IResult> Save<TDbBroker>(Func<TDbBroker, IResult<TDbBroker>> initialize, ProcessPayloadDto args, IRepository<TDbBroker> repo)
-        => this.InnerSave(payloadMessage =>
+        => InnerSave(payloadMessage =>
         {
             return !StringHelper.TryParseJson(payloadMessage, out TDbBroker? broker) || broker == null
                 ? IResult.Fail<IEnumerable<TDbBroker>>([], "Invalid JSON format.").ToAsync()
