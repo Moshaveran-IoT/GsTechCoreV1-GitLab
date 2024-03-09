@@ -5,5 +5,5 @@ using Moshaveran.Library.Results;
 
 namespace Moshaveran.GsTech.Mqtt.Domain.Commands;
 
-public sealed record ProcessTpmsPayloadCommand(ProcessTempPayloadDto Dto) : IRequest<IResult<ProcessTpmsPayloadCommandResponse>>;
+public sealed record ProcessTpmsPayloadCommand(ProcessTpmsPayloadDto Dto) : IRequest<IResult<ProcessTpmsPayloadCommandResponse>>;
 public sealed record ProcessTpmsPayloadCommandResponse();
