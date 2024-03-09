@@ -3,6 +3,7 @@ using Moshaveran.Library.Results;
 
 namespace Moshaveran.Mqtt.Domain.Services;
 
+[Obsolete("Migrated to CQRS", true)]
 public interface IGsTechMqttService : IBusinessService
 {
     Task<IResult> ProcessCameraPayload(ProcessPayloadArgs args);

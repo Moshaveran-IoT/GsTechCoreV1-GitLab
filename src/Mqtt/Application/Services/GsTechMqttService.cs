@@ -10,6 +10,7 @@ using System.Text;
 
 namespace Moshaveran.GsTech.Mqtt.Application.Services;
 
+[Obsolete("Migrated to CQRS", true)]
 public sealed class GsTechMqttService(
     IGeocodingService geocoding,
     IRepository<CanBroker> canRepo,

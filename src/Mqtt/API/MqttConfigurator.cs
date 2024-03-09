@@ -24,7 +24,7 @@ public static class MqttConfigurator
     {
         _ = services.AddScoped<IGeocodingService>(_ => new GeocodingService());
         _ = services.AddSingleton<IListenerService, ListenerService>();
-        _ = services.AddScoped<GsTechMqttService>();
+        //_ = services.AddScoped<GsTechMqttService>();
         _ = services.AddMqttNetServices();
         _ = services.AddMqttDataAccessServices(configuration);
         return services;

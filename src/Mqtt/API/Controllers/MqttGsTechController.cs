@@ -2,17 +2,14 @@
 
 using Moshaveran.GsTech.Mqtt.Application.Services;
 using Moshaveran.GsTech.Mqtt.Domain.Commands;
-using Moshaveran.Mqtt.Domain.Services;
 
 using MQTTnet.AspNetCore.AttributeRouting;
-
-using IResult = Moshaveran.Library.Results.IResult;
 
 namespace Moshaveran.GsTech.Mqtt.API.Controllers;
 
 [MqttController]
 [MqttRoute("Gs")]
-public sealed class MqttGsTechController(GsTechMqttService service, IMediator mediator) : MqttBaseController
+public sealed class MqttGsTechController(IMediator mediator) : MqttBaseController
 {
     [MqttRoute("{IMEI}/Image")]
     public Task Camera(string IMEI, CancellationToken token = default)
@@ -52,18 +49,5 @@ public sealed class MqttGsTechController(GsTechMqttService service, IMediator me
 
     [MqttRoute("{IMEI}/Voltage")]
     public Task Voltage(string IMEI, CancellationToken token = default)
-        => this.ProcessServiceMethod(service.ProcessVoltagePayload, "Voltage", IMEI, token);
-
-    private async Task ProcessServiceMethod(Func<ProcessPayloadArgs, Task<IResult>> method, string _, string imei, CancellationToken token = default)
-    {
-        var result = await method(new(this.Message.Payload, this.MqttContext.ClientId, imei, token));
-        if (result.IsSucceed)
-        {
-            await this.Ok();
-        }
-        else
-        {
-            await this.BadMessage();
-        }
-    }
+        => mediator.Send(new ProcessVoltagePayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
 }
