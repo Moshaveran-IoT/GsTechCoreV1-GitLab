@@ -6,14 +6,15 @@ using Moshaveran.Library.Data;
 using Moshaveran.Library.Helpers;
 using Moshaveran.Library.Results;
 using Moshaveran.Library.Validations;
+using Moshaveran.Mqtt.DataAccess.DataSources.DbModels;
 
-using Broker = Moshaveran.Mqtt.DataAccess.DataSources.DbModels.CameraBroker;
-using Command = Moshaveran.GsTech.Mqtt.Domain.Commands.ProcessCameraPayloadCommand;
-using Response = Moshaveran.GsTech.Mqtt.Domain.Commands.ProcessCameraPayloadCommandResponse;
+using Broker = Moshaveran.Mqtt.DataAccess.DataSources.DbModels.ObdBroker;
+using Command = Moshaveran.GsTech.Mqtt.Domain.Commands.ProcessObdPayloadCommand;
+using Response = Moshaveran.GsTech.Mqtt.Domain.Commands.ProcessObdPayloadCommandResponse;
 
 namespace Moshaveran.GsTech.Mqtt.Application.Commands;
 
-public sealed class ProcessCameraPayloadCommandHandler(IListenerService listener, IRepository<Broker> cameraRepo)
+public sealed class ProcessObdPayloadCommandHandler(IListenerService listener, IRepository<Broker> cameraRepo)
     : ProcessPayloadCommandHandlerBase(listener)
     , IRequestHandler<Command, IResult<Response>>
 {
@@ -22,11 +23,14 @@ public sealed class ProcessCameraPayloadCommandHandler(IListenerService listener
         Check.MustBeArgumentNotNull(request);
 
         var args = request.Dto;
-        var processResult = await this.Save((broker, payloadMessage) =>
+        var processResult = await this.Save((_, payloadMessage) =>
         {
-            broker.Imei = args.Imei;
-            broker.CreatedOn = DateTime.Now;
-            broker.Value = $"data:image/png;base64,{payloadMessage}";
+            var broker = new ObdBroker
+            {
+                Imei = args.Imei,
+                CreatedOn = DateTime.Now,
+                Value = payloadMessage
+            };
             return IResult.Success(broker).ToAsync();
         }, args, cameraRepo);
         return processResult.WithValue(new Response());

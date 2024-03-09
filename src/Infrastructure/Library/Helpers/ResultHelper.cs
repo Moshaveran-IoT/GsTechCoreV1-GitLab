@@ -21,9 +21,11 @@ public static class ResultHelper
         return result == null ? (default, default) : (result, result.Value);
     }
 
-    public static async Task<TValue?> GetValueAsync<TValue>(this Task<IResult<TValue?>> result)
-        => (await result.ArgumentNotNull()).Value;
+    public static TValue? GetValue<TValue>(this IResult<TValue?> result)
+        => result.ArgumentNotNull().Value;
 
+    public static async Task<TValue?> GetValueAsync<TValue>(this Task<IResult<TValue?>> result)
+            => (await result.ArgumentNotNull()).Value;
     public static bool IsFailure([NotNullWhen(false)] this IResult? result)
         => result is null or { IsFailure: true };
 
@@ -156,7 +158,7 @@ public static class ResultHelper
 
     public static async Task<IResult<TValue1>> WithValue<TValue, TValue1>(this Task<IResult<TValue>> resultAsync, Func<TValue, TValue1> builder)
         => (await resultAsync).WithValue(builder);
-    
+
     public static IResult<TValue> WithValue<TValue>(this IResult result, TValue value)
         => new Result<TValue>(value, result);
 

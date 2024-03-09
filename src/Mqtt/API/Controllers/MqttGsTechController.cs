@@ -16,28 +16,27 @@ public sealed class MqttGsTechController(GsTechMqttService service, IMediator me
 {
     [MqttRoute("{IMEI}/CAN")]
     public Task CAN(string IMEI, CancellationToken token = default)
-        => this.ProcessServiceMethod(service.ProcessCanPayload, "CAN", IMEI, token);
+        => mediator.Send(new ProcessCanPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
 
     [MqttRoute("{IMEI}/General")]
     public Task General(string IMEI, CancellationToken token = default)
-        => this.ProcessServiceMethod(service.ProcessGeneralPayload, "General", IMEI, token);
+        => mediator.Send(new ProcessGeneralPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
 
     [MqttRoute("{IMEI}/GeneralPlus")]
     public Task GeneralPlus(string IMEI, CancellationToken token = default)
-        => this.ProcessServiceMethod(service.ProcessGeneralPlusPayload, "General Plus", IMEI, token);
+        => mediator.Send(new ProcessGeneralPlusPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
 
     [MqttRoute("{IMEI}/GPS")]
     public Task GPS(string IMEI, CancellationToken token = default)
-        => this.ProcessServiceMethod(service.ProcessGpsPayload, "GPS", IMEI, token);
-
-    [MqttRoute("{IMEI}/Image")]
-    public Task ProcessCameraPayload(string IMEI, CancellationToken token = default)
-        //=> this.ProcessServiceMethod(service.ProcessCameraPayload, "Camera", IMEI, token);
-        => mediator.Send(new ProcessCameraPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
+        => mediator.Send(new ProcessGpsPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
 
     [MqttRoute("{IMEI}/OBD")]
     public Task OBD(string IMEI, CancellationToken token = default)
-        => this.ProcessServiceMethod(service.ProcessObdPayload, "OBD", IMEI, token);
+        => mediator.Send(new ProcessObdPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
+
+    [MqttRoute("{IMEI}/Image")]
+    public Task ProcessCameraPayload(string IMEI, CancellationToken token = default)
+        => mediator.Send(new ProcessCameraPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
 
     [MqttRoute("{IMEI}/Signal")]
     public Task Signal(string IMEI, CancellationToken token = default)
