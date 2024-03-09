@@ -48,7 +48,7 @@ public sealed class MqttGsTechController(GsTechMqttService service, IMediator me
 
     [MqttRoute("{IMEI}/TPMS")]
     public Task TPMS(string IMEI, CancellationToken token = default)
-        => this.ProcessServiceMethod(service.ProcessTpmsPayload, "TPMS", IMEI, token);
+        => mediator.Send(new ProcessTpmsPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
 
     [MqttRoute("{IMEI}/Voltage")]
     public Task Voltage(string IMEI, CancellationToken token = default)
