@@ -14,6 +14,10 @@ namespace Moshaveran.GsTech.Mqtt.API.Controllers;
 [MqttRoute("Gs")]
 public sealed class MqttGsTechController(GsTechMqttService service, IMediator mediator) : MqttBaseController
 {
+    [MqttRoute("{IMEI}/Image")]
+    public Task Camera(string IMEI, CancellationToken token = default)
+        => mediator.Send(new ProcessCameraPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
+
     [MqttRoute("{IMEI}/CAN")]
     public Task CAN(string IMEI, CancellationToken token = default)
         => mediator.Send(new ProcessCanPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
@@ -34,17 +38,13 @@ public sealed class MqttGsTechController(GsTechMqttService service, IMediator me
     public Task OBD(string IMEI, CancellationToken token = default)
         => mediator.Send(new ProcessObdPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
 
-    [MqttRoute("{IMEI}/Image")]
-    public Task ProcessCameraPayload(string IMEI, CancellationToken token = default)
-        => mediator.Send(new ProcessCameraPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
-
     [MqttRoute("{IMEI}/Signal")]
     public Task Signal(string IMEI, CancellationToken token = default)
-        => this.ProcessServiceMethod(service.ProcessSignalPayload, "Signal", IMEI, token);
+        => mediator.Send(new ProcessSignalPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
 
     [MqttRoute("{IMEI}/Temp")]
     public Task Temp(string IMEI, CancellationToken token = default)
-        => this.ProcessServiceMethod(service.ProcessTemperaturePayload, "Temp", IMEI, token);
+        => mediator.Send(new ProcessTempPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
 
     [MqttRoute("{IMEI}/TPMS")]
     public Task TPMS(string IMEI, CancellationToken token = default)
