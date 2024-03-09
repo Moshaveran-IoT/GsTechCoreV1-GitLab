@@ -38,6 +38,10 @@ public sealed class MqttGsTechController(GsTechMqttService service, IMediator me
     public Task ProcessCameraPayload(string IMEI, CancellationToken token = default)
         => mediator.Send(new ProcessCameraPayloadCommand(new(this.Message.Payload, this.MqttContext.ClientId, IMEI)), token);
 
+    [MqttRoute("{IMEI}/OBD")]
+    public Task OBD(string IMEI, CancellationToken token = default)
+        => this.ProcessServiceMethod(service.ProcessObdPayload, "OBD", IMEI, token);
+
     [MqttRoute("{IMEI}/Signal")]
     public Task Signal(string IMEI, CancellationToken token = default)
         => this.ProcessServiceMethod(service.ProcessSignalPayload, "Signal", IMEI, token);
