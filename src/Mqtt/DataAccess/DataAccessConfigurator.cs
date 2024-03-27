@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using Moshaveran.GsTech.Mqtt.DataAccess.Repositories;
 using Moshaveran.Library.Data;
@@ -23,19 +25,28 @@ public static class DataAccessConfigurator
         var writeConnectionString = configuration.GetConnectionString("WriteDb");
         var readConnectionString = configuration.GetConnectionString("ReadDb");
         _ = services
-            .AddDbContext<MqttWriteDbContext>(options => options.UseSqlServer(writeConnectionString, b =>
+            .AddDbContext<MqttWriteDbContext>(options =>
             {
-                _ = b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName);
-                _ = b.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
-            }), ServiceLifetime.Transient)
+                _ = options.UseSqlServer(writeConnectionString, b =>
+                {
+                    _ = b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName);
+                    _ = b.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
+                    _ = b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                });
+                _ = options.LogTo(Console.WriteLine, LogLevel.Information).EnableSensitiveDataLogging();
+                _ = options.ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning));
+            })
             .AddDbContext<MqttReadDbContext>(options =>
             {
                 _ = options.UseSqlServer(readConnectionString, b =>
                 {
                     _ = b.MigrationsAssembly(typeof(DataAccessConfigurator).Assembly.FullName);
                     _ = b.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
+                    _ = b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                 });
                 _ = options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                _ = options.LogTo(Console.WriteLine, LogLevel.Information).EnableSensitiveDataLogging();
+                _ = options.ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning));
             }, ServiceLifetime.Transient)
             ;
 

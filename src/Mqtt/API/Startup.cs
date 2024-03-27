@@ -11,6 +11,7 @@ public class Startup(IConfiguration configuration)
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IConfiguration configuration)
     {
         _ = app.UseExceptionHandler();
+        _ = app.UseLoggerMiddleware();
 
         // Add Prometheus metrics service
         _ = app.UseHttpMetrics();
@@ -36,23 +37,19 @@ public class Startup(IConfiguration configuration)
 
     public void ConfigureServices(IServiceCollection services)
     {
-        _ = services.AddExceptionHandler<GlobalExceptionHander>()
-            .AddProblemDetails();
+        _ = services.AddExceptionHandler<GlobalExceptionHander>().AddProblemDetails();
 
-        _ = services.AddMediatR(options => options.RegisterServicesFromAssemblyContaining(typeof(Startup)));
-        _ = services.AddMediatR(options => options.RegisterServicesFromAssemblyContaining(typeof(DomainModule)));
-
-        // // Add Prometheus metrics service
+        // Add Prometheus metrics service
         if (configuration.GetValue<bool?>("Prometheus:metrics:is_enabled") is true)
         {
             _ = services.AddMetricServer(options => options.Port = configuration.GetValue<ushort>("Prometheus:metrics:port"));
         }
 
-        // Add project services
-        _ = services.AddInfrastructureService()
+        _ = services
+            .AddInfrastructureService()
+            .AddApplicationLayer(configuration)
             .AddMqttServices(configuration);
 
-        _ = services.AddApplicationLayer(configuration);
 
         // Setup api
         _ = services.AddControllers();
