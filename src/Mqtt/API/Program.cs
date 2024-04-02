@@ -6,16 +6,16 @@ internal static class Program
 {
     public static void Main(string[] args)
     {
+        string? environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
         Console.Title = "GSTech IoT Service";
         createHostBuilder(args).Build().Run();
-
         static IHostBuilder createHostBuilder(string[] args)
             => Host.CreateDefaultBuilder(args)
                    .ConfigureWebHostDefaults(webBuilder =>
                    {
                        var config = new ConfigurationBuilder()
                            .SetBasePath(Directory.GetCurrentDirectory())
-                           .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                           .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true, reloadOnChange: true)
                            .Build();
 
                        var appPort = int.Parse(config["AppPort"]!);

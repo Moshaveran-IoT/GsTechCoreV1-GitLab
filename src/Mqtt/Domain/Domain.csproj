@@ -1,9 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <RootNamespace>Moshaveran.GsTech.Mqtt.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
     <AssemblyName>Moshaveran.IoT.$(MSBuildProjectName)</AssemblyName>
   </PropertyGroup>
@@ -17,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="12.2.0" />
+    <PackageReference Include="MediatR" />
   </ItemGroup>
 
 </Project>

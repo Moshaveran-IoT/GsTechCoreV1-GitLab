@@ -1,0 +1,76 @@
+<Project>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<LangVersion>preview</LangVersion>
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+		<GenerateRequiresPreviewFeaturesAttribute>true</GenerateRequiresPreviewFeaturesAttribute>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<LangVersion>Preview</LangVersion>
+		<AnalysisLevel>preview-all</AnalysisLevel>
+		<LangVersion>preview</LangVersion>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<PlatformTarget>x64</PlatformTarget>
+		<InvariantGlobalization>false</InvariantGlobalization>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
+		<CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
+		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+		<RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageVersion Include="MediatR" Version="12.2.0" />
+		<PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
+		<PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
+		<PackageVersion Include="prometheus-net.AspNetCore" Version="8.2.1" />
+		<PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageVersion Include="MQTTnet.AspNetCore.AttributeRouting.Forked" Version="0.3.16" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageVersion Include="Google.Protobuf" Version="3.25.3" />
+		<PackageVersion Include="Grpc.AspNetCore" Version="2.61.0" />
+		<PackageVersion Include="Grpc.Net.ClientFactory" Version="2.61.0" />
+		<PackageVersion Include="Grpc.Tools" Version="2.62.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageVersion>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageVersion Include="MQTTnet.AspNetCore.AttributeRouting.Forked" Version="0.3.16" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.2" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageVersion Include="FluentAssertions" Version="6.12.0" />
+		<PackageVersion Include="MediatR" Version="12.2.0" />
+		<PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.2" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.2" />
+		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+		<PackageVersion Include="Moq" Version="4.20.70" />
+		<PackageVersion Include="xunit" Version="2.7.0" />
+		<PackageVersion Include="Xunit.DependencyInjection" Version="8.9.1" />
+		<PackageVersion Include="xunit.runner.visualstudio" Version="2.5.7">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageVersion>
+		<PackageVersion Include="coverlet.collector" Version="6.0.1">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageVersion>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="8.0.0"/>
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions"  Version="8.0.0"/>
+	</ItemGroup>
+</Project>
