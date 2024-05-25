@@ -4,12 +4,14 @@ description: Report a bug in the project
 title: "[BUG] "
 labels: ["bug", "scrum"]
 assignees: []
+projects: ["GSTech on GitLab"]
+"Work Item Template": "Bug"
 
 body:
 - type: markdown
   attributes:
     value: |
-      ## Bug Report
+      # Bug Report
       Please follow the template below to help us fix the bug. Thank you!
 - type: input
   id: summary
@@ -79,7 +81,7 @@ body:
 - type: markdown
   attributes:
     value: |
-      ## Bug Fix
+      # Bug Fix
 - type: textarea
   id: tasks
   attributes:
