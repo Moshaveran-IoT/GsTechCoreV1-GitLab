@@ -5,7 +5,6 @@ title: "[BUG] "
 labels: ["bug", "scrum"]
 assignees: []
 projects: ["GSTech on GitLab"]
-"Work Item Template": "Bug"
 
 body:
 - type: markdown
