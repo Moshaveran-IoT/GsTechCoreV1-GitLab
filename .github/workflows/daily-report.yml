@@ -1,0 +1,33 @@
+name: Daily Issue and PR Report
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # این cron job هر روز در ساعت 00:00 UTC اجرا می‌شود.
+  workflow_dispatch: # این به شما اجازه می‌دهد تا این workflow را به صورت دستی نیز اجرا کنید.
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install @octokit/rest
+
+    - name: Generate report
+      run: node generate-report.js
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload report
+      uses: actions/upload-artifact@v2
+      with:
+        name: daily-report
+        path: report.txt
