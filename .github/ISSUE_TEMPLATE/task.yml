@@ -2,8 +2,7 @@
 name: Task
 description: 'A task to be done to fix a bug or implement a user story.'
 title: '[TASK]: '
-assignees: 'mirmostafa'
-projects: ["MES 2.0 Infrastructure"]
+projects: ["GsTechCoreV1-GitLab"]
 body:
   - type: textarea
     id: description
